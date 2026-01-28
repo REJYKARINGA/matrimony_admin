@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme }) {
     const menuItems = [
         { path: '/dashboard', label: 'Verifications', icon: <FaUserShield size={20} /> },
         { path: '/users', label: 'Users', icon: <FaUsers size={20} /> },
+        { path: '/user-profiles', label: 'User Profiles', icon: <FaIdCard size={20} /> },
         { path: '/reports', label: 'Reports', icon: <FaFlag size={20} /> },
         { path: '/success-stories', label: 'Success Stories', icon: <FaHeart size={20} /> },
         { path: '/payments', label: 'Payments', icon: <FaMoneyBillWave size={20} /> },
