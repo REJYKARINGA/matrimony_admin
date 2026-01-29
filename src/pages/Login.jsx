@@ -22,7 +22,7 @@ export default function Login() {
                 return;
             }
 
-            localStorage.setItem('admin_token', token);
+            localStorage.setItem('token', token);
             localStorage.setItem('admin_user', JSON.stringify(user));
 
             navigate('/dashboard');

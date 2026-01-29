@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
 import Verifications from './pages/Verifications';
 import Users from './pages/Users';
 import UserProfiles from './pages/UserProfiles';
@@ -16,7 +17,8 @@ function App() {
 
         {/* Protected Admin Routes */}
         <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Verifications />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/verifications" element={<Verifications />} />
           <Route path="/users" element={<Users />} />
           <Route path="/user-profiles" element={<UserProfiles />} />
           <Route path="/reports" element={<Reports />} />
