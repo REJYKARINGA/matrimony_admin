@@ -67,7 +67,8 @@ export default function UserProfiles() {
                                     <th>Location</th>
                                     <th>Education</th>
                                     <th>Occupation</th>
-                                    <th>Verified</th>
+                                    <th>Status</th>
+                                    <th>Verification Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -75,10 +76,10 @@ export default function UserProfiles() {
                                     <tr key={profile.id}>
                                         <td>
                                             {profile.profile_picture ? (
-                                                <img 
-                                                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`} 
-                                                    alt="Profile" 
-                                                    style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} 
+                                                <img
+                                                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
+                                                    alt="Profile"
+                                                    style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
                                                 />
                                             ) : (
                                                 <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -92,7 +93,7 @@ export default function UserProfiles() {
                                             </div>
                                         </td>
                                         <td>
-                                            {profile.date_of_birth ? new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear() : 'N/A'}
+                                            {profile.date_of_birth ? new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear() : '-'}
                                         </td>
                                         <td>
                                             <span className="badge" style={{ textTransform: 'capitalize' }}>
@@ -108,15 +109,40 @@ export default function UserProfiles() {
                                             {profile.city}, {profile.state}
                                         </td>
                                         <td>
-                                            {profile.education || 'N/A'}
+                                            {profile.education || '-'}
                                         </td>
                                         <td>
-                                            {profile.occupation || 'N/A'}
+                                            {profile.occupation || '-'}
                                         </td>
+
                                         <td>
                                             <span className={`badge ${profile.is_active_verified ? 'badge-verified' : 'badge-rejected'}`}>
                                                 {profile.is_active_verified ? 'Yes' : 'No'}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {(() => {
+                                                const status = profile.user?.verification?.status;
+                                                let badgeClass = 'badge-secondary';
+                                                let statusText = 'Not Submitted';
+
+                                                if (status === 'verified') {
+                                                    badgeClass = 'badge-success';
+                                                    statusText = 'Verified';
+                                                } else if (status === 'pending') {
+                                                    badgeClass = 'badge-warning';
+                                                    statusText = 'Pending';
+                                                } else if (status === 'rejected') {
+                                                    badgeClass = 'badge-danger';
+                                                    statusText = 'Rejected';
+                                                }
+
+                                                return (
+                                                    <span className={`badge ${badgeClass}`} style={{ textTransform: 'capitalize' }}>
+                                                        {statusText}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                     </tr>
                                 ))}
