@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet } from 'react-icons/fa';
 
-export default function Sidebar({ collapsed, isMobile, theme }) {
+export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
+    const [isHovered, setIsHovered] = useState(false);
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: <FaChartLine size={20} /> },
         { path: '/verifications', label: 'Verifications', icon: <FaUserShield size={20} /> },
@@ -17,8 +19,9 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
         { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
     ];
 
-    const sidebarWidth = isMobile ? '250px' : (collapsed ? '80px' : '250px');
+    const sidebarWidth = isMobile ? '250px' : (collapsed && !isHovered ? '80px' : '250px');
     const transform = isMobile ? (collapsed ? 'translateX(-100%)' : 'translateX(0)') : 'none';
+    const isExpanded = !isMobile && (isHovered || !collapsed);
 
     return (
         <div style={{
@@ -35,13 +38,23 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
             zIndex: 20,
             transform: transform,
             boxShadow: isMobile && !collapsed ? '4px 0 10px var(--shadow-color)' : 'none'
+        }}
+        onMouseEnter={() => {
+            if (collapsed && !isMobile) {
+                setIsHovered(true);
+                onHoverChange?.(true);
+            }
+        }}
+        onMouseLeave={() => {
+            setIsHovered(false);
+            onHoverChange?.(false);
         }}>
             <div style={{
                 height: '64px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: (collapsed && !isMobile) ? 'center' : 'flex-start',
-                padding: (collapsed && !isMobile) ? '0' : '0 2rem',
+                justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
+                padding: (!isExpanded && !isMobile) ? '0' : '0 2rem',
                 borderBottom: '1px solid var(--border-color)'
             }}>
                 <h2 style={{
@@ -49,7 +62,7 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
                     color: 'var(--primary)',
                     fontSize: '1.5rem'
                 }}>
-                    {(collapsed && !isMobile) ? 'M' : 'Matrimony'}
+                    {(!isExpanded && !isMobile) ? 'M' : 'Matrimony'}
                 </h2>
             </div>
 
@@ -62,7 +75,7 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
                                 style={({ isActive }) => ({
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: (collapsed && !isMobile) ? 'center' : 'flex-start',
+                                    justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
                                     padding: '0.75rem 1rem',
                                     textDecoration: 'none',
                                     color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
@@ -70,12 +83,12 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
                                     borderLeft: isActive ? '4px solid var(--primary)' : '4px solid transparent',
                                     transition: 'all 0.2s'
                                 })}
-                                title={(collapsed && !isMobile) ? item.label : ''}
+                                title={(!isExpanded && !isMobile) ? item.label : ''}
                             >
-                                <span style={{ marginRight: (collapsed && !isMobile) ? 0 : '1rem', display: 'flex' }}>
+                                <span style={{ marginRight: (!isExpanded && !isMobile) ? 0 : '1rem', display: 'flex' }}>
                                     {item.icon}
                                 </span>
-                                {(!collapsed || isMobile) && <span style={{ fontWeight: 500 }}>{item.label}</span>}
+                                {(isExpanded || isMobile) && <span style={{ fontWeight: 500 }}>{item.label}</span>}
                             </NavLink>
                         </li>
                     ))}

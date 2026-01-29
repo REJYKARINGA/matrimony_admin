@@ -6,6 +6,7 @@ import Header from './Header';
 export default function Layout() {
     const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [sidebarHovered, setSidebarHovered] = useState(false);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const location = useLocation();
 
@@ -54,11 +55,16 @@ export default function Layout() {
                 />
             )}
 
-            <Sidebar collapsed={collapsed} isMobile={isMobile} theme={theme} />
+            <Sidebar 
+                collapsed={collapsed} 
+                isMobile={isMobile} 
+                theme={theme} 
+                onHoverChange={setSidebarHovered}
+            />
 
             <div style={{
                 flex: 1,
-                marginLeft: isMobile ? 0 : (collapsed ? '80px' : '250px'),
+                marginLeft: isMobile ? 0 : (collapsed && !sidebarHovered ? '80px' : '250px'),
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
