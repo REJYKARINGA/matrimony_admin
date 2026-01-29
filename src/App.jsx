@@ -12,6 +12,7 @@ import Education from './pages/Education';
 import Occupation from './pages/Occupation';
 import FamilyDetails from './pages/FamilyDetails';
 import Preferences from './pages/Preferences';
+import WalletTransactions from './pages/WalletTransactions';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/occupation" element={<Occupation />} />
           <Route path="/family-details" element={<FamilyDetails />} />
           <Route path="/preferences" element={<Preferences />} />
+          <Route path="/wallet-transactions" element={<WalletTransactions />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
