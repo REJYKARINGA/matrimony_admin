@@ -8,6 +8,8 @@ import UserProfiles from './pages/UserProfiles';
 import Reports from './pages/Reports';
 import SuccessStories from './pages/SuccessStories';
 import Payments from './pages/Payments';
+import Education from './pages/Education';
+import Occupation from './pages/Occupation';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/success-stories" element={<SuccessStories />} />
           <Route path="/payments" element={<Payments />} />
+          <Route path="/education" element={<Education />} />
+          <Route path="/occupation" element={<Occupation />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

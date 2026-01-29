@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme }) {
     const menuItems = [
@@ -10,6 +10,8 @@ export default function Sidebar({ collapsed, isMobile, theme }) {
         { path: '/reports', label: 'Reports', icon: <FaFlag size={20} /> },
         { path: '/success-stories', label: 'Success Stories', icon: <FaHeart size={20} /> },
         { path: '/payments', label: 'Payments', icon: <FaMoneyBillWave size={20} /> },
+        { path: '/education', label: 'Education', icon: <FaGraduationCap size={20} /> },
+        { path: '/occupation', label: 'Occupation', icon: <FaBriefcase size={20} /> },
     ];
 
     const sidebarWidth = isMobile ? '250px' : (collapsed ? '80px' : '250px');
