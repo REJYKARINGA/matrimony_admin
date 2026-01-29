@@ -10,6 +10,7 @@ import SuccessStories from './pages/SuccessStories';
 import Payments from './pages/Payments';
 import Education from './pages/Education';
 import Occupation from './pages/Occupation';
+import FamilyDetails from './pages/FamilyDetails';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/education" element={<Education />} />
           <Route path="/occupation" element={<Occupation />} />
+          <Route path="/family-details" element={<FamilyDetails />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
