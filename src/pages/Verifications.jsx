@@ -76,6 +76,8 @@ export default function Verifications() {
                                 <thead>
                                     <tr>
                                         <th>User</th>
+                                        <th>Profile Pic</th>
+                                        <th>Photos</th>
                                         <th>ID Type</th>
                                         <th>ID Number</th>
                                         <th>Documents</th>
@@ -91,6 +93,47 @@ export default function Verifications() {
                                                         {v.user?.user_profile?.first_name} {v.user?.user_profile?.last_name}
                                                     </div>
                                                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{v.user?.email}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {v.user?.user_profile?.profile_picture ? (
+                                                    <img
+                                                        src={v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `http://localhost:8000${v.user.user_profile.profile_picture}`}
+                                                        alt="Profile"
+                                                        onClick={() => setPreviewImage({ url: v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `http://localhost:8000${v.user.user_profile.profile_picture}`, title: 'Profile Picture' })}
+                                                        style={{
+                                                            width: '50px',
+                                                            height: '50px',
+                                                            objectFit: 'cover',
+                                                            borderRadius: '50%',
+                                                            cursor: 'pointer',
+                                                            border: '1px solid var(--border-color)'
+                                                        }}
+                                                    />
+                                                ) : <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No Image</span>}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', maxWidth: '200px' }}>
+                                                    {v.user?.profile_photos && v.user.profile_photos.length > 0 ? (
+                                                        v.user.profile_photos.map((photo, idx) => (
+                                                            <img
+                                                                key={photo.id || idx}
+                                                                src={photo.full_photo_url}
+                                                                alt={`Photo ${idx + 1}`}
+                                                                onClick={() => setPreviewImage({ url: photo.full_photo_url, title: `User Photo ${idx + 1}` })}
+                                                                style={{
+                                                                    width: '40px',
+                                                                    height: '40px',
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: '4px',
+                                                                    cursor: 'pointer',
+                                                                    border: '1px solid var(--border-color)'
+                                                                }}
+                                                            />
+                                                        ))
+                                                    ) : (
+                                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No Photos</span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td>{v.id_proof_type}</td>
