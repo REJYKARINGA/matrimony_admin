@@ -1,10 +1,10 @@
 import { FaBars, FaSignOutAlt, FaUserCircle, FaMoon, FaSun } from 'react-icons/fa';
 
-export default function Header({ toggleSidebar, collapsed, theme, toggleTheme }) {
+export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, isMobile }) {
     const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
 
     const handleLogout = () => {
-        localStorage.removeItem('admin_token');
+        localStorage.removeItem('token');
         localStorage.removeItem('admin_user');
         window.location.href = '/';
     };
@@ -18,7 +18,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme })
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 2rem',
+            padding: isMobile ? '0 1rem' : '0 2rem',
             position: 'sticky',
             top: 0,
             zIndex: 10,
@@ -41,10 +41,10 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme })
                 >
                     <FaBars />
                 </button>
-                <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text)' }}>Dashboard</h2>
+                <h2 style={{ margin: 0, fontSize: isMobile ? '1rem' : '1.25rem', color: 'var(--text)' }}>Dashboard</h2>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.75rem' : '1.5rem' }}>
                 <button
                     onClick={toggleTheme}
                     style={{
@@ -55,7 +55,6 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme })
                         fontSize: '1.25rem',
                         display: 'flex',
                         alignItems: 'center',
-                        marginTop: '4px'
                     }}
                     title="Toggle Theme"
                 >
@@ -64,9 +63,11 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme })
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <FaUserCircle size={24} color={theme === 'dark' ? '#94A3B8' : '#CBD5E1'} />
-                    <span style={{ fontWeight: 500, color: 'var(--text)' }}>
-                        {user.user_profile?.first_name || 'Admin'}
-                    </span>
+                    {!isMobile && (
+                        <span style={{ fontWeight: 500, color: 'var(--text)' }}>
+                            {user.user_profile?.first_name || 'Admin'}
+                        </span>
+                    )}
                 </div>
                 <button
                     onClick={handleLogout}
@@ -80,9 +81,10 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme })
                         gap: '0.5rem',
                         fontWeight: 500
                     }}
+                    title="Logout"
                 >
                     <FaSignOutAlt />
-                    Logout
+                    {!isMobile && 'Logout'}
                 </button>
             </div>
         </header>

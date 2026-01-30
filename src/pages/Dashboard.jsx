@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, 
-    CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart 
+import {
+    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis,
+    CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
 } from 'recharts';
-import { 
-    FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave, 
+import {
+    FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
     FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock
 } from 'react-icons/fa6';
 
@@ -131,6 +132,7 @@ export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const { isMobile } = useOutletContext();
 
     useEffect(() => {
         setMounted(true);
@@ -160,11 +162,11 @@ export default function Dashboard() {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '1rem', 
-                        marginBottom: '2rem' 
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        marginBottom: '2rem'
                     }}
                 >
                     <motion.div
@@ -173,11 +175,11 @@ export default function Dashboard() {
                     >
                         <FaSpinner size={32} color={COLORS.primary} />
                     </motion.div>
-                    <h1 style={{ 
-                        margin: 0, 
-                        fontSize: '2rem', 
-                        fontWeight: 'bold', 
-                        color: 'var(--text-primary)' 
+                    <h1 style={{
+                        margin: 0,
+                        fontSize: '2rem',
+                        fontWeight: 'bold',
+                        color: 'var(--text-primary)'
                     }}>
                         Loading Dashboard...
                     </h1>
@@ -206,15 +208,15 @@ export default function Dashboard() {
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    minHeight: '400px' 
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px'
                 }}
             >
-                <div style={{ 
-                    fontSize: '1.25rem', 
+                <div style={{
+                    fontSize: '1.25rem',
                     color: 'var(--text-secondary)',
                     textAlign: 'center'
                 }}>
@@ -226,56 +228,56 @@ export default function Dashboard() {
     }
 
     const statCards = [
-        { 
-            title: 'Total Users', 
-            value: stats.users.total, 
-            icon: FaUsers, 
-            color: COLORS.primary, 
+        {
+            title: 'Total Users',
+            value: stats.users.total,
+            icon: FaUsers,
+            color: COLORS.primary,
             subtitle: `${stats.users.active} active`,
             trend: '+12%',
             delay: 0
         },
-        { 
-            title: 'Verifications', 
-            value: stats.verifications.pending, 
-            icon: FaUserShield, 
-            color: COLORS.warning, 
+        {
+            title: 'Verifications',
+            value: stats.verifications.pending,
+            icon: FaUserShield,
+            color: COLORS.warning,
             subtitle: 'pending verification',
             trend: '+8%',
             delay: 0.1
         },
-        { 
-            title: 'Total Profiles', 
-            value: stats.profiles.total, 
-            icon: FaUserCheck, 
-            color: COLORS.info, 
+        {
+            title: 'Total Profiles',
+            value: stats.profiles.total,
+            icon: FaUserCheck,
+            color: COLORS.info,
             subtitle: `${stats.profiles.verified} verified`,
             trend: '+15%',
             delay: 0.2
         },
-        { 
-            title: 'Active Matches', 
-            value: stats.matches.total, 
-            icon: FaHeart, 
-            color: COLORS.danger, 
+        {
+            title: 'Active Matches',
+            value: stats.matches.total,
+            icon: FaHeart,
+            color: COLORS.danger,
             subtitle: `${stats.matches.accepted} accepted`,
             trend: '+23%',
             delay: 0.3
         },
-        { 
-            title: 'Total Revenue', 
-            value: `₹${stats.payments.totalRevenue.toLocaleString()}`, 
-            icon: FaMoneyBillWave, 
-            color: COLORS.success, 
+        {
+            title: 'Total Revenue',
+            value: `₹${stats.payments.totalRevenue.toLocaleString()}`,
+            icon: FaMoneyBillWave,
+            color: COLORS.success,
             subtitle: `₹${stats.payments.revenueThisMonth.toLocaleString()} this month`,
             trend: '+18%',
             delay: 0.4
         },
-        { 
-            title: 'Reports', 
-            value: stats.reports.total, 
-            icon: FaFlag, 
-            color: COLORS.danger, 
+        {
+            title: 'Reports',
+            value: stats.reports.total,
+            icon: FaFlag,
+            color: COLORS.danger,
             subtitle: `${stats.reports.pending} pending`,
             trend: '-5%',
             delay: 0.5
@@ -285,7 +287,7 @@ export default function Dashboard() {
     if (!mounted) return null;
 
     return (
-        <div style={{ padding: '2rem', position: 'relative' }}>
+        <div style={{ padding: isMobile ? '1rem' : '2rem', position: 'relative' }}>
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -323,32 +325,32 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: -30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 100 }}
-                style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '1rem', 
-                    marginBottom: '2rem' 
+                    gap: '1rem',
+                    marginBottom: '2rem'
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <motion.div
-                        animate={{ 
+                        animate={{
                             rotate: [0, 10, -10, 0],
                             scale: [1, 1.1, 1]
                         }}
-                        transition={{ 
-                            duration: 4, 
-                            repeat: Infinity, 
-                            repeatDelay: 3 
+                        transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            repeatDelay: 3
                         }}
                     >
                         <FaChartLine size={32} color={COLORS.primary} />
                     </motion.div>
-                    <h1 style={{ 
-                        margin: 0, 
-                        fontSize: '2rem', 
-                        fontWeight: 'bold', 
+                    <h1 style={{
+                        margin: 0,
+                        fontSize: isMobile ? '1.5rem' : '2rem',
+                        fontWeight: 'bold',
                         background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
@@ -357,7 +359,7 @@ export default function Dashboard() {
                         Dashboard
                     </h1>
                 </div>
-                
+
                 <motion.div
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -383,7 +385,7 @@ export default function Dashboard() {
                 animate="visible"
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fit, minmax(100%, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}
@@ -431,38 +433,38 @@ export default function Dashboard() {
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
                             <div style={{ flex: 1 }}>
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: card.delay + 0.1 }}
-                                    style={{ 
-                                        fontSize: '0.875rem', 
-                                        color: 'var(--text-secondary)', 
+                                    style={{
+                                        fontSize: '0.875rem',
+                                        color: 'var(--text-secondary)',
                                         marginBottom: '0.5rem',
                                         fontWeight: '500'
                                     }}
                                 >
                                     {card.title}
                                 </motion.div>
-                                
-                                <motion.div 
+
+                                <motion.div
                                     variants={numberVariants}
-                                    style={{ 
-                                        fontSize: '2rem', 
-                                        fontWeight: 'bold', 
+                                    style={{
+                                        fontSize: '2rem',
+                                        fontWeight: 'bold',
                                         color: 'var(--text-primary)',
                                         marginBottom: '0.25rem'
                                     }}
                                 >
                                     {card.value}
                                 </motion.div>
-                                
-                                <motion.div 
+
+                                <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: card.delay + 0.3 }}
-                                    style={{ 
-                                        fontSize: '0.75rem', 
+                                    style={{
+                                        fontSize: '0.75rem',
                                         color: 'var(--text-secondary)',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -475,12 +477,12 @@ export default function Dashboard() {
                                     </span>
                                 </motion.div>
                             </div>
-                            
+
                             <motion.div
                                 initial={{ scale: 0, rotate: -180 }}
                                 animate={{ scale: 1, rotate: 0 }}
-                                transition={{ 
-                                    type: 'spring', 
+                                transition={{
+                                    type: 'spring',
                                     delay: card.delay + 0.2,
                                     stiffness: 200
                                 }}
@@ -508,10 +510,10 @@ export default function Dashboard() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', 
-                    gap: '2rem' 
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(500px, 1fr))',
+                    gap: '2rem'
                 }}
             >
                 {/* User Growth Chart */}
@@ -525,14 +527,14 @@ export default function Dashboard() {
                         boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
                     }}
                 >
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 }}
-                        style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: 'bold', 
-                            marginBottom: '1.5rem', 
+                        style={{
+                            fontSize: '1.25rem',
+                            fontWeight: 'bold',
+                            marginBottom: '1.5rem',
                             color: 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
@@ -546,8 +548,8 @@ export default function Dashboard() {
                         <AreaChart data={stats.users.growth}>
                             <defs>
                                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3}/>
-                                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
+                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
@@ -562,10 +564,10 @@ export default function Dashboard() {
                                     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
                                 }}
                             />
-                            <Area 
-                                type="monotone" 
-                                dataKey="count" 
-                                stroke={COLORS.primary} 
+                            <Area
+                                type="monotone"
+                                dataKey="count"
+                                stroke={COLORS.primary}
                                 strokeWidth={3}
                                 fill="url(#colorUsers)"
                                 animationDuration={2000}
@@ -585,14 +587,14 @@ export default function Dashboard() {
                         boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
                     }}
                 >
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.7 }}
-                        style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: 'bold', 
-                            marginBottom: '1.5rem', 
+                        style={{
+                            fontSize: '1.25rem',
+                            fontWeight: 'bold',
+                            marginBottom: '1.5rem',
                             color: 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
@@ -616,9 +618,9 @@ export default function Dashboard() {
                                     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
                                 }}
                             />
-                            <Bar 
-                                dataKey="amount" 
-                                fill={COLORS.success} 
+                            <Bar
+                                dataKey="amount"
+                                fill={COLORS.success}
                                 name="Revenue (₹)"
                                 radius={[8, 8, 0, 0]}
                                 animationDuration={2000}
@@ -638,14 +640,14 @@ export default function Dashboard() {
                         boxShadow: '0 4px 24px var(--shadow-color)',
                     }}
                 >
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.8 }}
-                        style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: 'bold', 
-                            marginBottom: '1.5rem', 
+                        style={{
+                            fontSize: '1.25rem',
+                            fontWeight: 'bold',
+                            marginBottom: '1.5rem',
                             color: 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
@@ -674,13 +676,13 @@ export default function Dashboard() {
                                     const radius = innerRadiusValue + (outerRadiusValue - innerRadiusValue) * 0.5;
                                     const x = cx + radius * Math.cos(-RADIAN);
                                     const y = cy + radius * Math.sin(-RADIAN);
-                                    
+
                                     return (
-                                        <text 
-                                            x={x} 
-                                            y={y} 
-                                            fill="var(--text-primary)" 
-                                            textAnchor={x > cx ? 'start' : 'end'} 
+                                        <text
+                                            x={x}
+                                            y={y}
+                                            fill="var(--text-primary)"
+                                            textAnchor={x > cx ? 'start' : 'end'}
                                             dominantBaseline="central"
                                             fontSize="12"
                                             fontWeight="600"
@@ -695,8 +697,8 @@ export default function Dashboard() {
                                 animationEasing="ease-out"
                             >
                                 {stats.profiles.genderDistribution.map((entry, index) => (
-                                    <Cell 
-                                        key={`cell-${index}`} 
+                                    <Cell
+                                        key={`cell-${index}`}
                                         fill={index === 0 ? COLORS.info : COLORS.danger}
                                         style={{
                                             filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.1))',
@@ -733,14 +735,14 @@ export default function Dashboard() {
                         boxShadow: '0 4px 24px var(--shadow-color)',
                     }}
                 >
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.9 }}
-                        style={{ 
-                            fontSize: '1.25rem', 
-                            fontWeight: 'bold', 
-                            marginBottom: '1.5rem', 
+                        style={{
+                            fontSize: '1.25rem',
+                            fontWeight: 'bold',
+                            marginBottom: '1.5rem',
                             color: 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
@@ -769,13 +771,13 @@ export default function Dashboard() {
                                     const radius = innerRadiusValue + (outerRadiusValue - innerRadiusValue) * 0.5;
                                     const x = cx + radius * Math.cos(-RADIAN);
                                     const y = cy + radius * Math.sin(-RADIAN);
-                                    
+
                                     return (
-                                        <text 
-                                            x={x} 
-                                            y={y} 
-                                            fill="var(--text-primary)" 
-                                            textAnchor={x > cx ? 'start' : 'end'} 
+                                        <text
+                                            x={x}
+                                            y={y}
+                                            fill="var(--text-primary)"
+                                            textAnchor={x > cx ? 'start' : 'end'}
                                             dominantBaseline="central"
                                             fontSize="12"
                                             fontWeight="600"
@@ -790,8 +792,8 @@ export default function Dashboard() {
                                 animationEasing="ease-out"
                             >
                                 {stats.verifications.distribution.map((entry, index) => (
-                                    <Cell 
-                                        key={`cell-${index}`} 
+                                    <Cell
+                                        key={`cell-${index}`}
                                         fill={[COLORS.warning, COLORS.success, COLORS.danger][index]}
                                         style={{
                                             filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.1))',

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
@@ -9,6 +9,14 @@ export default function Layout() {
     const [sidebarHovered, setSidebarHovered] = useState(false);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -55,10 +63,10 @@ export default function Layout() {
                 />
             )}
 
-            <Sidebar 
-                collapsed={collapsed} 
-                isMobile={isMobile} 
-                theme={theme} 
+            <Sidebar
+                collapsed={collapsed}
+                isMobile={isMobile}
+                theme={theme}
                 onHoverChange={setSidebarHovered}
             />
 
@@ -75,9 +83,10 @@ export default function Layout() {
                     collapsed={collapsed}
                     theme={theme}
                     toggleTheme={toggleTheme}
+                    isMobile={isMobile}
                 />
                 <main style={{ padding: isMobile ? '1rem' : '2rem', flex: 1, overflowX: 'hidden' }}>
-                    <Outlet context={{ theme }} />
+                    <Outlet context={{ theme, isMobile }} />
                 </main>
             </div>
         </div>
