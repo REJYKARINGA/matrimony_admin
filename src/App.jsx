@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import MediatorDashboard from './pages/MediatorDashboard';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Verifications from './pages/Verifications';
@@ -12,6 +13,8 @@ import Education from './pages/Education';
 import Occupation from './pages/Occupation';
 import FamilyDetails from './pages/FamilyDetails';
 import Preferences from './pages/Preferences';
+import PromotionSettings from './pages/PromotionSettings';
+import MediatorPromotions from './pages/MediatorPromotions';
 import WalletTransactions from './pages/WalletTransactions';
 
 function App() {
@@ -19,6 +22,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/mediator/dashboard" element={<MediatorDashboard />} />
 
         {/* Protected Admin Routes */}
         <Route element={<Layout />}>
@@ -33,6 +37,8 @@ function App() {
           <Route path="/occupation" element={<Occupation />} />
           <Route path="/family-details" element={<FamilyDetails />} />
           <Route path="/preferences" element={<Preferences />} />
+          <Route path="/promotion-settings" element={<PromotionSettings />} />
+          <Route path="/mediator-promotions" element={<MediatorPromotions />} />
           <Route path="/wallet-transactions" element={<WalletTransactions />} />
         </Route>
 

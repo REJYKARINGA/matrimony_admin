@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -17,12 +17,13 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
         { path: '/occupation', label: 'Occupation', icon: <FaBriefcase size={20} /> },
         { path: '/family-details', label: 'Family Details', icon: <FaHome size={20} /> },
         { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
+        { path: '/promotion-settings', label: 'Promotion Settings', icon: <FaBullhorn size={20} /> },
+        { path: '/mediator-promotions', label: 'Mediator Promotions', icon: <FaBullseye size={20} /> },
     ];
 
     const sidebarWidth = isMobile ? '250px' : (collapsed && !isHovered ? '80px' : '250px');
     const transform = isMobile ? (collapsed ? 'translateX(-100%)' : 'translateX(0)') : 'none';
     const isExpanded = !isMobile && (isHovered || !collapsed);
-
     return (
         <div style={{
             width: sidebarWidth,
@@ -39,16 +40,16 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             transform: transform,
             boxShadow: isMobile && !collapsed ? '4px 0 10px var(--shadow-color)' : 'none'
         }}
-        onMouseEnter={() => {
-            if (collapsed && !isMobile) {
-                setIsHovered(true);
-                onHoverChange?.(true);
-            }
-        }}
-        onMouseLeave={() => {
-            setIsHovered(false);
-            onHoverChange?.(false);
-        }}>
+            onMouseEnter={() => {
+                if (collapsed && !isMobile) {
+                    setIsHovered(true);
+                    onHoverChange?.(true);
+                }
+            }}
+            onMouseLeave={() => {
+                setIsHovered(false);
+                onHoverChange?.(false);
+            }}>
             <div style={{
                 height: '64px',
                 display: 'flex',
@@ -66,7 +67,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 </h2>
             </div>
 
-            <nav style={{ flex: 1, padding: '1rem 0' }}>
+            <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {menuItems.map((item) => (
                         <li key={item.path} style={{ marginBottom: '0.5rem' }}>
@@ -83,6 +84,18 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                     borderLeft: isActive ? '4px solid var(--primary)' : '4px solid transparent',
                                     transition: 'all 0.2s'
                                 })}
+                                onMouseEnter={(e) => {
+                                    const isActive = e.currentTarget.classList.contains('active');
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    const isActive = e.currentTarget.classList.contains('active');
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = 'transparent';
+                                    }
+                                }}
                                 title={(!isExpanded && !isMobile) ? item.label : ''}
                             >
                                 <span style={{ marginRight: (!isExpanded && !isMobile) ? 0 : '1rem', display: 'flex' }}>
