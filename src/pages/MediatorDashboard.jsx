@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun } from 'react-icons/fa';
 import FormModal from '../components/FormModal';
+import TimeFormatCell from '../components/TimeFormatCell';
+
 
 export default function MediatorDashboard() {
     const navigate = useNavigate();
@@ -220,6 +222,8 @@ export default function MediatorDashboard() {
                                         <th>Payout</th>
                                         <th>Status</th>
                                         <th>Submitted</th>
+                                        <th>Last Updated</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -255,7 +259,9 @@ export default function MediatorDashboard() {
                                                     {promo.status}
                                                 </span>
                                             </td>
-                                            <td>{new Date(promo.created_at).toLocaleDateString()}</td>
+                                            <td><TimeFormatCell date={promo.created_at} /></td>
+                                            <td><TimeFormatCell date={promo.updated_at} /></td>
+
                                         </tr>
                                     ))}
                                 </tbody>
@@ -286,8 +292,7 @@ export default function MediatorDashboard() {
                             <option value="">Select Platform</option>
                             <option value="youtube">YouTube</option>
                             <option value="instagram">Instagram</option>
-                            <option value="facebook">Facebook</option>
-                            <option value="tiktok">TikTok</option>
+
                         </select>
                     </div>
 
@@ -302,8 +307,28 @@ export default function MediatorDashboard() {
                             required
                         />
                         <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.5rem' }}>
-                            Paste the direct link to your promotional video or post
+                            {formData.platform === 'youtube'
+                                ? 'Example: https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID'
+                                : formData.platform === 'instagram'
+                                    ? 'Example: https://www.instagram.com/p/POST_ID/ or https://www.instagram.com/reel/REEL_ID/'
+                                    : 'Paste the direct link to your promotional video or post'
+                            }
                         </small>
+                    </div>
+
+                    <div style={{
+                        padding: '1rem',
+                        background: 'var(--bg)',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        marginTop: '1rem'
+                    }}>
+                        <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            <strong>Note:</strong> Stats (views, likes, comments) will be manually verified by admin after submission.
+                        </p>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            Due to platform API restrictions, automatic fetching is not available. Admin will review your submission and update the counts.
+                        </p>
                     </div>
                 </FormModal>
             )}

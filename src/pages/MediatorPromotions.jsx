@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { FaEdit, FaTrash, FaExternalLinkAlt } from 'react-icons/fa';
 import FormModal from '../components/FormModal';
+import TimeFormatCell from '../components/TimeFormatCell';
+
 
 export default function MediatorPromotions() {
     const [promotions, setPromotions] = useState([]);
@@ -86,7 +88,9 @@ export default function MediatorPromotions() {
                                 <th>Stats (V/L/C)</th>
                                 <th>Payout</th>
                                 <th>Status</th>
+                                <th>Last Updated</th>
                                 <th>Actions</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -111,6 +115,8 @@ export default function MediatorPromotions() {
                                             {promo.status}
                                         </span>
                                     </td>
+                                    <td><TimeFormatCell date={promo.updated_at} /></td>
+
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <button
