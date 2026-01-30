@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis,
-    CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
+    BarChart, Bar, XAxis, YAxis,
+    CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart
 } from 'recharts';
 import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
@@ -51,18 +51,7 @@ const itemVariants = {
     }
 };
 
-const cardHoverVariants = {
-    hover: {
-        y: -8,
-        scale: 1.02,
-        boxShadow: '0 20px 40px rgba(180, 127, 255, 0.15)',
-        transition: {
-            type: 'spring',
-            stiffness: 300,
-            damping: 20
-        }
-    }
-};
+
 
 const numberVariants = {
     hidden: { scale: 0.5, opacity: 0 },
@@ -657,71 +646,81 @@ export default function Dashboard() {
                         <FaUserCheck color={COLORS.info} />
                         Gender Distribution
                     </motion.h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                            <Pie
-                                data={stats.profiles.genderDistribution}
-                                cx="50%"
-                                cy="50%"
-                                startAngle={90}
-                                endAngle={-270}
-                                innerRadius={40}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                labelLine={false}
-                                label={({ gender, count, percent, cx, cy }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const innerRadiusValue = 40;
-                                    const outerRadiusValue = 80;
-                                    const radius = innerRadiusValue + (outerRadiusValue - innerRadiusValue) * 0.5;
-                                    const x = cx + radius * Math.cos(-RADIAN);
-                                    const y = cy + radius * Math.sin(-RADIAN);
+                    <div style={{ padding: '1rem 0' }}>
+                        {/* Summary Stats */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginBottom: '1.5rem',
+                            gap: '1rem'
+                        }}>
+                            {stats.profiles.genderDistribution.map((item, index) => (
+                                <div key={index} style={{ textAlign: 'center', flex: 1 }}>
+                                    <div style={{
+                                        fontSize: '1.5rem',
+                                        fontWeight: 'bold',
+                                        color: index === 0 ? COLORS.info : COLORS.danger
+                                    }}>
+                                        {item.count}
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                        {item.gender}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
-                                    return (
-                                        <text
-                                            x={x}
-                                            y={y}
-                                            fill="var(--text-primary)"
-                                            textAnchor={x > cx ? 'start' : 'end'}
-                                            dominantBaseline="central"
-                                            fontSize="12"
-                                            fontWeight="600"
-                                        >
-                                            {`${gender}: ${(percent * 100).toFixed(0)}%`}
-                                        </text>
-                                    );
-                                }}
-                                dataKey="count"
-                                animationBegin={800}
-                                animationDuration={2000}
-                                animationEasing="ease-out"
-                            >
-                                {stats.profiles.genderDistribution.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={index === 0 ? COLORS.info : COLORS.danger}
+                        {/* Progress Bar */}
+                        <div style={{
+                            height: '24px',
+                            width: '100%',
+                            background: 'var(--border-color)',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            position: 'relative'
+                        }}>
+                            {stats.profiles.genderDistribution.map((item, index) => {
+                                const total = stats.profiles.genderDistribution.reduce((a, b) => a + b.count, 0);
+                                const percent = (item.count / total) * 100;
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${percent}%` }}
+                                        transition={{ duration: 1, delay: 0.5 + (index * 0.2) }}
                                         style={{
-                                            filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.1))',
-                                            cursor: 'pointer'
+                                            background: index === 0 ? COLORS.info : COLORS.danger,
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
                                         }}
+                                        title={`${item.gender}: ${percent.toFixed(1)}%`}
                                     />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-primary)',
-                                    boxShadow: '0 8px 24px var(--shadow-color)'
-                                }}
-                                formatter={(value, name, props) => [
-                                    `${value} (${((props.payload.count / stats.profiles.genderDistribution.reduce((a, b) => a + b.count, 0)) * 100).toFixed(1)}%)`,
-                                    props.payload.gender
-                                ]}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                                );
+                            })}
+                        </div>
+
+                        {/* Legend */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginTop: '0.5rem',
+                            fontSize: '0.75rem',
+                            color: 'var(--text-secondary)'
+                        }}>
+                            {stats.profiles.genderDistribution.map((item, index) => {
+                                const total = stats.profiles.genderDistribution.reduce((a, b) => a + b.count, 0);
+                                const percent = (item.count / total) * 100;
+                                return (
+                                    <span key={index}>
+                                        {percent.toFixed(1)}%
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </motion.div>
 
                 {/* Verification Status */}
@@ -752,71 +751,55 @@ export default function Dashboard() {
                         <FaUserShield color={COLORS.warning} />
                         Verification Status
                     </motion.h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                            <Pie
-                                data={stats.verifications.distribution}
-                                cx="50%"
-                                cy="50%"
-                                startAngle={90}
-                                endAngle={-270}
-                                innerRadius={40}
-                                outerRadius={80}
-                                paddingAngle={3}
-                                labelLine={false}
-                                label={({ status, count, percent, cx, cy }) => {
-                                    const RADIAN = Math.PI / 180;
-                                    const innerRadiusValue = 40;
-                                    const outerRadiusValue = 80;
-                                    const radius = innerRadiusValue + (outerRadiusValue - innerRadiusValue) * 0.5;
-                                    const x = cx + radius * Math.cos(-RADIAN);
-                                    const y = cy + radius * Math.sin(-RADIAN);
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+                        {stats.verifications.distribution.map((item, index) => {
+                            const total = stats.verifications.distribution.reduce((a, b) => a + b.count, 0);
+                            const percent = total > 0 ? (item.count / total) * 100 : 0;
+                            const color = [COLORS.warning, COLORS.success, COLORS.danger][index % 3];
 
-                                    return (
-                                        <text
-                                            x={x}
-                                            y={y}
-                                            fill="var(--text-primary)"
-                                            textAnchor={x > cx ? 'start' : 'end'}
-                                            dominantBaseline="central"
-                                            fontSize="12"
-                                            fontWeight="600"
-                                        >
-                                            {`${status.slice(0, 4)}... ${(percent * 100).toFixed(0)}%`}
-                                        </text>
-                                    );
-                                }}
-                                dataKey="count"
-                                animationBegin={1000}
-                                animationDuration={2000}
-                                animationEasing="ease-out"
-                            >
-                                {stats.verifications.distribution.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={[COLORS.warning, COLORS.success, COLORS.danger][index]}
-                                        style={{
-                                            filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.1))',
-                                            cursor: 'pointer'
-                                        }}
-                                    />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-primary)',
-                                    boxShadow: '0 8px 24px var(--shadow-color)'
-                                }}
-                                formatter={(value, name, props) => [
-                                    `${value} (${((props.payload.count / stats.verifications.distribution.reduce((a, b) => a + b.count, 0)) * 100).toFixed(1)}%)`,
-                                    props.payload.status
-                                ]}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                            return (
+                                <div key={index}>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        marginBottom: '0.5rem',
+                                        fontSize: '0.875rem',
+                                        color: 'var(--text-primary)',
+                                        fontWeight: '500'
+                                    }}>
+                                        <span>{item.status}</span>
+                                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>
+                                    </div>
+                                    <div style={{
+                                        height: '10px',
+                                        width: '100%',
+                                        background: 'var(--border-color)',
+                                        borderRadius: '5px',
+                                        overflow: 'hidden'
+                                    }}>
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${percent}%` }}
+                                            transition={{ duration: 1, delay: 0.8 + (index * 0.1) }}
+                                            style={{
+                                                height: '100%',
+                                                background: color,
+                                                borderRadius: '5px'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{
+                                        textAlign: 'right',
+                                        fontSize: '0.75rem',
+                                        color: 'var(--text-secondary)',
+                                        marginTop: '0.25rem'
+                                    }}>
+                                        {percent.toFixed(1)}%
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </motion.div>
             </motion.div>
         </div>
