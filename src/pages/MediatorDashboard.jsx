@@ -168,7 +168,7 @@ export default function MediatorDashboard() {
                     }}>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Earnings</div>
                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2196F3' }}>
-                            ₹{promotions.reduce((sum, p) => sum + Number(p.calculated_payout || 0), 0).toLocaleString()}
+                            ₹{promotions.reduce((sum, p) => sum + Number(p.total_paid_amount || 0) + Number(p.calculated_payout || 0), 0).toLocaleString()}
                         </div>
                     </div>
                     <div className="stat-card" style={{
@@ -177,9 +177,9 @@ export default function MediatorDashboard() {
                         borderRadius: '8px',
                         border: '1px solid var(--border-color)'
                     }}>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Paid</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Paid</div>
                         <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
-                            ₹{promotions.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.calculated_payout || 0), 0).toLocaleString()}
+                            ₹{promotions.reduce((sum, p) => sum + Number(p.total_paid_amount || 0), 0).toLocaleString()}
                         </div>
                     </div>
                 </div>
@@ -243,8 +243,83 @@ export default function MediatorDashboard() {
                                             <td>{Number(promo.views_count).toLocaleString()}</td>
                                             <td>{Number(promo.likes_count).toLocaleString()}</td>
                                             <td>{Number(promo.comments_count).toLocaleString()}</td>
-                                            <td style={{ fontWeight: 'bold', color: 'var(--primary)' }}>
-                                                ₹{Number(promo.calculated_payout).toLocaleString()}
+                                            <td>
+                                                <div style={{ fontWeight: 'bold', color: Number(promo.calculated_payout) > 0 ? 'var(--primary)' : 'inherit' }}>
+                                                    {Number(promo.calculated_payout) > 0 ? `Pending: ₹${Number(promo.calculated_payout).toLocaleString()}` : 'No Pending Payout'}
+                                                </div>
+                                                {Number(promo.total_paid_amount) > 0 && (
+                                                    <div style={{ fontSize: '0.8rem', color: '#4CAF50', marginTop: '2px' }}>
+                                                        Paid: ₹{Number(promo.total_paid_amount).toLocaleString()}
+                                                    </div>
+                                                )}
+                                                {promo.setting ? (() => {
+                                                    const vMult = Math.floor(promo.views_count / (promo.setting.views_required || 1));
+                                                    let finalMult = vMult;
+
+                                                    if (promo.setting.is_likes_enabled) {
+                                                        const lMult = Math.floor(promo.likes_count / (promo.setting.likes_required || 1));
+                                                        finalMult = Math.min(finalMult, lMult);
+                                                    }
+
+                                                    if (promo.setting.is_comments_enabled) {
+                                                        const cMult = Math.floor(promo.comments_count / (promo.setting.comments_required || 1));
+                                                        finalMult = Math.min(finalMult, cMult);
+                                                    }
+
+                                                    const viewsPerUnit = Number(promo.setting.views_required) || 1;
+                                                    const totalViewUnits = Math.floor(Number(promo.views_count) / viewsPerUnit);
+
+                                                    if (Number(promo.calculated_payout) > 0) {
+                                                        const currentUnits = Math.floor(Number(promo.calculated_payout) / Number(promo.setting.payout_amount));
+                                                        return (
+                                                            <div style={{ fontSize: '0.7rem', color: '#4CAF50', marginTop: '4px' }}>
+                                                                Ready for {currentUnits} unit(s)
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    const vReq = Number(promo.setting.views_required);
+                                                    const lReq = promo.setting.is_likes_enabled ? Number(promo.setting.likes_required) : 0;
+                                                    const cReq = promo.setting.is_comments_enabled ? Number(promo.setting.comments_required) : 0;
+
+                                                    const lUnits = lReq > 0 ? Math.floor(Number(promo.likes_count) / lReq) : 999999;
+                                                    const cUnits = cReq > 0 ? Math.floor(Number(promo.comments_count) / cReq) : 999999;
+
+                                                    const finalUnits = Math.min(totalViewUnits, lUnits, cUnits);
+
+                                                    if (totalViewUnits > 0 && finalUnits < totalViewUnits) {
+                                                        const bottleneck = lUnits < totalViewUnits && lUnits <= cUnits ? 'Likes' : 'Comments';
+                                                        const needAmt = (totalViewUnits * (bottleneck === 'Likes' ? lReq : cReq)) - (bottleneck === 'Likes' ? promo.likes_count : promo.comments_count);
+
+                                                        return (
+                                                            <div style={{ fontSize: '0.7rem', color: '#F44336', marginTop: '4px', lineHeight: '1.2' }}>
+                                                                Views reached {totalViewUnits} units, but need {needAmt} more {bottleneck} to unlock full payout.
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    if (totalViewUnits === 0) {
+                                                        return (
+                                                            <div style={{ fontSize: '0.7rem', color: '#F44336', marginTop: '4px' }}>
+                                                                Need {vReq - promo.views_count} more views for 1st unit
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    if (Number(promo.total_paid_amount) > 0) {
+                                                        return (
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                                                Already paid for latest milestones
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                                            No pending payout
+                                                        </div>
+                                                    );
+                                                })() : null}
                                             </td>
                                             <td>
                                                 <span style={{
@@ -308,13 +383,30 @@ export default function MediatorDashboard() {
                         />
                         <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.5rem' }}>
                             {formData.platform === 'youtube'
-                                ? 'Example: https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID'
+                                ? 'Example: https://www.youtube.com/watch?v=VIDEO_ID'
                                 : formData.platform === 'instagram'
-                                    ? 'Example: https://www.instagram.com/p/POST_ID/ or https://www.instagram.com/reel/REEL_ID/'
+                                    ? 'Example: https://www.instagram.com/reel/C8X_qP_.../'
                                     : 'Paste the direct link to your promotional video or post'
                             }
                         </small>
                     </div>
+
+                    {formData.platform === 'instagram' && (
+                        <div className="form-group" style={{ marginTop: '1rem' }}>
+                            <label>Instagram Username</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={formData.username || ''}
+                                onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                placeholder="e.g. your_instagram_handle"
+                                required
+                            />
+                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.5rem' }}>
+                                Required for automatic stats fetching via Business Discovery.
+                            </small>
+                        </div>
+                    )}
 
                     <div style={{
                         padding: '1rem',
