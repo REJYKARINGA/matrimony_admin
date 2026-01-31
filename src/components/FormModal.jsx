@@ -75,12 +75,12 @@ export default function FormModal({
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            marginBottom: '1.5rem',
+                            marginBottom: 0,
                             position: 'sticky',
                             top: 0,
                             background: 'var(--card-bg)',
                             zIndex: 10,
-                            paddingBottom: '1rem',
+                            padding: '1.5rem 1.5rem 1rem',
                             borderBottom: '1px solid var(--border-color)'
                         }}>
                             <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{title}</h2>
@@ -102,7 +102,7 @@ export default function FormModal({
                         </div>
 
                         <form onSubmit={onSubmit}>
-                            <div className="modal-body" style={{ marginBottom: '1.5rem' }}>
+                            <div className="modal-body" style={{ padding: '1.5rem 1.5rem 6rem' }}>
                                 {children}
                             </div>
 
@@ -110,12 +110,13 @@ export default function FormModal({
                                 display: 'flex',
                                 justifyContent: 'flex-end',
                                 gap: '1rem',
-                                paddingTop: '1rem',
+                                padding: '1rem 1.5rem 1.5rem',
                                 borderTop: '1px solid var(--border-color)',
                                 position: 'sticky',
                                 bottom: 0,
                                 background: 'var(--card-bg)',
-                                marginTop: 'auto'
+                                marginTop: 'auto',
+                                zIndex: 10
                             }}>
                                 <button
                                     type="button"

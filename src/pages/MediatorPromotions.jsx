@@ -174,14 +174,14 @@ export default function MediatorPromotions() {
     const handleProcessPayment = async () => {
         setSubmitting(true);
         try {
-            await api.put(`/admin/mediator-promotions/${selectedPromotion.id}`, {
-                status: 'paid'
-            });
+            await api.post(`/admin/mediator-promotions/${selectedPromotion.id}/payout`);
             setIsPayModalOpen(false);
             fetchPromotions();
+            alert('Payout initiated successfully via RazorpayX.');
         } catch (error) {
             console.error('Failed to process payment:', error);
-            alert('Failed to process payment');
+            const msg = error.response?.data?.error || 'Failed to process payment';
+            alert('Error: ' + msg);
         } finally {
             setSubmitting(false);
         }
@@ -202,7 +202,7 @@ export default function MediatorPromotions() {
     if (!mounted) return null;
 
     return (
-        <div style={{ padding: '2rem', position: 'relative' }}>
+        <div style={{ padding: '1rem', position: 'relative', boxSizing: 'border-box', overflowX: 'hidden' }}>
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -276,7 +276,7 @@ export default function MediatorPromotions() {
                 animate="visible"
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}
@@ -398,7 +398,7 @@ export default function MediatorPromotions() {
             >
                 <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.5rem' }}>Promotions History</h2>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div style={{ position: 'relative' }}>
                         <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                         <input
@@ -469,8 +469,8 @@ export default function MediatorPromotions() {
                     </div>
                 ) : (
                     <>
-                        <div className="table-container">
-                            <table className="data-table">
+                        <div className="table-container" style={{ overflowX: 'auto' }}>
+                            <table className="data-table" style={{ minWidth: '1000px', width: '100%' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
                                         <th style={{ padding: '1rem', textAlign: 'left' }}>Mediator</th>
@@ -796,18 +796,30 @@ export default function MediatorPromotions() {
             )}
 
             {isPayModalOpen && (
-                <div className="modal-overlay">
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                    backdropFilter: 'blur(3px)'
+                }}>
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="modal-content"
-                        style={{ maxWidth: '400px', borderRadius: '24px', padding: '10px' }}
+                        style={{ maxWidth: '400px', borderRadius: '24px', background: 'var(--card-bg)', overflow: 'hidden' }}
                     >
-                        <div className="modal-header" style={{ padding: '20px 24px 0' }}>
-                            <h2 style={{ fontSize: '1.25rem' }}>Process Payment</h2>
+                        <div className="modal-header" style={{ padding: '1.5rem 1.5rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Process Payment</h2>
                             <button onClick={() => setIsPayModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-primary)' }}>&times;</button>
                         </div>
-                        <div className="modal-body" style={{ textAlign: 'center', padding: '24px' }}>
+                        <div className="modal-body" style={{ textAlign: 'center', padding: '1.5rem' }}>
                             <div style={{ fontSize: '4rem', color: 'var(--success)', marginBottom: '16px' }}>
                                 <FaCheckCircle />
                             </div>
