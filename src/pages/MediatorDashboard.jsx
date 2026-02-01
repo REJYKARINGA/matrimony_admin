@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar } from 'react-icons/fa';
+import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar, FaWallet } from 'react-icons/fa';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 
@@ -133,6 +133,33 @@ export default function MediatorDashboard() {
             alert('Failed to submit promotion');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleRequestPayout = async () => {
+        const totalPayable = promotions.reduce((sum, p) => sum + calculatePayable(p), 0);
+        if (totalPayable <= 0) {
+            alert('No pending payout balance.');
+            return;
+        }
+
+        const primaryAcc = bankAccounts.find(a => a.is_primary);
+        if (!primaryAcc) {
+            alert('Please add and set a primary bank account first.');
+            setActiveTab('bank-accounts');
+            return;
+        }
+
+        if (!window.confirm(`Request payout of ₹${totalPayable.toLocaleString()} to ${primaryAcc.account_name} (${primaryAcc.account_number})?`)) return;
+
+        try {
+            const response = await api.post('/mediator/request-payout');
+            alert(response.data.message);
+            fetchPromotions();
+            fetchBankAccounts();
+        } catch (error) {
+            console.error('Payout failed:', error);
+            alert(error.response?.data?.error || 'Payout request failed');
         }
     };
 
@@ -274,12 +301,39 @@ export default function MediatorDashboard() {
                             background: 'var(--card-bg)',
                             padding: '1.5rem',
                             borderRadius: '8px',
-                            border: '1px solid var(--border-color)'
+                            border: '1px solid var(--border-color)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between'
                         }}>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Payable</div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                ₹{promotions.reduce((sum, p) => sum + calculatePayable(p), 0).toLocaleString()}
+                            <div>
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Payable</div>
+                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                    ₹{promotions.reduce((sum, p) => sum + calculatePayable(p), 0).toLocaleString()}
+                                </div>
                             </div>
+                            {promotions.reduce((sum, p) => sum + calculatePayable(p), 0) > 0 && (
+                                <button
+                                    onClick={handleRequestPayout}
+                                    style={{
+                                        marginTop: '1rem',
+                                        padding: '0.5rem',
+                                        background: 'var(--primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem'
+                                    }}
+                                >
+                                    <FaWallet /> Withdraw Funds
+                                </button>
+                            )}
                         </div>
                         <div className="stat-card" style={{
                             background: 'var(--card-bg)',
