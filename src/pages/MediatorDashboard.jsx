@@ -4,6 +4,7 @@ import api from '../api/axios';
 import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar, FaWallet } from 'react-icons/fa';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
+import './MediatorDashboard.css';
 
 
 export default function MediatorDashboard() {
@@ -221,60 +222,46 @@ export default function MediatorDashboard() {
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
             {/* Header */}
-            <div style={{
-                background: 'var(--card-bg)',
-                borderBottom: '1px solid var(--border-color)',
-                padding: '1rem 2rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                position: 'sticky',
-                top: 0,
-                zIndex: 100,
-                backdropFilter: 'blur(10px)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="mediator-header">
+                <div className="header-left">
                     <FaBullhorn size={24} color="var(--primary)" />
                     <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text)' }}>Mediator Dashboard</h1>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Welcome, {user?.name}</span>
-                    <button
-                        onClick={toggleTheme}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem',
-                            color: 'var(--text)',
-                            padding: '0.5rem',
-                            display: 'flex',
-                            alignItems: 'center'
-                        }}
-                        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                    >
-                        {theme === 'light' ? <FaMoon /> : <FaSun />}
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className="btn btn-secondary"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    >
-                        <FaSignOutAlt /> Logout
-                    </button>
+                <div className="header-right">
+                    <span className="welcome-text">Welcome, {user?.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                            onClick={toggleTheme}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '1.2rem',
+                                color: 'var(--text)',
+                                padding: '0.5rem',
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                        >
+                            {theme === 'light' ? <FaMoon /> : <FaSun />}
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="btn btn-secondary"
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+                        >
+                            <FaSignOutAlt /> Logout
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+            <div className="dashboard-content">
                 <div style={{ minWidth: 0 }}>
                     {/* Stats Cards */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '1rem',
-                        marginBottom: '2rem'
-                    }}>
+                    <div className="stats-grid">
                         <div className="stat-card" style={{
                             background: 'var(--card-bg)',
                             padding: '1.5rem',
@@ -349,47 +336,23 @@ export default function MediatorDashboard() {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        borderBottom: '1px solid var(--border-color)',
-                        paddingBottom: '2px'
-                    }}>
+                    <div className="tab-nav">
                         <button
                             onClick={() => setActiveTab('promotions')}
+                            className="tab-button"
                             style={{
-                                padding: '1rem 2rem',
-                                background: 'none',
-                                border: 'none',
                                 borderBottom: activeTab === 'promotions' ? '3px solid var(--primary)' : '3px solid transparent',
                                 color: activeTab === 'promotions' ? 'var(--primary)' : 'var(--text-secondary)',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                transition: 'all 0.3s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
                             }}
                         >
                             <FaBullhorn /> My Promotions
                         </button>
                         <button
                             onClick={() => setActiveTab('bank-accounts')}
+                            className="tab-button"
                             style={{
-                                padding: '1rem 2rem',
-                                background: 'none',
-                                border: 'none',
                                 borderBottom: activeTab === 'bank-accounts' ? '3px solid var(--primary)' : '3px solid transparent',
                                 color: activeTab === 'bank-accounts' ? 'var(--primary)' : 'var(--text-secondary)',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                transition: 'all 0.3s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
                             }}
                         >
                             <FaUniversity /> Bank Accounts
@@ -404,7 +367,7 @@ export default function MediatorDashboard() {
                             border: '1px solid var(--border-color)',
                             padding: '1.5rem'
                         }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div className="promotions-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h2 style={{ margin: 0, color: 'var(--text)' }}>My Promotions</h2>
                                 <button
                                     className="btn btn-primary"
@@ -567,7 +530,7 @@ export default function MediatorDashboard() {
                             border: '1px solid var(--border-color)',
                             padding: '2rem'
                         }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <div className="bank-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                 <div>
                                     <h2 style={{ margin: 0, color: 'var(--text)', fontSize: '1.5rem' }}>Bank Accounts</h2>
                                     <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -590,7 +553,7 @@ export default function MediatorDashboard() {
                                     <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Submit your bank details to enable payouts for your promotions.</p>
                                 </div>
                             ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
+                                <div className="bank-grid">
                                     {bankAccounts.map((account) => (
                                         <div key={account.id} style={{
                                             background: account.is_primary ? 'rgba(var(--primary-rgb), 0.05)' : 'var(--bg)',
