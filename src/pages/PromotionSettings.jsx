@@ -210,12 +210,16 @@ export default function PromotionSettings() {
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                         <div className="form-group" style={{ flex: '1 1 200px' }}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.is_likes_enabled}
-                                    onChange={e => setFormData({ ...formData, is_likes_enabled: e.target.checked })}
-                                /> Enable Likes Requirement
+                            <label className="form-toggle">
+                                <span className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.is_likes_enabled}
+                                        onChange={e => setFormData({ ...formData, is_likes_enabled: e.target.checked })}
+                                    />
+                                    <span className="slider"></span>
+                                </span>
+                                <span>Enable Likes Requirement</span>
                             </label>
                             {formData.is_likes_enabled && (
                                 <input
@@ -229,12 +233,16 @@ export default function PromotionSettings() {
                             )}
                         </div>
                         <div className="form-group" style={{ flex: '1 1 200px' }}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.is_comments_enabled}
-                                    onChange={e => setFormData({ ...formData, is_comments_enabled: e.target.checked })}
-                                /> Enable Comments Requirement
+                            <label className="form-toggle">
+                                <span className="switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.is_comments_enabled}
+                                        onChange={e => setFormData({ ...formData, is_comments_enabled: e.target.checked })}
+                                    />
+                                    <span className="slider"></span>
+                                </span>
+                                <span>Enable Comments Requirement</span>
                             </label>
                             {formData.is_comments_enabled && (
                                 <input
@@ -275,20 +283,28 @@ export default function PromotionSettings() {
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-                            <input
-                                type="checkbox"
-                                checked={formData.is_active}
-                                onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                            /> Active Status
+                    <div className="form-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+                        <label className="form-toggle">
+                            <span className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.is_active}
+                                    onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+                                />
+                                <span className="slider"></span>
+                            </span>
+                            <span>Active Status</span>
                         </label>
-                        <label style={{ display: 'block' }}>
-                            <input
-                                type="checkbox"
-                                checked={formData.is_default}
-                                onChange={e => setFormData({ ...formData, is_default: e.target.checked })}
-                            /> Set as Default
+                        <label className="form-toggle">
+                            <span className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.is_default}
+                                    onChange={e => setFormData({ ...formData, is_default: e.target.checked })}
+                                />
+                                <span className="slider"></span>
+                            </span>
+                            <span>Set as Default</span>
                         </label>
                     </div>
                 </FormModal>
