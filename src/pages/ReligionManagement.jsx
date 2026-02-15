@@ -159,6 +159,11 @@ export default function ReligionManagement() {
         return castes.find(c => c.id === id)?.name || 'Unknown';
     };
 
+    const getReligionNameByCasteId = (casteId) => {
+        const caste = castes.find(c => c.id === casteId);
+        return caste ? getReligionName(caste.religion_id) : 'Unknown';
+    };
+
     return (
         <div style={{ padding: '2rem' }}>
             {/* Header */}
@@ -320,6 +325,7 @@ export default function ReligionManagement() {
                             minWidth: '700px'
                         }}>
                             <div style={{ flex: 2, fontWeight: 'bold', color: 'var(--text-primary)' }}>Religion Type / Community</div>
+                            <div style={{ width: '100px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)' }}>Castes</div>
                             <div style={{ width: '120px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)' }}>Order Number</div>
                             <div style={{ width: '120px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)' }}>Status</div>
                             <div style={{ width: '120px', fontWeight: 'bold', textAlign: 'right', color: 'var(--text-primary)' }}>Actions</div>
@@ -354,6 +360,20 @@ export default function ReligionManagement() {
                                         </button>
                                         <FaMosque color="var(--primary)" size={18} />
                                         <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{religion.name}</span>
+                                    </div>
+
+                                    {/* Castes Count Column */}
+                                    <div style={{ width: '100px', display: 'flex', justifyContent: 'center' }}>
+                                        <span style={{
+                                            padding: '0.2rem 0.5rem',
+                                            background: 'rgba(var(--primary-rgb), 0.1)',
+                                            color: 'var(--primary)',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600'
+                                        }}>
+                                            {getCastesByReligion(religion.id).length}
+                                        </span>
                                     </div>
 
                                     {/* Religion Order Number Column */}
@@ -455,6 +475,17 @@ export default function ReligionManagement() {
                                                             {expandedCastes[caste.id] ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}
                                                         </button>
                                                         <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{caste.name}</span>
+                                                    </div>
+
+                                                    {/* Subcastes Count Column */}
+                                                    <div style={{ width: '100px', display: 'flex', justifyContent: 'center' }}>
+                                                        <span style={{
+                                                            fontSize: '0.75rem',
+                                                            color: 'var(--text-secondary)',
+                                                            fontWeight: '500'
+                                                        }}>
+                                                            {getSubCastesByCaste(caste.id).length} Sub
+                                                        </span>
                                                     </div>
 
                                                     {/* Caste Order Column */}
@@ -652,6 +683,7 @@ export default function ReligionManagement() {
                                 <tr>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Name</th>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Religion</th>
+                                    <th style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-primary)' }}>Sub-Castes</th>
                                     <th style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-primary)' }}>Order</th>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Status</th>
                                     <th style={{ padding: '1rem', textAlign: 'right', color: 'var(--text-primary)' }}>Actions</th>
@@ -662,6 +694,17 @@ export default function ReligionManagement() {
                                     <tr key={caste.id} style={{ borderTop: idx > 0 ? '1px solid var(--border-color)' : 'none' }}>
                                         <td style={{ padding: '1rem', color: 'var(--text-primary)' }}>{caste.name}</td>
                                         <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{getReligionName(caste.religion_id)}</td>
+                                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                            <span style={{
+                                                padding: '0.2rem 0.5rem',
+                                                background: 'rgba(var(--primary-rgb), 0.1)',
+                                                color: 'var(--primary)',
+                                                borderRadius: '4px',
+                                                fontSize: '0.8rem'
+                                            }}>
+                                                {getSubCastesByCaste(caste.id).length}
+                                            </span>
+                                        </td>
                                         <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>{caste.order_number || 0}</td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{
@@ -753,6 +796,7 @@ export default function ReligionManagement() {
                             <thead style={{ background: 'var(--input-bg)' }}>
                                 <tr>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Name</th>
+                                    <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Religion</th>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Caste</th>
                                     <th style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-primary)' }}>Order</th>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Status</th>
@@ -763,6 +807,7 @@ export default function ReligionManagement() {
                                 {subCastes.map((subCaste, idx) => (
                                     <tr key={subCaste.id} style={{ borderTop: idx > 0 ? '1px solid var(--border-color)' : 'none' }}>
                                         <td style={{ padding: '1rem', color: 'var(--text-primary)' }}>{subCaste.name}</td>
+                                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{getReligionNameByCasteId(subCaste.caste_id)}</td>
                                         <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{getCasteName(subCaste.caste_id)}</td>
                                         <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>{subCaste.order_number || 0}</td>
                                         <td style={{ padding: '1rem' }}>
