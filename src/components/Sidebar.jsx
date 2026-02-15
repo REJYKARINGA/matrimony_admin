@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -15,6 +15,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
         { path: '/wallet-transactions', label: 'Wallet Transactions', icon: <FaWallet size={20} /> },
         { path: '/education', label: 'Education', icon: <FaGraduationCap size={20} /> },
         { path: '/occupation', label: 'Occupation', icon: <FaBriefcase size={20} /> },
+        { path: '/religion-management', label: 'Religion & Community', icon: <FaMosque size={20} /> },
         { path: '/family-details', label: 'Family Details', icon: <FaHome size={20} /> },
         { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
         { path: '/promotion-settings', label: 'Promotion Settings', icon: <FaBullhorn size={20} /> },

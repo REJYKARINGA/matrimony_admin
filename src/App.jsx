@@ -16,6 +16,7 @@ import Preferences from './pages/Preferences';
 import PromotionSettings from './pages/PromotionSettings';
 import MediatorPromotions from './pages/MediatorPromotions';
 import WalletTransactions from './pages/WalletTransactions';
+import ReligionManagement from './pages/ReligionManagement';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/education" element={<Education />} />
           <Route path="/occupation" element={<Occupation />} />
+          <Route path="/religion-management" element={<ReligionManagement />} />
           <Route path="/family-details" element={<FamilyDetails />} />
           <Route path="/preferences" element={<Preferences />} />
           <Route path="/promotion-settings" element={<PromotionSettings />} />
