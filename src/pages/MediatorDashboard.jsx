@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar, FaWallet } from 'react-icons/fa';
+import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar, FaWallet, FaShareAlt, FaCopy, FaUsers, FaRupeeSign } from 'react-icons/fa';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 import './MediatorDashboard.css';
@@ -14,9 +14,20 @@ export default function MediatorDashboard() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('promotions');
+    const [activeTab, setActiveTab] = useState('reference');
     const [bankAccounts, setBankAccounts] = useState([]);
     const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+    // Reference card state
+    const [referrals, setReferrals] = useState([]);
+    const [referralStats, setReferralStats] = useState({ total_referrals: 0, total_purchases: 0 });
+    const [referralLoading, setReferralLoading] = useState(false);
+    const [codeCopied, setCodeCopied] = useState(false);
+    const [newReferralIdentifier, setNewReferralIdentifier] = useState('');
+    const [referralActionMessage, setReferralActionMessage] = useState({ type: '', text: '' });
+    const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+    const [isUserDetailModalOpen, setIsUserDetailModalOpen] = useState(false);
+    const [selectedReferral, setSelectedReferral] = useState(null);
+    const REWARD_PER_PURCHASE = 20; // ₹20 per contact unlock
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
@@ -47,6 +58,7 @@ export default function MediatorDashboard() {
         fetchUser();
         fetchPromotions();
         fetchBankAccounts();
+        fetchReferrals();
     }, [navigate]);
 
     useEffect(() => {
@@ -87,6 +99,55 @@ export default function MediatorDashboard() {
             console.error('Failed to fetch promotions:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReferrals = async () => {
+        setReferralLoading(true);
+        try {
+            const response = await api.get('/references/my-referrals');
+            setReferrals(response.data.referrals || []);
+            setReferralStats({
+                total_referrals: response.data.total_referrals || 0,
+                total_purchases: response.data.total_purchases || 0,
+                total_paid: response.data.total_paid || 0,
+            });
+        } catch (error) {
+            console.error('Failed to fetch referrals:', error);
+        } finally {
+            setReferralLoading(false);
+        }
+    };
+
+    const handleCopyCode = () => {
+        if (!user?.reference_code) return;
+        navigator.clipboard.writeText(user.reference_code);
+        setCodeCopied(true);
+        setTimeout(() => setCodeCopied(false), 2000);
+    };
+
+    const handleAddReferral = async (e) => {
+        e.preventDefault();
+        if (!newReferralIdentifier.trim()) return;
+
+        setReferralLoading(true);
+        setReferralActionMessage({ type: '', text: '' });
+
+        try {
+            const response = await api.post('/references/add', {
+                identifier: newReferralIdentifier
+            });
+            setReferralActionMessage({ type: 'success', text: response.data.message });
+            setNewReferralIdentifier('');
+            fetchReferrals(); // Refresh the list
+            setTimeout(() => setIsClaimModalOpen(false), 2000); // Close modal on success after delay
+        } catch (error) {
+            setReferralActionMessage({
+                type: 'error',
+                text: error.response?.data?.error || 'Failed to add referral.'
+            });
+        } finally {
+            setReferralLoading(false);
         }
     };
 
@@ -138,8 +199,11 @@ export default function MediatorDashboard() {
     };
 
     const handleRequestPayout = async () => {
-        const totalPayable = promotions.reduce((sum, p) => sum + calculatePayable(p), 0);
-        if (totalPayable <= 0) {
+        const totalPromoPayable = promotions.reduce((sum, p) => sum + calculatePayable(p), 0);
+        const totalRefEarnings = referralStats.total_purchases * REWARD_PER_PURCHASE;
+        const totalPayableCombined = totalPromoPayable + totalRefEarnings;
+
+        if (totalPayableCombined <= 0) {
             alert('No pending payout balance.');
             return;
         }
@@ -151,7 +215,7 @@ export default function MediatorDashboard() {
             return;
         }
 
-        if (!window.confirm(`Request payout of ₹${totalPayable.toLocaleString()} to ${primaryAcc.account_name} (${primaryAcc.account_number})?`)) return;
+        if (!window.confirm(`Request payout of ₹${totalPayableCombined.toLocaleString()} to ${primaryAcc.account_name} (${primaryAcc.account_number})?`)) return;
 
         try {
             const response = await api.post('/mediator/request-payout');
@@ -201,6 +265,11 @@ export default function MediatorDashboard() {
             console.error('Failed to delete account:', error);
             alert(error.response?.data?.error || 'Failed to delete account');
         }
+    };
+
+    const handleViewUser = (referral) => {
+        setSelectedReferral(referral);
+        setIsUserDetailModalOpen(true);
     };
 
     const handleLogout = () => {
@@ -260,80 +329,97 @@ export default function MediatorDashboard() {
             {/* Main Content */}
             <div className="dashboard-content">
                 <div style={{ minWidth: 0 }}>
-                    {/* Stats Cards */}
-                    <div className="stats-grid">
-                        <div className="stat-card" style={{
-                            background: 'var(--card-bg)',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-color)'
-                        }}>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Submissions</div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                {promotions.length}
-                            </div>
-                        </div>
-                        <div className="stat-card" style={{
-                            background: 'var(--card-bg)',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-color)'
-                        }}>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Verified</div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
-                                {promotions.filter(p => p.status === 'verified').length}
-                            </div>
-                        </div>
-                        <div className="stat-card" style={{
-                            background: 'var(--card-bg)',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-color)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between'
-                        }}>
-                            <div>
-                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Payable</div>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                    ₹{promotions.reduce((sum, p) => sum + calculatePayable(p), 0).toLocaleString()}
+                    {/* Stats Summary Combined */}
+                    {(() => {
+                        const promoPayable = promotions.reduce((sum, p) => sum + calculatePayable(p), 0);
+                        const refEarningsTotal = (referralStats.total_purchases || 0) * REWARD_PER_PURCHASE;
+                        const refPaid = Number(referralStats.total_paid || 0);
+                        const refPayable = Math.max(0, refEarningsTotal - refPaid);
+
+                        const totalCombinedPayable = promoPayable + refPayable;
+
+                        const promoPaid = promotions.reduce((sum, p) => sum + Number(p.total_paid_amount || 0), 0);
+                        const totalCombinedPaid = promoPaid + refPaid;
+
+                        return (
+                            <div className="stats-grid">
+                                <div className="stat-card" style={{
+                                    background: 'var(--card-bg)',
+                                    padding: '1.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Referrals</div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                        {referralStats.total_referrals || 0}
+                                    </div>
+                                </div>
+                                <div className="stat-card" style={{
+                                    background: 'var(--card-bg)',
+                                    padding: '1.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Promo Units</div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
+                                        {promotions.filter(p => p.status === 'verified').length}
+                                    </div>
+                                </div>
+                                <div className="stat-card" style={{
+                                    background: 'var(--card-bg)',
+                                    padding: '1.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between'
+                                }}>
+                                    <div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Payable</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                            ₹{totalCombinedPayable.toLocaleString()}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                            Incl. ₹{refPayable.toLocaleString()} Referral Earning
+                                        </div>
+                                    </div>
+                                    {totalCombinedPayable > 0 && (
+                                        <button
+                                            onClick={handleRequestPayout}
+                                            style={{
+                                                marginTop: '1rem',
+                                                padding: '0.5rem',
+                                                background: 'var(--primary)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85rem',
+                                                fontWeight: '600',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <FaWallet /> Withdraw Funds
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="stat-card" style={{
+                                    background: 'var(--card-bg)',
+                                    padding: '1.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Paid</div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
+                                        ₹{totalCombinedPaid.toLocaleString()}
+                                    </div>
                                 </div>
                             </div>
-                            {promotions.reduce((sum, p) => sum + calculatePayable(p), 0) > 0 && (
-                                <button
-                                    onClick={handleRequestPayout}
-                                    style={{
-                                        marginTop: '1rem',
-                                        padding: '0.5rem',
-                                        background: 'var(--primary)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.85rem',
-                                        fontWeight: '600',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    <FaWallet /> Withdraw Funds
-                                </button>
-                            )}
-                        </div>
-                        <div className="stat-card" style={{
-                            background: 'var(--card-bg)',
-                            padding: '1.5rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-color)'
-                        }}>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Paid</div>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
-                                ₹{promotions.reduce((sum, p) => sum + Number(p.total_paid_amount || 0), 0).toLocaleString()}
-                            </div>
-                        </div>
-                    </div>
+                        );
+                    })()}
 
                     {/* Tab Navigation */}
                     <div className="tab-nav">
@@ -348,6 +434,16 @@ export default function MediatorDashboard() {
                             <FaBullhorn /> My Promotions
                         </button>
                         <button
+                            onClick={() => { setActiveTab('reference'); fetchReferrals(); }}
+                            className="tab-button"
+                            style={{
+                                borderBottom: activeTab === 'reference' ? '3px solid var(--primary)' : '3px solid transparent',
+                                color: activeTab === 'reference' ? 'var(--primary)' : 'var(--text-secondary)',
+                            }}
+                        >
+                            <FaShareAlt /> Reference Card
+                        </button>
+                        <button
                             onClick={() => setActiveTab('bank-accounts')}
                             className="tab-button"
                             style={{
@@ -360,7 +456,7 @@ export default function MediatorDashboard() {
                     </div>
 
                     {activeTab === 'promotions' ? (
-                        /* Promotions Section */
+                        /* Promotions Section — unchanged */
                         <div style={{
                             background: 'var(--card-bg)',
                             borderRadius: '8px',
@@ -518,6 +614,230 @@ export default function MediatorDashboard() {
                                                 </tr>
                                             ))}
                                         </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    ) : activeTab === 'reference' ? (
+                        /* ─── Reference Card Tab ─── */
+                        <div style={{
+                            background: 'var(--card-bg)',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border-color)',
+                            padding: '2rem'
+                        }}>
+                            {/* Header */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h2 style={{ margin: '0 0 0.25rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <FaShareAlt color="var(--primary)" /> Reference Card
+                                </h2>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                    Share your code with new users. Earn <strong style={{ color: 'var(--primary)' }}>₹{REWARD_PER_PURCHASE}</strong> for every contact unlock they make.
+                                </p>
+                            </div>
+
+                            {/* Code + Summary row */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+
+                                {/* Reference Code Card */}
+                                <div style={{
+                                    background: 'linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%)',
+                                    borderRadius: '14px',
+                                    padding: '1.75rem',
+                                    color: 'white',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ fontSize: '0.78rem', opacity: 0.85, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Your Reference Code</div>
+                                    <div style={{ fontSize: '2.2rem', fontWeight: '800', letterSpacing: '6px', marginBottom: '1rem', fontFamily: 'monospace' }}>
+                                        {user?.reference_code || '------'}
+                                    </div>
+                                    <button
+                                        onClick={handleCopyCode}
+                                        style={{
+                                            background: 'rgba(255,255,255,0.2)',
+                                            border: '1px solid rgba(255,255,255,0.4)',
+                                            color: 'white',
+                                            padding: '0.4rem 1rem',
+                                            borderRadius: '20px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}
+                                    >
+                                        <FaCopy size={12} />
+                                        {codeCopied ? '✓ Copied!' : 'Copy Code'}
+                                    </button>
+                                    <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                                </div>
+
+                                {/* Total Referred */}
+                                <div style={{ background: 'var(--bg)', borderRadius: '14px', padding: '1.75rem', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                                        <FaUsers color="var(--primary)" /> Total Referred Users
+                                    </div>
+                                    <div style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--primary)' }}>
+                                        {referralStats.total_referrals}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>users joined with your code</div>
+                                </div>
+
+                                {/* Total Purchases */}
+                                <div style={{ background: 'var(--bg)', borderRadius: '14px', padding: '1.75rem', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
+                                        <FaRupeeSign color="#4CAF50" /> Total Purchases
+                                    </div>
+                                    <div style={{ fontSize: '2.4rem', fontWeight: '800', color: '#4CAF50' }}>
+                                        {referralStats.total_purchases}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>contact unlocks by your referrals</div>
+                                </div>
+
+                                {/* Total Earnings */}
+                                <div style={{
+                                    background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)',
+                                    borderRadius: '14px',
+                                    padding: '1.75rem',
+                                    color: 'white',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ fontSize: '0.78rem', opacity: 0.85, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Earnings</div>
+                                    <div style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '0.25rem' }}>
+                                        ₹{(referralStats.total_purchases * REWARD_PER_PURCHASE).toLocaleString()}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>{referralStats.total_purchases} × ₹{REWARD_PER_PURCHASE} per unlock</div>
+                                    <div style={{ position: 'absolute', bottom: '-15px', right: '-15px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                                </div>
+                            </div>
+
+                            {/* Claim New Referral Button */}
+                            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={() => {
+                                        setNewReferralIdentifier('');
+                                        setReferralActionMessage({ type: '', text: '' });
+                                        setIsClaimModalOpen(true);
+                                    }}
+                                    className="btn-primary"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.85rem 1.5rem', borderRadius: '12px' }}
+                                >
+                                    <FaPlus size={14} /> Claim New Referral
+                                </button>
+                            </div>
+
+                            {/* Referral Table */}
+                            <h3 style={{ margin: '0 0 1rem', color: 'var(--text)', fontSize: '1rem', fontWeight: '600' }}>Referred Users</h3>
+
+                            {referralLoading ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Loading referrals...</div>
+                            ) : referrals.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(var(--primary-rgb), 0.02)', borderRadius: '12px', border: '2px dashed var(--border-color)' }}>
+                                    <FaUsers size={42} style={{ opacity: 0.2, marginBottom: '1rem', display: 'block', margin: '0 auto 1rem' }} />
+                                    <h4 style={{ margin: '0 0 0.5rem', color: 'var(--text)' }}>No Referrals Yet</h4>
+                                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                        Share your code <strong style={{ color: 'var(--primary)', fontFamily: 'monospace', letterSpacing: '2px' }}>{user?.reference_code}</strong> with new users during registration.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table className="data-table" style={{ width: '100%', minWidth: '600px' }}>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Matrimony ID</th>
+                                                <th>Ref Code</th>
+                                                <th style={{ textAlign: 'center' }}>Purchases</th>
+                                                <th style={{ textAlign: 'center' }}>Your Earning</th>
+                                                <th>Joined</th>
+                                                <th style={{ textAlign: 'center' }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {referrals.map((ref, index) => (
+                                                <tr key={ref.id}>
+                                                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{index + 1}</td>
+                                                    <td>
+                                                        <span style={{
+                                                            fontFamily: 'monospace',
+                                                            fontWeight: '600',
+                                                            color: 'var(--primary)',
+                                                            background: 'rgba(var(--primary-rgb),0.08)',
+                                                            padding: '3px 8px',
+                                                            borderRadius: '6px',
+                                                            fontSize: '0.85rem'
+                                                        }}>
+                                                            {ref.referred_user?.matrimony_id || '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span style={{
+                                                            fontFamily: 'monospace',
+                                                            fontWeight: '600',
+                                                            color: 'var(--text)',
+                                                            background: 'var(--bg)',
+                                                            padding: '3px 8px',
+                                                            borderRadius: '6px',
+                                                            fontSize: '0.85rem',
+                                                            border: '1px solid var(--border-color)',
+                                                            letterSpacing: '1px'
+                                                        }}>
+                                                            {ref.referred_user?.reference_code || '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <span style={{
+                                                            background: ref.purchased_count > 0 ? 'rgba(76,175,80,0.12)' : 'var(--bg)',
+                                                            color: ref.purchased_count > 0 ? '#4CAF50' : 'var(--text-secondary)',
+                                                            fontWeight: '700',
+                                                            padding: '4px 14px',
+                                                            borderRadius: '20px',
+                                                            fontSize: '0.9rem',
+                                                            border: ref.purchased_count > 0 ? '1px solid rgba(76,175,80,0.3)' : '1px solid var(--border-color)',
+                                                            display: 'inline-block'
+                                                        }}>
+                                                            {ref.purchased_count}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center', fontWeight: '700', color: ref.purchased_count > 0 ? '#4CAF50' : 'var(--text-secondary)' }}>
+                                                        ₹{(ref.purchased_count * REWARD_PER_PURCHASE).toLocaleString()}
+                                                    </td>
+                                                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                                        {ref.joined_at ? new Date(ref.joined_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        <button
+                                                            onClick={() => handleViewUser(ref)}
+                                                            className="btn-icon"
+                                                            title="View User Details"
+                                                            style={{
+                                                                background: 'rgba(var(--primary-rgb), 0.1)',
+                                                                color: 'var(--primary)',
+                                                                padding: '6px 12px',
+                                                                borderRadius: '8px',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '6px',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: '600'
+                                                            }}
+                                                        >
+                                                            <FaEye size={12} /> View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr style={{ background: 'rgba(var(--primary-rgb),0.04)', fontWeight: '700' }}>
+                                                <td colSpan={3} style={{ padding: '0.75rem 1rem', color: 'var(--text)' }}>Total</td>
+                                                <td style={{ textAlign: 'center', color: '#4CAF50', padding: '0.75rem 1rem' }}>{referralStats.total_purchases}</td>
+                                                <td style={{ textAlign: 'center', color: '#4CAF50', padding: '0.75rem 1rem' }}>₹{(referralStats.total_purchases * REWARD_PER_PURCHASE).toLocaleString()}</td>
+                                                <td colSpan={2} />
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                 </div>
                             )}
@@ -791,6 +1111,137 @@ export default function MediatorDashboard() {
                     </div>
                 </FormModal>
             )}
+
+            {/* Claim Referral Modal */}
+            <FormModal
+                isOpen={isClaimModalOpen}
+                onClose={() => setIsClaimModalOpen(false)}
+                title="Claim Referral Code"
+                onSubmit={handleAddReferral}
+                isLoading={referralLoading}
+                submitText="Claim User"
+            >
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                        If a user registered but forgot to use your code, enter <strong>their unique 6-letter reference code</strong> below to link them to your account.
+                    </p>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label>User's Reference Code</label>
+                    <input
+                        type="text"
+                        placeholder="Enter 6-letter Code"
+                        maxLength={6}
+                        value={newReferralIdentifier}
+                        onChange={(e) => setNewReferralIdentifier(e.target.value.toUpperCase())}
+                        required
+                        style={{
+                            textAlign: 'center',
+                            fontSize: '1rem',
+                            textTransform: 'uppercase',
+                            background: 'var(--bg)',
+                            color: 'var(--text)',
+                            border: '1px solid var(--border-color)',
+                            padding: '12px'
+                        }}
+                    />
+                </div>
+
+                {referralActionMessage.text && (
+                    <div style={{
+                        marginBottom: '0.5rem',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        background: referralActionMessage.type === 'success' ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)',
+                        color: referralActionMessage.type === 'success' ? '#4CAF50' : '#F44336',
+                        border: `1px solid ${referralActionMessage.type === 'success' ? 'rgba(76,175,80,0.2)' : 'rgba(244,67,54,0.2)'}`
+                    }}>
+                        {referralActionMessage.text}
+                    </div>
+                )}
+            </FormModal>
+
+            {/* User Details Modal */}
+            <FormModal
+                isOpen={isUserDetailModalOpen}
+                onClose={() => setIsUserDetailModalOpen(false)}
+                title="User Details"
+                submitText="Close"
+                onSubmit={(e) => { e.preventDefault(); setIsUserDetailModalOpen(false); }}
+            >
+                {selectedReferral && (
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            {selectedReferral.referred_user?.user_profile?.profile_picture ? (
+                                <img
+                                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${selectedReferral.referred_user.user_profile.profile_picture}`}
+                                    alt="Profile"
+                                    style={{
+                                        width: '100px',
+                                        height: '100px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        border: '4px solid var(--primary)',
+                                        padding: '4px'
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
+                                    width: '100px',
+                                    height: '100px',
+                                    borderRadius: '50%',
+                                    background: 'rgba(var(--primary-rgb), 0.1)',
+                                    color: 'var(--primary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto',
+                                    fontSize: '2rem',
+                                    border: '4px solid var(--primary)',
+                                    padding: '4px'
+                                }}>
+                                    <FaUsers />
+                                </div>
+                            )}
+                        </div>
+
+                        <h3 style={{ margin: '0 0 0.25rem', color: 'var(--text)' }}>
+                            {selectedReferral.referred_user?.user_profile?.first_name || 'Anonymous User'} {selectedReferral.referred_user?.user_profile?.last_name || ''}
+                        </h3>
+                        <p style={{ margin: '0 0 1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {selectedReferral.referred_user?.role?.toUpperCase() || 'USER'}
+                        </p>
+
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '1rem',
+                            textAlign: 'left',
+                            background: 'rgba(var(--primary-rgb), 0.02)',
+                            padding: '1.5rem',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Matrimony ID</label>
+                                <span style={{ fontWeight: '600', color: 'var(--text)' }}>{selectedReferral.referred_user?.matrimony_id || '—'}</span>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Joined Date</label>
+                                <span style={{ fontWeight: '600', color: 'var(--text)' }}>
+                                    {selectedReferral.joined_at ? new Date(selectedReferral.joined_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                </span>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Purchases</label>
+                                <span style={{ fontWeight: '600', color: '#4CAF50' }}>{selectedReferral.purchased_count} Contact Unlocks</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </FormModal>
         </div>
     );
 }
