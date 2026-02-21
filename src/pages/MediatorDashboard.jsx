@@ -632,7 +632,7 @@ export default function MediatorDashboard() {
                                     <FaShareAlt color="var(--primary)" /> Reference Card
                                 </h2>
                                 <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                    Share your code with new users. Earn <strong style={{ color: 'var(--primary)' }}>₹{REWARD_PER_PURCHASE}</strong> for every contact unlock they make.
+                                    Share your code with new users. Earn <strong style={{ color: 'var(--primary)' }}>₹{REWARD_PER_PURCHASE}</strong> every time someone unlocks the profile of a user you referred.
                                 </p>
                             </div>
 
@@ -692,7 +692,7 @@ export default function MediatorDashboard() {
                                     <div style={{ fontSize: '2.4rem', fontWeight: '800', color: '#4CAF50' }}>
                                         {referralStats.total_purchases}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>contact unlocks by your referrals</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>times your referred profiles were unlocked</div>
                                 </div>
 
                                 {/* Total Earnings */}
