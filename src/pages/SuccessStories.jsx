@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
+import { CONFIG } from '../config';
 
 export default function SuccessStories() {
     const [stories, setStories] = useState([]);
@@ -90,7 +91,7 @@ export default function SuccessStories() {
                                         </td>
                                         <td>
                                             {story.photo_url && (
-                                                <a href={`http://localhost:8000${story.photo_url}`} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary)' }}>
+                                                <a href={`${CONFIG.BASE_URL}${story.photo_url}`} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary)' }}>
                                                     <FaExternalLinkAlt /> View
                                                 </a>
                                             )}

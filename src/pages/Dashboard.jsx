@@ -9,8 +9,9 @@ import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
     FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock
 } from 'react-icons/fa6';
+import { CONFIG } from '../config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = CONFIG.API_URL;
 
 const COLORS = {
     primary: '#B47FFF',

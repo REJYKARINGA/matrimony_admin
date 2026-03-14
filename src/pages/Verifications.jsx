@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
+import { CONFIG } from '../config';
 
 export default function Verifications() {
     const [verifications, setVerifications] = useState([]);
@@ -98,9 +99,9 @@ export default function Verifications() {
                                             <td>
                                                 {v.user?.user_profile?.profile_picture ? (
                                                     <img
-                                                        src={v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `http://localhost:8000${v.user.user_profile.profile_picture}`}
+                                                        src={v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${v.user.user_profile.profile_picture}`}
                                                         alt="Profile"
-                                                        onClick={() => setPreviewImage({ url: v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `http://localhost:8000${v.user.user_profile.profile_picture}`, title: 'Profile Picture' })}
+                                                        onClick={() => setPreviewImage({ url: v.user.user_profile.profile_picture.startsWith('http') ? v.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${v.user.user_profile.profile_picture}`, title: 'Profile Picture' })}
                                                         style={{
                                                             width: '50px',
                                                             height: '50px',
@@ -141,9 +142,9 @@ export default function Verifications() {
                                             <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                     <img
-                                                        src={`http://localhost:8000${v.id_proof_front_url}`}
+                                                        src={`${CONFIG.BASE_URL}${v.id_proof_front_url}`}
                                                         alt="Front ID"
-                                                        onClick={() => setPreviewImage({ url: `http://localhost:8000${v.id_proof_front_url}`, title: 'ID Proof - Front' })}
+                                                        onClick={() => setPreviewImage({ url: `${CONFIG.BASE_URL}${v.id_proof_front_url}`, title: 'ID Proof - Front' })}
                                                         style={{
                                                             width: '60px',
                                                             height: '60px',
@@ -158,9 +159,9 @@ export default function Verifications() {
                                                     />
                                                     {v.id_proof_back_url && (
                                                         <img
-                                                            src={`http://localhost:8000${v.id_proof_back_url}`}
+                                                            src={`${CONFIG.BASE_URL}${v.id_proof_back_url}`}
                                                             alt="Back ID"
-                                                            onClick={() => setPreviewImage({ url: `http://localhost:8000${v.id_proof_back_url}`, title: 'ID Proof - Back' })}
+                                                            onClick={() => setPreviewImage({ url: `${CONFIG.BASE_URL}${v.id_proof_back_url}`, title: 'ID Proof - Back' })}
                                                             style={{
                                                                 width: '60px',
                                                                 height: '60px',
