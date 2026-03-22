@@ -77,6 +77,7 @@ export default function UserProfiles() {
                                         <td>
                                             {profile.profile_picture ? (
                                                 <img
+                                                    className="profile-img-zoom"
                                                     src={profile.profile_picture.startsWith('http') 
                                                         ? profile.profile_picture 
                                                         : `${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
