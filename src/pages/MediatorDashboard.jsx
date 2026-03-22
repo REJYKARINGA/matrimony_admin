@@ -424,16 +424,6 @@ export default function MediatorDashboard() {
                     {/* Tab Navigation */}
                     <div className="tab-nav">
                         <button
-                            onClick={() => setActiveTab('promotions')}
-                            className="tab-button"
-                            style={{
-                                borderBottom: activeTab === 'promotions' ? '3px solid var(--primary)' : '3px solid transparent',
-                                color: activeTab === 'promotions' ? 'var(--primary)' : 'var(--text-secondary)',
-                            }}
-                        >
-                            <FaBullhorn /> My Promotions
-                        </button>
-                        <button
                             onClick={() => { setActiveTab('reference'); fetchReferrals(); }}
                             className="tab-button"
                             style={{
@@ -442,6 +432,16 @@ export default function MediatorDashboard() {
                             }}
                         >
                             <FaShareAlt /> Reference Card
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('promotions')}
+                            className="tab-button"
+                            style={{
+                                borderBottom: activeTab === 'promotions' ? '3px solid var(--primary)' : '3px solid transparent',
+                                color: activeTab === 'promotions' ? 'var(--primary)' : 'var(--text-secondary)',
+                            }}
+                        >
+                            <FaBullhorn /> My Promotions
                         </button>
                         <button
                             onClick={() => setActiveTab('bank-accounts')}
