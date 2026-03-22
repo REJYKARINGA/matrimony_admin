@@ -114,13 +114,13 @@ export default function Preferences() {
                                             ) : '-'}
                                         </td>
                                         <td>
-                                            {preference.religion ? (
+                                            {preference.religion_name ? (
                                                 <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
-                                                    {preference.religion}
+                                                    {preference.religion_name}
                                                 </span>
                                             ) : '-'}
                                         </td>
-                                        <td>{formatArray(preference.caste)}</td>
+                                        <td>{formatArray(preference.caste_names)}</td>
                                         <td>{formatArray(preference.education_names)}</td>
                                         <td>{formatArray(preference.occupation_names)}</td>
                                         <td>{formatIncome(preference.min_income)}</td>
