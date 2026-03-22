@@ -17,10 +17,12 @@ import PromotionSettings from './pages/PromotionSettings';
 import MediatorPromotions from './pages/MediatorPromotions';
 import WalletTransactions from './pages/WalletTransactions';
 import ReligionManagement from './pages/ReligionManagement';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/mediator/dashboard" element={<MediatorDashboard />} />
@@ -47,7 +49,8 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  );
+  </ErrorBoundary>
+);
 }
 
 export default App;
