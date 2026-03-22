@@ -77,7 +77,9 @@ export default function UserProfiles() {
                                         <td>
                                             {profile.profile_picture ? (
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
+                                                    src={profile.profile_picture.startsWith('http') 
+                                                        ? profile.profile_picture 
+                                                        : `${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
                                                     alt="Profile"
                                                     style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
                                                 />
@@ -102,17 +104,17 @@ export default function UserProfiles() {
                                         </td>
                                         <td>
                                             <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
-                                                {profile.religion}
+                                                {profile.religion_model?.name || '-'}
                                             </span>
                                         </td>
                                         <td>
                                             {profile.city}, {profile.state}
                                         </td>
                                         <td>
-                                            {profile.education || '-'}
+                                            {profile.education_model?.name || '-'}
                                         </td>
                                         <td>
-                                            {profile.occupation || '-'}
+                                            {profile.occupation_model?.name || '-'}
                                         </td>
 
                                         <td>
