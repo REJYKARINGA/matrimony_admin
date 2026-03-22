@@ -13,6 +13,10 @@ export default function Users() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [activeTab, setActiveTab] = useState('all');
+    const [emailFilter, setEmailFilter] = useState('all');
+    const [phoneFilter, setPhoneFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [genderFilter, setGenderFilter] = useState('all');
 
     // Form Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +28,7 @@ export default function Users() {
 
     useEffect(() => {
         fetchUsers(1);
-    }, [search, activeTab]);
+    }, [search, activeTab, emailFilter, phoneFilter, statusFilter, genderFilter]);
 
     const fetchUsers = async (page = 1) => {
         try {
@@ -33,7 +37,11 @@ export default function Users() {
                 params: {
                     search,
                     page,
-                    role: activeTab
+                    role: activeTab,
+                    ...(emailFilter !== 'all' && { email_verified: emailFilter }),
+                    ...(phoneFilter !== 'all' && { phone_verified: phoneFilter }),
+                    ...(statusFilter !== 'all' && { status: statusFilter }),
+                    ...(genderFilter !== 'all' && { gender: genderFilter }),
                 }
             });
             setUsers(response.data.data);
@@ -132,13 +140,13 @@ export default function Users() {
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h2 style={{ margin: 0 }}>User Management</h2>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                         <input
                             type="text"
-                            placeholder="Search users..."
+                            placeholder="Search by name, email, phone..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ width: '300px', marginBottom: 0 }}
+                            onChange={(e) => { setSearch(e.target.value); }}
+                            style={{ width: '260px', marginBottom: 0 }}
                         />
                         <button onClick={handleAddUser} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <FaPlus /> Add User
@@ -212,6 +220,44 @@ export default function Users() {
                     >
                         Admins
                     </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto', paddingBottom: '2px' }}>
+                        <select
+                            value={emailFilter}
+                            onChange={(e) => setEmailFilter(e.target.value)}
+                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                            <option value="all">Email: All</option>
+                            <option value="1">Email: Verified</option>
+                            <option value="0">Email: Unverified</option>
+                        </select>
+                        <select
+                            value={phoneFilter}
+                            onChange={(e) => setPhoneFilter(e.target.value)}
+                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                            <option value="all">Phone: All</option>
+                            <option value="1">Phone: Verified</option>
+                            <option value="0">Phone: Unverified</option>
+                        </select>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                            <option value="all">Status: All</option>
+                            <option value="active">Status: Active</option>
+                            <option value="blocked">Status: Blocked</option>
+                        </select>
+                        <select
+                            value={genderFilter}
+                            onChange={(e) => setGenderFilter(e.target.value)}
+                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                            <option value="all">Gender: All</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
                     <button
                         onClick={() => setActiveTab('trashed')}
                         style={{
@@ -224,7 +270,6 @@ export default function Users() {
                             borderBottom: activeTab === 'trashed' ? '3px solid #EF4444' : '3px solid transparent',
                             color: activeTab === 'trashed' ? '#EF4444' : 'var(--text-secondary)',
                             transition: 'all 0.2s ease',
-                            marginLeft: 'auto' // push to the right side if there's flex space
                         }}
                     >
                         Deleted Users
@@ -241,6 +286,7 @@ export default function Users() {
                                     <tr>
                                         <th>Profile</th>
                                         <th>Name</th>
+                                        <th>Gender</th>
                                         <th>Contact</th>
                                         <th>Matrimony ID</th>
                                         <th>Role</th>
@@ -282,6 +328,11 @@ export default function Users() {
                                                 <div style={{ fontWeight: '600' }}>
                                                     {user.user_profile?.first_name || 'N/A'} {user.user_profile?.last_name || ''}
                                                 </div>
+                                            </td>
+                                            <td>
+                                                <span style={{ textTransform: 'capitalize', fontWeight: '500', color: user.user_profile?.gender === 'male' ? '#60a5fa' : user.user_profile?.gender === 'female' ? '#f472b6' : 'var(--text-secondary)' }}>
+                                                    {user.user_profile?.gender || '—'}
+                                                </span>
                                             </td>
                                             <td>
                                                 <div>{user.email}</div>
