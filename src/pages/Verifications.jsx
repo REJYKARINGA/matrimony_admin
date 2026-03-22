@@ -14,19 +14,21 @@ export default function Verifications() {
     const [previewImage, setPreviewImage] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null, id: null });
     const [rejectReason, setRejectReason] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchVerifications(1);
-    }, []);
+    }, [searchTerm]);
 
     const fetchVerifications = async (page = 1) => {
         try {
             setLoading(true);
             const response = await api.get('/admin/verifications/pending', {
-                params: { page }
+                params: { 
+                    page,
+                    search: searchTerm
+                }
             });
-            // According to updated backend: return response()->json($paginator);
-            // So response.data is the paginator object.
             setVerifications(response.data.data);
             setCurrentPage(response.data.current_page);
             setTotalPages(response.data.last_page);
@@ -65,11 +67,32 @@ export default function Verifications() {
     return (
         <>
             <div className="card">
-                <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Pending ID Verifications</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 style={{ margin: 0 }}>Pending ID Verifications</h2>
+                    <div className="search-box">
+                        <input
+                            type="text"
+                            placeholder="Search by name, email, matrimony ID..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{
+                                padding: '0.6rem 1rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid var(--border-color)',
+                                minWidth: '300px',
+                                outline: 'none',
+                                fontSize: '0.875rem'
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {loading ? (
                     <p>Loading...</p>
                 ) : verifications.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>No pending verifications found.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                        {searchTerm ? 'No matching verifications found.' : 'No pending verifications found.'}
+                    </p>
                 ) : (
                     <>
                         <div className="table-container">
@@ -142,9 +165,12 @@ export default function Verifications() {
                                             <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                     <img
-                                                        src={`${CONFIG.BASE_URL}${v.id_proof_front_url}`}
+                                                        src={v.id_proof_front_url?.startsWith('http') ? v.id_proof_front_url : `${CONFIG.BASE_URL}${v.id_proof_front_url}`}
                                                         alt="Front ID"
-                                                        onClick={() => setPreviewImage({ url: `${CONFIG.BASE_URL}${v.id_proof_front_url}`, title: 'ID Proof - Front' })}
+                                                        onClick={() => {
+                                                            const url = v.id_proof_front_url?.startsWith('http') ? v.id_proof_front_url : `${CONFIG.BASE_URL}${v.id_proof_front_url}`;
+                                                            setPreviewImage({ url, title: 'ID Proof - Front' });
+                                                        }}
                                                         style={{
                                                             width: '60px',
                                                             height: '60px',
@@ -159,9 +185,12 @@ export default function Verifications() {
                                                     />
                                                     {v.id_proof_back_url && (
                                                         <img
-                                                            src={`${CONFIG.BASE_URL}${v.id_proof_back_url}`}
+                                                            src={v.id_proof_back_url?.startsWith('http') ? v.id_proof_back_url : `${CONFIG.BASE_URL}${v.id_proof_back_url}`}
                                                             alt="Back ID"
-                                                            onClick={() => setPreviewImage({ url: `${CONFIG.BASE_URL}${v.id_proof_back_url}`, title: 'ID Proof - Back' })}
+                                                            onClick={() => {
+                                                                const url = v.id_proof_back_url?.startsWith('http') ? v.id_proof_back_url : `${CONFIG.BASE_URL}${v.id_proof_back_url}`;
+                                                                setPreviewImage({ url, title: 'ID Proof - Back' });
+                                                            }}
                                                             style={{
                                                                 width: '60px',
                                                                 height: '60px',
