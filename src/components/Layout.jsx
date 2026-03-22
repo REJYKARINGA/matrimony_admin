@@ -73,7 +73,7 @@ export default function Layout() {
             <div style={{
                 flex: 1,
                 marginLeft: isMobile ? 0 : (collapsed && !sidebarHovered ? '80px' : '250px'),
-                width: '100%',
+                minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'margin-left 0.3s ease'

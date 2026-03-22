@@ -44,7 +44,7 @@ export default function FamilyDetails() {
     };
 
     return (
-        <div className="card">
+        <div className="card" style={{ maxWidth: '100%', overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <h2 style={{ margin: 0 }}>Family Details</h2>
                 <input
@@ -60,7 +60,7 @@ export default function FamilyDetails() {
                 <p>Loading...</p>
             ) : (
                 <>
-                    <div className="table-container">
+                    <div className="table-container" style={{ width: '100%', overflowX: 'auto' }}>
                         <table>
                             <thead>
                                 <tr>
