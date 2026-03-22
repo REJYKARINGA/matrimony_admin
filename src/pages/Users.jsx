@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { FaBan, FaUnlock, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaBan, FaUnlock, FaPlus, FaEdit, FaTrash, FaUndo } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -62,6 +62,8 @@ export default function Users() {
                 await api.post(`/admin/users/${confirmModal.id}/toggle-block`);
             } else if (confirmModal.action === 'delete') {
                 await api.delete(`/admin/users/${confirmModal.id}`);
+            } else if (confirmModal.action === 'restore') {
+                await api.post(`/admin/users/${confirmModal.id}/restore`);
             }
             fetchUsers(currentPage); // Refresh current page
         } catch (error) {
@@ -210,6 +212,23 @@ export default function Users() {
                     >
                         Admins
                     </button>
+                    <button
+                        onClick={() => setActiveTab('trashed')}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.75rem 0',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            borderBottom: activeTab === 'trashed' ? '3px solid #EF4444' : '3px solid transparent',
+                            color: activeTab === 'trashed' ? '#EF4444' : 'var(--text-secondary)',
+                            transition: 'all 0.2s ease',
+                            marginLeft: 'auto' // push to the right side if there's flex space
+                        }}
+                    >
+                        Deleted Users
+                    </button>
                 </div>
 
                 {loading ? (
@@ -276,28 +295,45 @@ export default function Users() {
                                                     >
                                                         <FaEdit />
                                                     </button>
+                                                    {activeTab !== 'trashed' && (
+                                                        <button
+                                                            onClick={() => openConfirmModal(
+                                                                user.id, 
+                                                                'toggleBlock', 
+                                                                `Are you sure you want to ${user.status === 'active' ? 'block' : 'unblock'} this user?`
+                                                            )}
+                                                            className={`btn ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
+                                                            title={user.status === 'active' ? 'Block User' : 'Unblock User'}
+                                                        >
+                                                            {user.status === 'active' ? <FaBan /> : <FaUnlock />}
+                                                        </button>
+                                                    )}
+                                                    {activeTab === 'trashed' && (
+                                                        <button
+                                                            onClick={() => openConfirmModal(
+                                                                user.id, 
+                                                                'restore', 
+                                                                'Are you sure you want to completely restore this user to their original role?'
+                                                            )}
+                                                            className="btn btn-success"
+                                                            title="Restore User"
+                                                        >
+                                                            <FaUndo /> 
+                                                        </button>
+                                                    )}
                                                     <button
-                                                        onClick={() => openConfirmModal(
-                                                            user.id,
-                                                            'toggleBlock',
-                                                            `Are you sure you want to ${user.status === 'active' ? 'block' : 'unblock'} this user?`
-                                                        )}
-                                                        className={`btn ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
-                                                        title={user.status === 'active' ? 'Block User' : 'Unblock User'}
-                                                    >
-                                                        {user.status === 'active' ? <FaBan /> : <FaUnlock />}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openConfirmModal(
-                                                            user.id,
-                                                            'delete',
-                                                            'Are you sure you want to completely delete this user? This action cannot be undone.'
-                                                        )}
-                                                        className="btn btn-danger"
-                                                        title="Delete User"
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
+                                                    onClick={() => openConfirmModal(
+                                                        user.id, 
+                                                        'delete', 
+                                                        activeTab === 'trashed' 
+                                                            ? 'Are you sure you want to completely erase this user? This cannot be undone.' 
+                                                            : 'Are you sure you want to delete this user? They will be moved to the Deleted Users list.'
+                                                    )}
+                                                    className="btn btn-danger"
+                                                    title={activeTab === 'trashed' ? "Permadelete" : "Trash User"}
+                                                >
+                                                    <FaTrash />
+                                                </button>
                                                 </div>
                                             </td>
                                         </tr>
