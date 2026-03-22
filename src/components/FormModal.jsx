@@ -128,7 +128,7 @@ export default function FormModal({
                             maxHeight: 'calc(85vh - 130px)',
                             scrollbarWidth: 'thin'
                         }}>
-                            <form id="modal-form" onSubmit={onSubmit} style={{ fontSize: '0.875rem' }}>
+                            <form id="modal-form" noValidate onSubmit={onSubmit} style={{ fontSize: '0.875rem' }}>
                                 {children}
                             </form>
                         </div>
