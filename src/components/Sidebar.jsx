@@ -15,6 +15,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
         { path: '/wallet-transactions', label: 'Wallet Transactions', icon: <FaWallet size={20} /> },
         { path: '/education', label: 'Education', icon: <FaGraduationCap size={20} /> },
         { path: '/occupation', label: 'Occupation', icon: <FaBriefcase size={20} /> },
+        { path: '/interests', label: 'Interests & Hobbies', icon: <FaHeart size={20} /> },
         { path: '/religion-management', label: 'Religion & Community', icon: <FaMosque size={20} /> },
         { path: '/family-details', label: 'Family Details', icon: <FaHome size={20} /> },
         { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
