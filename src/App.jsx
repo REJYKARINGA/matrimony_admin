@@ -20,6 +20,7 @@ import ReligionManagement from './pages/ReligionManagement';
 import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
 import AuditLogs from './pages/AuditLogs';
+import ContactUnlocks from './pages/ContactUnlocks';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
           <Route path="/interests" element={<Interests />} />
           <Route path="/personalities" element={<Personalities />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route path="/contact-unlocks" element={<ContactUnlocks />} />
           <Route path="/religion-management" element={<ReligionManagement />} />
           <Route path="/family-details" element={<FamilyDetails />} />
           <Route path="/preferences" element={<Preferences />} />

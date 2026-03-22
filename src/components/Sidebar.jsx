@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -22,6 +22,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
         { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
         { path: '/promotion-settings', label: 'Promotion Settings', icon: <FaBullhorn size={20} /> },
         { path: '/mediator-promotions', label: 'Mediator Promotions', icon: <FaBullseye size={20} /> },
+        { path: '/contact-unlocks', label: 'Contact Unlocks', icon: <FaUnlock size={20} /> },
         { path: '/audit-logs', label: 'Login & Activity Logs', icon: <FaHistory size={20} /> },
     ];
 
