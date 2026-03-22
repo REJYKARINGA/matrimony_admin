@@ -19,6 +19,7 @@ import WalletTransactions from './pages/WalletTransactions';
 import ReligionManagement from './pages/ReligionManagement';
 import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
+import AuditLogs from './pages/AuditLogs';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/occupation" element={<Occupation />} />
           <Route path="/interests" element={<Interests />} />
           <Route path="/personalities" element={<Personalities />} />
+          <Route path="/audit-logs" element={<AuditLogs />} />
           <Route path="/religion-management" element={<ReligionManagement />} />
           <Route path="/family-details" element={<FamilyDetails />} />
           <Route path="/preferences" element={<Preferences />} />
