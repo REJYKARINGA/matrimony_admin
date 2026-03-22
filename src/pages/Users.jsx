@@ -239,6 +239,7 @@ export default function Users() {
                             <table>
                                 <thead>
                                     <tr>
+                                        <th>Profile</th>
                                         <th>Name</th>
                                         <th>Contact</th>
                                         <th>Matrimony ID</th>
@@ -252,6 +253,31 @@ export default function Users() {
                                 <tbody>
                                     {users.map((user) => (
                                         <tr key={user.id}>
+                                            <td>
+                                                {user.user_profile?.profile_picture ? (
+                                                    <img
+                                                        className="profile-img-zoom"
+                                                        src={user.user_profile.profile_picture.startsWith('http') 
+                                                            ? user.user_profile.profile_picture 
+                                                            : `${import.meta.env.VITE_API_BASE_URL}/storage/${user.user_profile.profile_picture}`}
+                                                        alt="Profile"
+                                                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null; 
+                                                            const isMale = ['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase());
+                                                            const color1 = isMale ? '%2360a5fa' : '%23f472b6';
+                                                            const color2 = isMale ? '%232563eb' : '%23db2777';
+                                                            e.target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${color1}'/%3E%3Cstop offset='100%25' stop-color='${color2}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`;
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <img 
+                                                        src={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase()) ? '%2360a5fa' : '%23f472b6'}'/%3E%3Cstop offset='100%25' stop-color='${['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase()) ? '%232563eb' : '%23db2777'}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`}
+                                                        alt="Fallback Avatar"
+                                                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                                    />
+                                                )}
+                                            </td>
                                             <td>
                                                 <div style={{ fontWeight: '600' }}>
                                                     {user.user_profile?.first_name || 'N/A'} {user.user_profile?.last_name || ''}
