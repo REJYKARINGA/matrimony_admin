@@ -12,7 +12,7 @@ export default function Users() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [activeTab, setActiveTab] = useState('user');
+    const [activeTab, setActiveTab] = useState('all');
 
     // Form Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,6 +146,22 @@ export default function Users() {
 
                 {/* Tab Navigation */}
                 <div className="tab-nav" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
+                    <button
+                        onClick={() => setActiveTab('all')}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '0.75rem 0',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            borderBottom: activeTab === 'all' ? '3px solid var(--primary)' : '3px solid transparent',
+                            color: activeTab === 'all' ? 'var(--primary)' : 'var(--text-secondary)',
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        All
+                    </button>
                     <button
                         onClick={() => setActiveTab('user')}
                         style={{
