@@ -83,11 +83,20 @@ export default function UserProfiles() {
                                                         : `${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
                                                     alt="Profile"
                                                     style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null; 
+                                                        const isMale = ['male', 'm', 'groom'].includes(String(profile.gender).toLowerCase());
+                                                        const color1 = isMale ? '%2360a5fa' : '%23f472b6';
+                                                        const color2 = isMale ? '%232563eb' : '%23db2777';
+                                                        e.target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${color1}'/%3E%3Cstop offset='100%25' stop-color='${color2}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`;
+                                                    }}
                                                 />
                                             ) : (
-                                                <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ fontSize: '12px' }}>No Photo</span>
-                                                </div>
+                                                <img 
+                                                    src={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${['male', 'm', 'groom'].includes(String(profile.gender).toLowerCase()) ? '%2360a5fa' : '%23f472b6'}'/%3E%3Cstop offset='100%25' stop-color='${['male', 'm', 'groom'].includes(String(profile.gender).toLowerCase()) ? '%232563eb' : '%23db2777'}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`}
+                                                    alt="Fallback Avatar"
+                                                    style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
+                                                />
                                             )}
                                         </td>
                                         <td>
