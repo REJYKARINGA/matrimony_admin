@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FaTimes, FaCircleNotch } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,7 +30,7 @@ export default function FormModal({
         };
     }, [isOpen, onClose]);
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <motion.div
@@ -43,17 +44,15 @@ export default function FormModal({
                     transition={{ duration: 0.25 }}
                     style={{
                         position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        zIndex: 1000,
+                        zIndex: 99999,
                         backdropFilter: 'blur(6px)',
-                        padding: '1rem'
+                        padding: '1.5rem',
+                        boxSizing: 'border-box',
                     }}
                 >
                     <motion.div
@@ -65,6 +64,8 @@ export default function FormModal({
                             maxWidth,
                             width: '100%',
                             maxHeight: '85vh',
+                            display: 'flex',
+                            flexDirection: 'column',
                             overflow: 'hidden',
                             position: 'relative',
                             border: '1px solid var(--border-color)'
@@ -82,6 +83,7 @@ export default function FormModal({
                             padding: '1.25rem 1.5rem',
                             borderBottom: '1px solid var(--border-color)',
                             background: 'var(--card-bg)',
+                            flexShrink: 0,
                             zIndex: 10
                         }}>
                             <h2 style={{
@@ -125,7 +127,7 @@ export default function FormModal({
                         <div className="modal-body" style={{
                             padding: '1.5rem',
                             overflowY: 'auto',
-                            maxHeight: 'calc(85vh - 130px)',
+                            flex: 1,
                             scrollbarWidth: 'thin'
                         }}>
                             <form id="modal-form" noValidate onSubmit={onSubmit} style={{ fontSize: '0.875rem' }}>
@@ -142,6 +144,7 @@ export default function FormModal({
                             borderTop: '1px solid var(--border-color)',
                             background: 'var(--card-bg)',
                             marginTop: 'auto',
+                            flexShrink: 0,
                             zIndex: 10
                         }}>
                             <button
@@ -205,6 +208,7 @@ export default function FormModal({
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }
