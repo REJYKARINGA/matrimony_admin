@@ -120,8 +120,8 @@ export default function FamilyDetails() {
                                         </td>
                                         <td>
                                             {detail.family_status ? (
-                                                <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
-                                                    {detail.family_status.replace('_', ' ')}
+                                                <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                                                    {detail.family_status === 'rich' ? 'Upper Class' : detail.family_status.replace(/_/g, ' ')}
                                                 </span>
                                             ) : '-'}
                                         </td>
