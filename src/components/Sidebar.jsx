@@ -26,6 +26,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             title: 'App Content',
             items: [
                 { path: '/success-stories', label: 'Success Stories', icon: <FaHeart size={20} /> },
+                { path: '/engagement-posters', label: 'Engagement Posters', icon: <FaHeart size={20} /> },
             ]
         },
         {

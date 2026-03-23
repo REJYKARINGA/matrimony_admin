@@ -8,6 +8,7 @@ import Users from './pages/Users';
 import UserProfiles from './pages/UserProfiles';
 import Reports from './pages/Reports';
 import SuccessStories from './pages/SuccessStories';
+import EngagementPosters from './pages/EngagementPosters';
 import Payments from './pages/Payments';
 import Education from './pages/Education';
 import Occupation from './pages/Occupation';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/user-profiles" element={<UserProfiles />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/success-stories" element={<SuccessStories />} />
+          <Route path="/engagement-posters" element={<EngagementPosters />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/education" element={<Education />} />
           <Route path="/occupation" element={<Occupation />} />
