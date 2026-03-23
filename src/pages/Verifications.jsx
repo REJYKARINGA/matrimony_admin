@@ -221,7 +221,7 @@ export default function Verifications() {
                                                 {selectedVerification.user?.user_profile?.first_name} {selectedVerification.user?.user_profile?.last_name}
                                             </p>
                                             <p style={{ margin: '0 0 0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{selectedVerification.user?.email}</p>
-                                            <div style={{ display: 'inline-block', background: 'var(--primary-color)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
+                                            <div style={{ display: 'inline-block', background: 'var(--primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
                                                 ID: {selectedVerification.user?.matrimony_id}
                                             </div>
                                         </div>
@@ -235,10 +235,10 @@ export default function Verifications() {
                                                 <img
                                                     src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
                                                     alt="Primary"
-                                                    style={{ ...galleryImageStyle, border: '2px solid var(--primary-color)' }}
+                                                    style={{ ...galleryImageStyle, border: '2px solid var(--primary)' }}
                                                     onClick={() => setZoomedImage(selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`)}
                                                 />
-                                                <span style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--primary-color)', color: 'white', fontSize: '0.6rem', textAlign: 'center', fontWeight: 'bold' }}>PRIMARY</span>
+                                                <span style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--primary)', color: 'white', fontSize: '0.6rem', textAlign: 'center', fontWeight: 'bold' }}>PRIMARY</span>
                                             </div>
                                         )}
                                         
@@ -299,7 +299,7 @@ export default function Verifications() {
                                                 <button 
                                                     onClick={() => setCurrentIDPart(0)}
                                                     style={{ 
-                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 0 ? 'var(--primary-color)' : 'transparent',
+                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 0 ? 'var(--primary)' : 'transparent',
                                                         color: '#fff', cursor: 'pointer', fontWeight: 'bold'
                                                     }}
                                                 >
@@ -308,7 +308,7 @@ export default function Verifications() {
                                                 <button 
                                                     onClick={() => setCurrentIDPart(1)}
                                                     style={{ 
-                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 1 ? 'var(--primary-color)' : 'transparent',
+                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 1 ? 'var(--primary)' : 'transparent',
                                                         color: '#fff', cursor: 'pointer', fontWeight: 'bold'
                                                     }}
                                                 >
@@ -414,7 +414,7 @@ const tabStyle = {
 
 const activeTabStyle = {
     ...tabStyle,
-    background: 'var(--primary-color)',
+    background: 'var(--primary)',
     color: '#fff'
 };
 
@@ -465,7 +465,7 @@ const sectionTitleStyle = {
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    color: 'var(--primary-color)',
+    color: 'var(--primary)',
     marginBottom: '1rem',
     borderBottom: '1px solid rgba(255,255,255,0.05)',
     paddingBottom: '0.5rem'
