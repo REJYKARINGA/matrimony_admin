@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
-import { FaCheck, FaTimes, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaExternalLinkAlt, FaTrash, FaUser, FaHeart } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 import { CONFIG } from '../config';
 
@@ -13,6 +13,17 @@ export default function EngagementPosters() {
     const [totalItems, setTotalItems] = useState(0);
     const [selectedImage, setSelectedImage] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: false });
+
+    const getAvatarColor = (gender) => {
+        if (gender?.toLowerCase() === 'female') return '#FB419E'; // Soft Pink
+        if (gender?.toLowerCase() === 'male') return '#2196F3'; // Bright Blue
+        return '#9e9e9e'; // Gray default
+    };
+
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    };
 
     useEffect(() => {
         fetchPosters(1);
@@ -104,14 +115,79 @@ export default function EngagementPosters() {
                                 {posters.map((poster) => (
                                     <tr key={poster.id}>
                                         <td>
-                                            <div style={{ fontWeight: '600' }}>
-                                                {poster.user?.user_profile?.first_name || poster.user?.email || 'N/A'} 
-                                            </div>
-                                            <div style={{ fontSize: '0.8rem', color: 'gray' }}>
-                                                {poster.user?.matrimony_id}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <div style={{ flexShrink: 0 }}>
+                                                    {poster.user?.user_profile?.profile_picture ? (
+                                                        <img 
+                                                            src={poster.user.user_profile.profile_picture.startsWith('http') ? poster.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${poster.user.user_profile.profile_picture}`} 
+                                                            alt="User" 
+                                                            style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)', padding: '2px' }}
+                                                        />
+                                                    ) : (
+                                                        <div style={{ 
+                                                            width: '50px', 
+                                                            height: '50px', 
+                                                            borderRadius: '50%', 
+                                                            background: getAvatarColor(poster.user?.user_profile?.gender), 
+                                                            color: 'white',
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '1.2rem',
+                                                            border: '2px solid white',
+                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            {getInitials(poster.user?.user_profile?.first_name || poster.user?.email)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: '600' }}>
+                                                        {poster.user?.user_profile?.first_name || poster.user?.email || 'N/A'} 
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'gray' }}>
+                                                        {poster.user?.matrimony_id}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td>{poster.partner_matrimony_id}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <div style={{ flexShrink: 0 }}>
+                                                    {poster.partner?.user_profile?.profile_picture ? (
+                                                        <img 
+                                                            src={poster.partner.user_profile.profile_picture.startsWith('http') ? poster.partner.user_profile.profile_picture : `${CONFIG.BASE_URL}${poster.partner.user_profile.profile_picture}`} 
+                                                            alt="Partner" 
+                                                            style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--secondary-color, #ec4899)', padding: '2px' }}
+                                                        />
+                                                    ) : (
+                                                        <div style={{ 
+                                                            width: '50px', 
+                                                            height: '50px', 
+                                                            borderRadius: '50%', 
+                                                            background: getAvatarColor(poster.partner?.user_profile?.gender), 
+                                                            color: 'white',
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '1.2rem',
+                                                            border: '2px solid white',
+                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            {getInitials(poster.partner?.user_profile?.first_name || poster.partner_matrimony_id)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: '500' }}>{poster.partner_matrimony_id}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'gray' }}>
+                                                        {poster.partner?.user_profile?.first_name ? `${poster.partner.user_profile.first_name} ${poster.partner.user_profile.last_name || ''}` : 'Pending Account'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td>{new Date(poster.engagement_date).toLocaleDateString()}</td>
                                         <td>
                                             <div style={{ maxWidth: '200px', fontSize: '0.875rem' }} title={poster.announcement_message}>
