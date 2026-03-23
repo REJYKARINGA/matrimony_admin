@@ -105,9 +105,9 @@ export default function PromotionSettings() {
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ margin: 0, color: 'var(--text)' }}>Promotion Settings</h1>
+        <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <h2 style={{ margin: 0 }}>Promotion Settings</h2>
                 <button
                     className="btn btn-primary"
                     onClick={() => { resetForm(); setIsModalOpen(true); }}
@@ -121,7 +121,7 @@ export default function PromotionSettings() {
                 <div style={{ color: 'var(--text-secondary)' }}>Loading...</div>
             ) : (
                 <div className="table-container">
-                    <table className="data-table">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Views Required</th>
@@ -144,7 +144,7 @@ export default function PromotionSettings() {
                                     <td>₹{Number(setting.payout_amount).toLocaleString()}</td>
                                     <td>{setting.payout_period_days} days</td>
                                     <td>
-                                        <span className={`status-badge ${setting.is_active ? 'status-active' : 'status-blocked'}`}>
+                                        <span className={`badge ${setting.is_active ? 'badge-verified' : 'badge-rejected'}`}>
                                             {setting.is_active ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
