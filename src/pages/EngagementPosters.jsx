@@ -20,6 +20,13 @@ export default function EngagementPosters() {
         return '#9e9e9e'; // Gray default
     };
 
+    const getFullImageUrl = (path) => {
+        if (!path) return '';
+        if (path.toString().startsWith('http')) return path;
+        const cleanPath = path.toString().startsWith('/') ? path : `/${path}`;
+        return `${CONFIG.BASE_URL}${cleanPath}`;
+    };
+
     const getInitials = (name) => {
         if (!name) return 'U';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -119,28 +126,31 @@ export default function EngagementPosters() {
                                                 <div style={{ flexShrink: 0 }}>
                                                     {poster.user?.user_profile?.profile_picture ? (
                                                         <img 
-                                                            src={poster.user.user_profile.profile_picture.startsWith('http') ? poster.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${poster.user.user_profile.profile_picture}`} 
+                                                            src={getFullImageUrl(poster.user.user_profile.profile_picture)} 
                                                             alt="User" 
                                                             style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)', padding: '2px' }}
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
                                                         />
-                                                    ) : (
-                                                        <div style={{ 
-                                                            width: '50px', 
-                                                            height: '50px', 
-                                                            borderRadius: '50%', 
-                                                            background: getAvatarColor(poster.user?.user_profile?.gender), 
-                                                            color: 'white',
-                                                            display: 'flex', 
-                                                            alignItems: 'center', 
-                                                            justifyContent: 'center',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '1.2rem',
-                                                            border: '2px solid white',
-                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                                                        }}>
-                                                            {getInitials(poster.user?.user_profile?.first_name || poster.user?.email)}
-                                                        </div>
-                                                    )}
+                                                    ) : null}
+                                                    <div style={{ 
+                                                        width: '50px', 
+                                                        height: '50px', 
+                                                        borderRadius: '50%', 
+                                                        background: getAvatarColor(poster.user?.user_profile?.gender), 
+                                                        color: 'white',
+                                                        display: poster.user?.user_profile?.profile_picture ? 'none' : 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '1.2rem',
+                                                        border: '2px solid white',
+                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <FaUser size={24} />
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <div style={{ fontWeight: '600' }}>
@@ -157,28 +167,31 @@ export default function EngagementPosters() {
                                                 <div style={{ flexShrink: 0 }}>
                                                     {poster.partner?.user_profile?.profile_picture ? (
                                                         <img 
-                                                            src={poster.partner.user_profile.profile_picture.startsWith('http') ? poster.partner.user_profile.profile_picture : `${CONFIG.BASE_URL}${poster.partner.user_profile.profile_picture}`} 
+                                                            src={getFullImageUrl(poster.partner.user_profile.profile_picture)} 
                                                             alt="Partner" 
                                                             style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--secondary-color, #ec4899)', padding: '2px' }}
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
                                                         />
-                                                    ) : (
-                                                        <div style={{ 
-                                                            width: '50px', 
-                                                            height: '50px', 
-                                                            borderRadius: '50%', 
-                                                            background: getAvatarColor(poster.partner?.user_profile?.gender), 
-                                                            color: 'white',
-                                                            display: 'flex', 
-                                                            alignItems: 'center', 
-                                                            justifyContent: 'center',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '1.2rem',
-                                                            border: '2px solid white',
-                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                                                        }}>
-                                                            {getInitials(poster.partner?.user_profile?.first_name || poster.partner_matrimony_id)}
-                                                        </div>
-                                                    )}
+                                                    ) : null}
+                                                    <div style={{ 
+                                                        width: '50px', 
+                                                        height: '50px', 
+                                                        borderRadius: '50%', 
+                                                        background: getAvatarColor(poster.partner?.user_profile?.gender), 
+                                                        color: 'white',
+                                                        display: poster.partner?.user_profile?.profile_picture ? 'none' : 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '1.2rem',
+                                                        border: '2px solid white',
+                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <FaUser size={24} />
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <div style={{ fontWeight: '500' }}>{poster.partner_matrimony_id}</div>
@@ -197,10 +210,11 @@ export default function EngagementPosters() {
                                         <td>
                                             {poster.poster_image && (
                                                 <img 
-                                                    src={poster.poster_image.startsWith('http') ? poster.poster_image : `${CONFIG.BASE_URL}${poster.poster_image}`} 
+                                                    src={getFullImageUrl(poster.poster_image)} 
                                                     alt="Poster" 
-                                                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid #eee' }}
-                                                    onClick={() => setSelectedImage(poster.poster_image.startsWith('http') ? poster.poster_image : `${CONFIG.BASE_URL}${poster.poster_image}`)}
+                                                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid #777' }}
+                                                    onClick={() => setSelectedImage(getFullImageUrl(poster.poster_image))}
+                                                    onError={(e) => { e.target.style.opacity = '0.3'; e.target.title = 'Image not found'; }}
                                                 />
                                             )}
                                         </td>
