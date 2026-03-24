@@ -22,6 +22,7 @@ import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
 import AuditLogs from './pages/AuditLogs';
 import ContactUnlocks from './pages/ContactUnlocks';
+import Suggestions from './pages/Suggestions';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/promotion-settings" element={<PromotionSettings />} />
           <Route path="/mediator-promotions" element={<MediatorPromotions />} />
           <Route path="/wallet-transactions" element={<WalletTransactions />} />
+          <Route path="/suggestions" element={<Suggestions />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

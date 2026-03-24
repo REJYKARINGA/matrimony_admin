@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -27,6 +27,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             items: [
                 { path: '/success-stories', label: 'Success Stories', icon: <FaHeart size={20} /> },
                 { path: '/engagement-posters', label: 'Engagement Posters', icon: <FaHeart size={20} /> },
+                { path: '/suggestions', label: 'User Suggestions', icon: <FaLightbulb size={20} /> },
             ]
         },
         {
