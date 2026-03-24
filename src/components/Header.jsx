@@ -1,4 +1,5 @@
-import { FaBars, FaSignOutAlt, FaUserCircle, FaMoon, FaSun } from 'react-icons/fa';
+import { LuMenu, LuLogOut, LuUser, LuMoon, LuSun } from 'react-icons/lu';
+// Refined Header Component with Lucide Icons for Premium UI
 
 export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, isMobile }) {
     const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
@@ -39,7 +40,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                         alignItems: 'center'
                     }}
                 >
-                    <FaBars />
+                    <LuMenu />
                 </button>
                 <h2 style={{ margin: 0, fontSize: isMobile ? '1rem' : '1.25rem', color: 'var(--text)' }}>Dashboard</h2>
             </div>
@@ -58,11 +59,11 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                     }}
                     title="Toggle Theme"
                 >
-                    {theme === 'dark' ? <FaSun /> : <FaMoon />}
+                    {theme === 'dark' ? <LuSun /> : <LuMoon />}
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FaUserCircle size={24} color={theme === 'dark' ? '#94A3B8' : 'var(--icon-muted)'} />
+                    <LuUser size={24} color={theme === 'dark' ? '#94A3B8' : 'var(--icon-muted)'} />
                     {!isMobile && (
                         <span style={{ fontWeight: 500, color: 'var(--text)' }}>
                             {user.user_profile?.first_name || 'Admin'}
@@ -83,7 +84,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                     }}
                     title="Logout"
                 >
-                    <FaSignOutAlt />
+                    <LuLogOut />
                     {!isMobile && 'Logout'}
                 </button>
             </div>
