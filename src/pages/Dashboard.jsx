@@ -7,6 +7,11 @@ import {
     PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import {
+    LuUsers, LuUserCheck, LuUserPlus, LuHeart, LuCreditCard,
+    LuTriangleAlert, LuTrendingUp, LuLoader, LuClock,
+    LuWallet, LuGraduationCap, LuTarget, LuShieldCheck, LuMessageSquare
+} from 'react-icons/lu';
+import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
     FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock,
     FaWallet, FaGraduationCap, FaBullseye, FaArrowRotateLeft
@@ -28,6 +33,8 @@ const COLORS = {
     chart4: '#F59E0B',
     chart5: '#EF4444',
     chart6: '#10B981',
+    female: '#ec4899',
+    male: '#1565c0'
 };
 
 const containerVariants = {
@@ -122,7 +129,8 @@ export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
-    const { isMobile } = useOutletContext();
+    const { theme, isMobile } = useOutletContext();
+    const isDark = theme === 'dark';
 
     useEffect(() => {
         setMounted(true);
@@ -161,9 +169,9 @@ export default function Dashboard() {
                 >
                     <motion.div
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
                     >
-                        <FaSpinner size={32} color={COLORS.primary} />
+                        <LuLoader size={32} color={COLORS.primary} />
                     </motion.div>
                     <h1 style={{
                         margin: 0,
@@ -210,7 +218,7 @@ export default function Dashboard() {
                     color: 'var(--text-secondary)',
                     textAlign: 'center'
                 }}>
-                    <FaClock size={48} style={{ marginBottom: '1rem' }} />
+                    <LuClock size={48} style={{ marginBottom: '1rem' }} />
                     <div>Failed to load dashboard data</div>
                 </div>
             </motion.div>
@@ -221,7 +229,7 @@ export default function Dashboard() {
         {
             title: 'Total Users',
             value: stats?.users?.total ?? 0,
-            icon: FaUsers,
+            icon: LuUsers,
             color: COLORS.primary,
             subtitle: `${stats?.users?.active ?? 0} active members`,
             delay: 0
@@ -229,75 +237,43 @@ export default function Dashboard() {
         {
             title: 'Verifications',
             value: stats?.verifications?.pending ?? 0,
-            icon: FaUserShield,
+            icon: LuShieldCheck,
             color: COLORS.warning,
-            subtitle: `${stats?.verifications?.approved ?? 0} verified total`,
+            subtitle: `${stats?.verifications?.approved ?? 0} verified`,
             delay: 0.1
         },
         {
-            title: 'Interests Sent',
+            title: 'Connections',
             value: stats?.interests?.total ?? 0,
-            icon: FaHeart,
+            icon: LuHeart,
             color: '#6366f1',
-            subtitle: `${stats?.interests?.accepted ?? 0} connections`,
+            subtitle: `${stats?.interests?.accepted ?? 0} accepted`,
             delay: 0.2
         },
         {
-            title: 'Total Revenue',
+            title: 'Revenue Flow',
             value: `₹${(stats?.payments?.totalRevenue ?? 0).toLocaleString()}`,
-            icon: FaMoneyBillWave,
+            icon: LuCreditCard,
             color: COLORS.success,
-            subtitle: `₹${(stats?.payments?.revenueThisMonth ?? 0).toLocaleString()} this month`,
+            subtitle: `₹${(stats?.payments?.revenueThisMonth ?? 0).toLocaleString()} current`,
             delay: 0.3
         },
         {
-            title: 'Wallet Balance',
-            value: `₹${(stats?.payments?.walletBalance ?? 0).toLocaleString()}`,
-            icon: FaWallet,
-            color: COLORS.secondary,
-            subtitle: `${stats?.payments?.walletTransactions ?? 0} transactions`,
+            title: 'Security Alert',
+            value: stats?.reports?.pending ?? 0,
+            icon: LuTriangleAlert,
+            color: COLORS.danger,
+            subtitle: `${stats?.reports?.total ?? 0} total cases`,
             delay: 0.4
         },
         {
-            title: 'Posters',
-            value: stats?.content?.posters ?? 0,
-            icon: FaBullseye,
-            color: COLORS.info,
-            subtitle: `${stats?.content?.postersVerified ?? 0} verified announcements`,
+            title: 'Customer Stories',
+            value: stats?.successStories?.approved ?? 0,
+            icon: LuMessageSquare,
+            color: '#8b5cf6',
+            subtitle: `${stats?.successStories?.total ?? 0} stories shared`,
             delay: 0.5
-        },
-        {
-            title: 'Stories',
-            value: stats?.successStories?.total ?? 0,
-            icon: FaHeart,
-            color: COLORS.danger,
-            subtitle: `${stats?.successStories?.approved ?? 0} approved stories`,
-            delay: 0.6
-        },
-        {
-            title: 'Library Data',
-            value: (stats?.dataManagement?.education ?? 0) + (stats?.dataManagement?.occupation ?? 0),
-            icon: FaGraduationCap,
-            color: COLORS.warning,
-            subtitle: `${stats?.dataManagement?.interests ?? 0} interests in lib`,
-            delay: 0.7
-        },
-        {
-            title: 'Reports',
-            value: stats?.reports?.total ?? 0,
-            icon: FaFlag,
-            color: COLORS.danger,
-            subtitle: `${stats?.reports?.pending ?? 0} unresolved cases`,
-            delay: 0.8
-        },
-        {
-            title: 'Audit Logs',
-            value: stats?.audit?.activityLogs ?? 0,
-            icon: FaArrowRotateLeft,
-            color: COLORS.primary,
-            subtitle: `${stats?.audit?.logsToday ?? 0} logs recorded today`,
-            delay: 0.9
-        },
+        }
     ];
 
     if (!mounted) return null;
@@ -388,7 +364,7 @@ export default function Dashboard() {
                     transition={{ duration: 2, repeat: Infinity }}
                     style={{
                         padding: '0.6rem 1.2rem',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '24px',
                         fontSize: '0.875rem',
                         color: COLORS.primary,
@@ -397,7 +373,7 @@ export default function Dashboard() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.6rem',
-                        border: '1px solid rgba(21, 101, 192, 0.1)'
+                        border: '1px solid var(--border-color)'
                     }}
                 >
                     <div style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%' }} />
@@ -413,7 +389,7 @@ export default function Dashboard() {
                 position: 'relative',
                 paddingBottom: '4rem'
             }}>
-                
+
                 {/* Hero Stats (Top 4) */}
                 {statCards.slice(0, 4).map((card, index) => (
                     <motion.div
@@ -424,7 +400,7 @@ export default function Dashboard() {
                         whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)' }}
                         style={{
                             gridColumn: isMobile ? 'span 1' : 'span 3',
-                            background: 'white',
+                            background: 'var(--card-bg)',
                             borderRadius: '32px',
                             padding: '1.8rem',
                             display: 'flex',
@@ -432,7 +408,7 @@ export default function Dashboard() {
                             justifyContent: 'space-between',
                             gap: '1.2rem',
                             boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-                            border: '1px solid rgba(0,0,0,0.02)',
+                            border: '1px solid var(--border-color)',
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                             minHeight: '160px'
                         }}
@@ -458,37 +434,38 @@ export default function Dashboard() {
                                 background: `${COLORS.success}15`,
                                 borderRadius: '12px'
                             }}>
-                                +12% 
+                                +12%
                             </div>
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>{card.title}</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginTop: '0.2rem' }}>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '600' }}>{card.title}</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text)', marginTop: '0.2rem' }}>
                                 {card.value}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.3rem' }}>{card.subtitle}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>{card.subtitle}</div>
                         </div>
                     </motion.div>
                 ))}
 
-                {/* Growth Chart (Main) */}
+                {/* Row 2: Engagement Matrix */}
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 8',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid rgba(0,0,0,0.02)'
+                        border: '1px solid var(--border-color)',
+                        minHeight: '480px'
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#1e293b' }}>Engagement Matrix</h2>
-                            <p style={{ margin: '0.3rem 0 0', color: '#94a3b8', fontSize: '0.9rem', fontWeight: '500' }}>Real-time user interaction analysis</p>
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: 'var(--text)' }}>Engagement Matrix</h2>
+                            <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>User registrations growth (Last 12 Months)</p>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={380}>
@@ -499,46 +476,35 @@ export default function Dashboard() {
                                     <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.01} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dy={15} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dx={-15} />
-                            <Tooltip
-                                contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '1.2rem' }}
-                                cursor={{ stroke: COLORS.primary, strokeWidth: 2, strokeDasharray: '6 6' }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="count"
-                                stroke={COLORS.primary}
-                                strokeWidth={5}
-                                fill="url(#colorEngagement)"
-                                dot={{ fill: '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 7 }}
-                                activeDot={{ r: 9, strokeWidth: 0, fill: COLORS.secondary }}
-                                animationDuration={2500}
-                            />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
+                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dy={15} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dx={-15} />
+                            <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '1.2rem' }} />
+                            <Area type="monotone" dataKey="count" stroke={COLORS.primary} strokeWidth={5} fill="url(#colorEngagement)" dot={{ fill: '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 7 }} activeDot={{ r: 9, strokeWidth: 0, fill: COLORS.secondary }} animationDuration={2500} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </motion.div>
 
-                {/* System Pulse (Radar) */}
+                {/* Network Health */}
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 4',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid rgba(0,0,0,0.02)',
+                        border: '1px solid var(--border-color)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        gap: '2.5rem'
+                        gap: '2.5rem',
+                        minHeight: '480px'
                     }}
                 >
-                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: '#1e293b' }}>Network Health</h2>
+                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Network Health</h2>
                     <ResponsiveContainer width="100%" height={320}>
                         <RadarChart cx="50%" cy="55%" outerRadius="80%" data={[
                             { subject: 'Users', A: stats?.users?.active || 0, fullMark: stats?.users?.total || 100 },
@@ -547,133 +513,310 @@ export default function Dashboard() {
                             { subject: 'Interests', A: stats?.interests?.accepted || 0, fullMark: stats?.interests?.total || 100 },
                             { subject: 'Stories', A: stats?.successStories?.approved || 0, fullMark: stats?.successStories?.total || 100 },
                         ]}>
-                            <PolarGrid stroke="#e2e8f0" />
-                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12, fontWeight: '600' }} />
+                            <PolarGrid stroke={isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"} />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 12, fontWeight: '600' }} />
                             <Radar name="System" dataKey="A" stroke={COLORS.secondary} fill={COLORS.secondary} fillOpacity={0.4} animationDuration={3000} />
                         </RadarChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ color: COLORS.success, fontWeight: '900', fontSize: '2rem' }}>A+</div>
+                        <div style={{ color: COLORS.success, fontWeight: '900', fontSize: '2.5rem' }}>A+</div>
                         <div style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '600' }}>Overall Reliability Score</div>
                     </div>
                 </motion.div>
 
-                {/* Verification Breakdown (Bar) */}
+                {/* Row 3: Revenue Momentum */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 6',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border-color)',
+                        minHeight: '400px'
+                    }}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Revenue Momentum</h2>
+                            <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Financial performance indicators</p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '900', color: COLORS.success }}>
+                                ₹{stats?.payments?.totalRevenue?.toLocaleString() ?? 0}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700' }}>LIFETIME PROFIT</div>
+                        </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={stats?.payments?.revenueGrowth || []}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
+                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', background: 'var(--card-bg)', color: 'var(--text)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                            <Bar dataKey="amount" fill={COLORS.success} radius={[6, 6, 0, 0]} animationDuration={3000} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </motion.div>
+
+                {/* Match Outcomes & Demographics */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 3',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border-color)',
+                        minHeight: '400px'
+                    }}
+                >
+                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center' }}>Match Success</h2>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <PieChart>
+                            <Pie data={stats?.matches?.distribution || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="count" nameKey="status">
+                                {(stats?.matches?.distribution || []).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? COLORS.success : COLORS.warning} />
+                                ))}
+                            </Pie>
+                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none' }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+                        {stats?.matches?.distribution?.map((d, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: i === 0 ? COLORS.success : COLORS.warning }} />
+                                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)' }}>{d.status}</span>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 3',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border-color)',
+                        minHeight: '400px'
+                    }}
+                >
+                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center' }}>User Demographics</h2>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <PieChart>
+                            <Pie data={stats?.profiles?.genderDistribution || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="count" nameKey="gender">
+                                {(stats?.profiles?.genderDistribution || []).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? COLORS.male : COLORS.female} />
+                                ))}
+                            </Pie>
+                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none' }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+                        {stats?.profiles?.genderDistribution?.map((d, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: i === 0 ? COLORS.male : COLORS.female }} />
+                                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)' }}>{d.gender}</span>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Row 4: Operational Pulse */}
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 7',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid rgba(0,0,0,0.02)'
+                        border: '1px solid var(--border-color)',
+                        minHeight: '420px'
                     }}
                 >
-                    <h2 style={{ margin: '0 0 2rem', fontSize: '1.3rem', fontWeight: '800', color: '#1e293b' }}>Data Pipeline</h2>
+                    <h2 style={{ margin: '0 0 2rem', fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Operational Pipeline</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        {stats?.verifications?.distribution.map((item, index) => {
-                             const total = stats.verifications.distribution.reduce((a, b) => a + b.count, 0) || 1;
-                             const percent = (item.count / total) * 100;
-                             const colors = [COLORS.warning, COLORS.success, COLORS.danger];
-                             return (
-                                 <div key={index}>
-                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.7rem', fontSize: '1rem', fontWeight: '700', color: '#334155' }}>
-                                         <span>{item.status}</span>
-                                         <span>{item.count}</span>
-                                     </div>
-                                     <div style={{ height: '16px', background: '#f8fafc', borderRadius: '8px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-                                         <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }} transition={{ duration: 1.5, delay: 0.5 }} style={{ height: '100%', background: colors[index % 3], borderRadius: '8px' }} />
-                                     </div>
-                                 </div>
-                             );
-                        })}
+                        {[
+                            { label: 'Pending Verifications', count: stats?.verifications?.pending ?? 0, color: COLORS.warning, total: (stats?.verifications?.approved + stats?.verifications?.pending + stats?.verifications?.rejected) || 1 },
+                            { label: 'Verified Community Members', count: stats?.verifications?.approved ?? 0, color: COLORS.success, total: (stats?.verifications?.approved + stats?.verifications?.pending + stats?.verifications?.rejected) || 1 },
+                            { label: 'Unresolved Reports', count: stats?.reports?.pending ?? 0, color: COLORS.danger, total: stats?.reports?.total || 1 },
+                            { label: 'Published Success Stories', count: stats?.successStories?.approved ?? 0, color: COLORS.primary, total: stats?.successStories?.total || 1 },
+                        ].map((item, index) => (
+                            <div key={index}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.7rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text)' }}>
+                                    <span>{item.label}</span>
+                                    <span>{item.count}</span>
+                                </div>
+                                <div style={{ height: '14px', background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', borderRadius: '7px', overflow: 'hidden', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9'}` }}>
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${(item.count / item.total) * 100}%` }} transition={{ duration: 1.5, delay: 0.5 }} style={{ height: '100%', background: item.color, borderRadius: '7px' }} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </motion.div>
 
-                {/* Donut with Percentage */}
+                {/* Global Integrity Breakdown */}
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 5',
-                        background: 'white',
+                        background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid rgba(0,0,0,0.02)',
+                        border: '1px solid var(--border-color)',
+                        textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
                         justifyContent: 'center',
-                        position: 'relative'
+                        alignItems: 'center',
+                        gap: '2.5rem',
+                        minHeight: '420px'
                     }}
                 >
-                    <h2 style={{ position: 'absolute', top: '2.5rem', left: '2.5rem', margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>Overall Trust</h2>
-                    <div style={{ position: 'relative', width: '260px', height: '260px' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Global Integrity</h2>
+                    <div style={{ position: 'relative', width: '220px', height: '220px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie 
-                                    data={[
-                                        {v: stats?.verifications?.approved || 0}, 
-                                        {v: (stats?.verifications?.total || 1) - (stats?.verifications?.approved || 0)}
-                                    ]} 
-                                    innerRadius={90} 
-                                    outerRadius={115} 
-                                    paddingAngle={8} 
-                                    dataKey="v" 
-                                    stroke="none" 
-                                    animationDuration={3000}
-                                    startAngle={90}
-                                    endAngle={450}
-                                >
-                                    <Cell fill={COLORS.primary} />
-                                    <Cell fill="#f4f7fa" />
+                                <Pie data={stats?.verifications?.distribution || []} cx="50%" cy="50%" innerRadius={75} outerRadius={105} paddingAngle={5} dataKey="count">
+                                    {(stats?.verifications?.distribution || []).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={[COLORS.warning, COLORS.success, COLORS.danger][index % 3]} />
+                                    ))}
                                 </Pie>
                             </PieChart>
                         </ResponsiveContainer>
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                            <div style={{ fontSize: '3.2rem', fontWeight: '900', color: '#1e293b', lineHeight: 1 }}>
-                                {Math.round((stats?.verifications?.approved / (stats?.verifications?.total || 1)) * 100)}%
+                            <div style={{ fontSize: '3.2rem', fontWeight: '900', color: 'var(--text)' }}>
+                                {Math.round((stats?.verifications?.approved / ((stats?.verifications?.approved + stats?.verifications?.pending + stats?.verifications?.rejected) || 1)) * 100)}%
                             </div>
-                            <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: '700', marginTop: '4px' }}>VERIFIED</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Verified</div>
                         </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', width: '100%' }}>
+                        {[
+                            { label: 'Pending', color: COLORS.warning, count: stats?.verifications?.pending },
+                            { label: 'Approved', color: COLORS.success, count: stats?.verifications?.approved },
+                            { label: 'Rejected', color: COLORS.danger, count: stats?.verifications?.rejected },
+                        ].map((item, i) => (
+                            <div key={i}>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '900', color: item.color }}>{item.count}</div>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-secondary)' }}>{item.label}</div>
+                            </div>
+                        ))}
                     </div>
                 </motion.div>
 
-                {/* Secondary Stats Grid */}
-                <div style={{ gridColumn: 'span 12', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '1.5rem' }}>
-                    {statCards.slice(4, 8).map((card, index) => (
-                        <motion.div key={index} variants={itemVariants} initial="hidden" animate="visible" whileHover={{ y: -8, scale: 1.02 }} style={{ background: 'white', borderRadius: '28px', padding: '1.8rem', boxShadow: '0 10px 25px rgba(0,0,0,0.02)', border: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
-                            <div>
-                                <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: '600' }}>{card.title}</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '900', marginTop: '0.4rem', color: '#1e293b' }}>{card.value}</div>
-                            </div>
-                            <div style={{ width: '52px', height: '52px', borderRadius: '18px', background: `${card.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
-                                <card.icon size={24} />
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                {/* Row 5: Community Demographics */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: 'span 12',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '3rem',
+                        boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
+                        border: '1px solid var(--border-color)',
+                        minHeight: '400px',
+                        marginTop: '1.5rem'
+                    }}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '900', color: 'var(--text)' }}>Community Diversity</h2>
+                            <p style={{ margin: '0.4rem 0 0', color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: '500' }}>Active member distribution by religious background</p>
+                        </div>
+                    </div>
 
-                {/* Final Row Metrics */}
-                <div style={{ gridColumn: 'span 12', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '1.5rem', marginTop: '1.5rem' }}>
-                    {statCards.slice(8, 10).map((card, index) => (
-                        <motion.div key={index} variants={itemVariants} initial="hidden" animate="visible" style={{ background: 'white', borderRadius: '40px', padding: '2.5rem', boxShadow: '0 15px 40px rgba(0,0,0,0.04)', border: '1px solid #f8fafc', display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: `${card.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
-                                <card.icon size={36} />
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={stats?.profiles?.religionDistribution || []} layout="vertical" margin={{ left: 40, right: 40 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
+                            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} hide />
+                            <YAxis dataKey="religion" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 14, fontWeight: '700' }} width={120} />
+                            <Tooltip cursor={{ fill: 'var(--hover-bg)' }} contentStyle={{ background: 'var(--card-bg)', border: 'none', borderRadius: '20px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }} />
+                            <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40} animationDuration={3000}>
+                                {(stats?.profiles?.religionDistribution || []).map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][index % 7]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </motion.div>
+
+                {/* Final Row: Repository & Security Metrics */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: 'span 12',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '3rem',
+                        boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
+                        border: '1px solid var(--border-color)',
+                        minHeight: '400px',
+                        marginTop: '1rem'
+                    }}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: 'var(--text)' }}>Database Repository Hub</h2>
+                            <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: '500' }}>Master data distribution across mandatory system entities</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '3rem' }}>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: COLORS.primary }}>{stats?.audit?.activityLogs?.toLocaleString() ?? 0}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Log Capacity</div>
                             </div>
-                            <div>
-                                <div style={{ fontSize: '1rem', color: '#64748b', fontWeight: '600' }}>{card.title}</div>
-                                <div style={{ fontSize: '2.4rem', fontWeight: '1000', color: '#1e293b', letterSpacing: '-1.5px', lineHeight: 1.1 }}>{card.value}</div>
-                                <div style={{ fontSize: '0.95rem', color: '#94a3b8', fontWeight: '500', marginTop: '0.4rem' }}>{card.subtitle}</div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: COLORS.secondary }}>{stats?.audit?.logsToday ?? 0}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Activity Today</div>
                             </div>
-                        </motion.div>
-                    ))}
-                </div>
+                        </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart
+                            data={[
+                                { name: 'Educations', count: stats?.dataManagement?.education || 0 },
+                                { name: 'Occupations', count: stats?.dataManagement?.occupation || 0 },
+                                { name: 'Religions', count: stats?.dataManagement?.religions || 0 },
+                                { name: 'Castes', count: stats?.dataManagement?.castes || 0 },
+                                { name: 'Library', count: stats?.interests?.libraryTotal || 0 },
+                                { name: 'Posters', count: stats?.content?.posters || 0 },
+                                { name: 'Unlocks', count: stats?.unlocks?.total || 0 },
+                            ]}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 13, fontWeight: '700' }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} />
+                            <Tooltip cursor={{ fill: 'var(--hover-bg)' }} contentStyle={{ background: 'var(--card-bg)', border: 'none', borderRadius: '20px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }} />
+                            <Bar dataKey="count" radius={[12, 12, 0, 0]} barSize={60} animationDuration={3000}>
+                                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                                    <Cell key={i} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][i % 7]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </motion.div>
             </div>
         </div>
     );
