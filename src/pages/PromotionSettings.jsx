@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { FaEdit, FaTrash, FaCheck, FaPlus, FaBullhorn } from 'react-icons/fa';
+import { FaCheck, FaPlus } from 'react-icons/fa';
+import { LuPencil, LuTrash2, LuSparkles, LuCircleCheck, LuSettings2 } from 'react-icons/lu';
 import FormModal from '../components/FormModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function PromotionSettings() {
     const [settings, setSettings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
         views_required: '',
@@ -56,14 +60,21 @@ export default function PromotionSettings() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this setting?')) return;
+    const confirmDelete = async () => {
+        if (!deleteId) return;
         try {
-            await api.delete(`/admin/promotion-settings/${id}`);
+            await api.delete(`/admin/promotion-settings/${deleteId}`);
             fetchSettings();
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
         } catch (error) {
             console.error('Failed to delete setting:', error);
         }
+    };
+
+    const handleDelete = (id) => {
+        setDeleteId(id);
+        setIsDeleteModalOpen(true);
     };
 
     const handleSetDefault = async (id) => {
@@ -93,7 +104,6 @@ export default function PromotionSettings() {
     const openEditModal = (setting) => {
         setEditingId(setting.id);
         const { created_at, updated_at, ...data } = setting;
-        // Ensure boolean conversion if API returns 1/0
         setFormData({
             ...data,
             is_likes_enabled: Boolean(data.is_likes_enabled),
@@ -107,77 +117,115 @@ export default function PromotionSettings() {
     return (
         <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h2 style={{ margin: 0 }}>Promotion Settings</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ background: 'var(--primary)', color: 'white', padding: '10px', borderRadius: '12px', display: 'flex' }}>
+                        <LuSettings2 size={22} />
+                    </div>
+                    <div>
+                        <h2 style={{ margin: 0 }}>Promotion Tiers</h2>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Manage reward criteria and payouts</p>
+                    </div>
+                </div>
                 <button
                     className="btn btn-primary"
                     onClick={() => { resetForm(); setIsModalOpen(true); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    style={{ borderRadius: '12px', padding: '0.75rem 1.25rem' }}
                 >
-                    <FaPlus /> Add New Setting
+                    <LuSparkles /> Add New Tier
                 </button>
             </div>
 
             {loading ? (
-                <div style={{ color: 'var(--text-secondary)' }}>Loading...</div>
+                <div style={{ color: 'var(--text-secondary)', padding: '2rem', textAlign: 'center' }}>Loading...</div>
             ) : (
                 <div className="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Views Required</th>
-                                <th>Likes / Comments</th>
-                                <th>Payout</th>
-                                <th>Period</th>
+                                <th>Criteria Details</th>
+                                <th>Payout Amount</th>
+                                <th>Vality Period</th>
                                 <th>Status</th>
                                 <th>Default</th>
-                                <th>Actions</th>
+                                <th style={{ textAlign: 'center' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {settings.map((setting) => (
                                 <tr key={setting.id}>
-                                    <td>{Number(setting.views_required).toLocaleString()}</td>
-                                    <td>
-                                        <div>Likes: {setting.is_likes_enabled ? Number(setting.likes_required).toLocaleString() : '-'}</div>
-                                        <div>Comments: {setting.is_comments_enabled ? Number(setting.comments_required).toLocaleString() : '-'}</div>
+                                    <td style={{ fontWeight: 700, color: 'var(--primary)' }}>
+                                        {Number(setting.views_required).toLocaleString()}
                                     </td>
-                                    <td>₹{Number(setting.payout_amount).toLocaleString()}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <LuCircleCheck size={14} color={setting.is_likes_enabled ? 'var(--success)' : 'var(--text-secondary)'} />
+                                                Likes: {setting.is_likes_enabled ? Number(setting.likes_required).toLocaleString() : 'N/A'}
+                                            </span>
+                                            <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <LuCircleCheck size={14} color={setting.is_comments_enabled ? 'var(--success)' : 'var(--text-secondary)'} />
+                                                Comments: {setting.is_comments_enabled ? Number(setting.comments_required).toLocaleString() : 'N/A'}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style={{ fontWeight: 600, color: 'var(--success)' }}>
+                                        ₹{Number(setting.payout_amount).toLocaleString()}
+                                    </td>
                                     <td>{setting.payout_period_days} days</td>
                                     <td>
                                         <span className={`badge ${setting.is_active ? 'badge-verified' : 'badge-rejected'}`}>
-                                            {setting.is_active ? 'Active' : 'Inactive'}
+                                            {setting.is_active ? 'Active' : 'Stopped'}
                                         </span>
                                     </td>
                                     <td>
                                         {setting.is_default ? (
-                                            <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <FaCheck /> Default
+                                            <span style={{
+                                                color: 'var(--success)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontWeight: 700,
+                                                background: 'rgba(16, 185, 129, 0.1)',
+                                                padding: '4px 12px',
+                                                borderRadius: '8px',
+                                                width: 'fit-content'
+                                            }}>
+                                                <LuCircleCheck size={16} /> Current Default
                                             </span>
                                         ) : (
                                             <button
-                                                className="btn btn-secondary"
-                                                style={{ padding: '2px 8px', fontSize: '0.8rem' }}
+                                                className="icon-btn success"
+                                                style={{
+                                                    width: 'auto',
+                                                    padding: '4px 12px',
+                                                    fontSize: '0.75rem',
+                                                    borderRadius: '8px',
+                                                    gap: '6px',
+                                                    fontWeight: 600
+                                                }}
                                                 onClick={() => handleSetDefault(setting.id)}
+                                                title="Set as Default Tier"
                                             >
-                                                Make Default
+                                                <LuSparkles size={14} /> Make Default
                                             </button>
                                         )}
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                                             <button
                                                 className="icon-btn edit"
                                                 onClick={() => openEditModal(setting)}
                                                 title="Edit"
                                             >
-                                                <FaEdit />
+                                                <LuPencil />
                                             </button>
                                             <button
                                                 className="icon-btn delete"
                                                 onClick={() => handleDelete(setting.id)}
                                                 title="Delete"
                                             >
-                                                <FaTrash />
+                                                <LuTrash2 />
                                             </button>
                                         </div>
                                     </td>
@@ -196,7 +244,7 @@ export default function PromotionSettings() {
                     onSubmit={handleSubmit}
                     isLoading={submitting}
                 >
-                    <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <div className="form-group">
                         <label>Views Required (per payout unit)</label>
                         <input
                             type="number"
@@ -208,7 +256,7 @@ export default function PromotionSettings() {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
                         <div className="form-group" style={{ flex: '1 1 200px' }}>
                             <label className="form-toggle">
                                 <span className="switch">
@@ -257,7 +305,7 @@ export default function PromotionSettings() {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
                         <div className="form-group" style={{ flex: '1 1 200px' }}>
                             <label>Payout Amount (₹)</label>
                             <input
@@ -309,6 +357,19 @@ export default function PromotionSettings() {
                     </div>
                 </FormModal>
             )}
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteId(null);
+                }}
+                onConfirm={confirmDelete}
+                title="Delete Promotion Setting"
+                message="Are you sure you want to delete this setting? This action cannot be undone."
+                confirmText="Delete Setting"
+                confirmButtonClass="btn-danger"
+            />
         </div>
     );
 }

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { FaTimes } from 'react-icons/fa';
 
 export default function ConfirmModal({
@@ -18,10 +19,9 @@ export default function ConfirmModal({
 
     const handleConfirm = () => {
         onConfirm();
-        onClose();
     };
 
-    return (
+    return createPortal(
         <div
             onClick={onClose}
             style={{
@@ -30,11 +30,12 @@ export default function ConfirmModal({
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'rgba(0, 0, 0, 0.5)',
+                background: 'rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(4px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 1001,
+                zIndex: 999999,
                 padding: '1rem'
             }}
         >
@@ -42,22 +43,25 @@ export default function ConfirmModal({
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     background: 'var(--card-bg)',
-                    borderRadius: '1rem',
-                    maxWidth: '500px',
+                    borderRadius: '1.25rem',
+                    maxWidth: '450px',
                     width: '100%',
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
-                    overflow: 'hidden'
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border-color)',
+                    animation: 'modalSlideUp 0.3s ease-out'
                 }}
             >
                 {/* Header */}
                 <div style={{
-                    padding: '1.5rem',
+                    padding: '1.25rem 1.5rem',
                     borderBottom: '1px solid var(--border-color)',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    background: 'var(--hover-bg)'
                 }}>
-                    <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '1.25rem' }}>{title}</h3>
+                    <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '1.1rem', fontWeight: 700 }}>{title}</h3>
                     <button
                         onClick={onClose}
                         style={{
@@ -66,18 +70,21 @@ export default function ConfirmModal({
                             color: 'var(--text-secondary)',
                             cursor: 'pointer',
                             fontSize: '1.25rem',
-                            padding: '0.5rem',
+                            padding: '0.25rem',
                             display: 'flex',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            transition: 'transform 0.2s'
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'rotate(90deg)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'rotate(0)'}
                     >
                         <FaTimes />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div style={{ padding: '1.5rem' }}>
-                    <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                <div style={{ padding: '1.75rem 1.5rem' }}>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
                         {message}
                     </p>
 
@@ -87,7 +94,7 @@ export default function ConfirmModal({
                             placeholder={inputPlaceholder}
                             value={inputValue}
                             onChange={(e) => onInputChange(e.target.value)}
-                            style={{ marginBottom: 0 }}
+                            style={{ marginTop: '1rem', marginBottom: 0 }}
                             autoFocus
                         />
                     )}
@@ -95,37 +102,46 @@ export default function ConfirmModal({
 
                 {/* Footer */}
                 <div style={{
-                    padding: '1rem 1.5rem',
+                    padding: '1.25rem 1.5rem',
+                    background: 'var(--hover-bg)',
                     borderTop: '1px solid var(--border-color)',
                     display: 'flex',
-                    gap: '0.75rem',
+                    gap: '1rem',
                     justifyContent: 'flex-end'
                 }}>
                     <button
                         onClick={onClose}
                         style={{
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: '0.5rem',
+                            padding: '0.6rem 1.25rem',
+                            borderRadius: '0.75rem',
                             border: '1px solid var(--border-color)',
-                            background: 'transparent',
+                            background: 'var(--card-bg)',
                             color: 'var(--text-secondary)',
                             cursor: 'pointer',
                             fontWeight: 600,
-                            transition: 'background 0.2s'
+                            fontSize: '0.875rem',
+                            transition: 'all 0.2s'
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.background = 'var(--hover-bg)'}
-                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border-color)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--card-bg)'}
                     >
                         {cancelText}
                     </button>
                     <button
                         onClick={handleConfirm}
                         className={`btn ${confirmButtonClass}`}
+                        style={{
+                            padding: '0.6rem 1.5rem',
+                            borderRadius: '0.75rem',
+                            fontSize: '0.875rem',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
                     >
                         {confirmText}
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
