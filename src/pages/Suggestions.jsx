@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { createPortal } from 'react-dom';
+import ConfirmModal from '../components/ConfirmModal';
 import {
     LuLightbulb, LuSearch, LuTrash2, LuX, LuClock,
     LuLoader, LuCircleCheck, LuCircleX, LuChevronLeft,
     LuChevronRight, LuTerminal, LuRocket, LuEye, LuMessageSquare,
-    LuGitPullRequest, LuZap
+    LuGitPullRequest, LuZap, LuImage, LuPaperclip, LuDownload
 } from 'react-icons/lu';
 
 // ─── Status Config ────────────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ const StatusBadge = ({ status }) => {
 function ReviewModal({ suggestion, onClose, onSaved }) {
     const [status, setStatus] = useState(suggestion.status);
     const [devNotes, setDevNotes] = useState(suggestion.response_text || '');
+    const [devPhoto, setDevPhoto] = useState(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -44,9 +46,16 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
         setSaving(true);
         setError('');
         try {
-            await api.put(`/admin/suggestions/${suggestion.id}/respond`, {
-                status,
-                response_text: devNotes,
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('status', status);
+            formData.append('response_text', devNotes);
+            if (devPhoto) {
+                formData.append('response_photo', devPhoto);
+            }
+
+            await api.post(`/admin/suggestions/${suggestion.id}/respond`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             onSaved();
             onClose();
@@ -138,6 +147,52 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
                         />
                     </div>
 
+                    {/* Developer Photo Upload */}
+                    <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Attach Screenshot/Mockup (Optional)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ 
+                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                padding: '0.45rem 0.85rem', background: 'var(--hover-bg)', 
+                                border: '1px solid var(--border-color)', borderRadius: '8px', 
+                                cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text)'
+                            }}>
+                                <LuPaperclip size={14} /> {devPhoto ? 'Change File' : 'Choose File'}
+                                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                                    if(e.target.files && e.target.files.length > 0) setDevPhoto(e.target.files[0]);
+                                }} />
+                            </label>
+                            {devPhoto && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{devPhoto.name}</span>}
+                        </div>
+                        {suggestion.response_photo && !devPhoto && (
+                            <div style={{ marginTop: '8px', fontSize: '0.75rem' }}>
+                                <a href={suggestion.response_photo.startsWith('http') ? suggestion.response_photo : `http://localhost:8000${suggestion.response_photo}`} target="_blank" rel="noreferrer" style={{ color: '#6366F1', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <LuImage size={12} /> View currently attached photo
+                                </a>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* User Provided Screenshots Preview */}
+                    {suggestion.user_photos && Array.isArray(suggestion.user_photos) && suggestion.user_photos.length > 0 && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                            <p style={{ margin: '0 0 8px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text)' }}>User Attached Screenshots</p>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {suggestion.user_photos.map((photo, j) => {
+                                    const imgUrl = photo.startsWith('http') ? photo : `http://localhost:8000${photo}`;
+                                    return (
+                                        <a key={j} href={imgUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: 60, height: 60, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border-color)', position: 'relative' }}>
+                                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: '0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }} onMouseEnter={e => e.currentTarget.style.opacity=1} onMouseLeave={e => e.currentTarget.style.opacity=0}>
+                                                <LuDownload size={16} />
+                                            </div>
+                                            <img src={imgUrl} alt={`Attachment ${j}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {error && <p style={{ margin: 0, color: '#EF4444', fontSize: '0.82rem' }}>{error}</p>}
 
                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
@@ -165,6 +220,7 @@ export default function Suggestions() {
     const [total, setTotal]       = useState(0);
     const [reviewTarget, setReviewTarget] = useState(null);
     const [deleting, setDeleting] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -184,16 +240,17 @@ export default function Suggestions() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Delete this feature request permanently?')) return;
-        setDeleting(id);
+    const handleDelete = async () => {
+        if (!confirmModal.id) return;
+        setDeleting(confirmModal.id);
         try {
-            await api.delete(`/admin/suggestions/${id}`);
+            await api.delete(`/admin/suggestions/${confirmModal.id}`);
             fetchData();
         } catch {
             alert('Failed to delete.');
         } finally {
             setDeleting(null);
+            setConfirmModal({ isOpen: false, id: null });
         }
     };
 
@@ -322,7 +379,14 @@ export default function Suggestions() {
                                             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>{subInfo}</div>
                                         </td>
                                         <td style={{ maxWidth: 300 }}>
-                                            <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: 3 }}>{s.title}</div>
+                                            <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: 3 }}>
+                                                {s.title}
+                                            </div>
+                                            {s.category && (
+                                                <span style={{ display: 'inline-block', marginBottom: 4, padding: '2px 8px', background: '#F3F4F6', color: '#4B5563', fontSize: '0.7rem', fontWeight: 600, borderRadius: 4 }}>
+                                                    {s.category}
+                                                </span>
+                                            )}
                                             {s.description && (
                                                 <div style={{
                                                     fontSize: '0.78rem', color: 'var(--text-secondary)',
@@ -353,12 +417,12 @@ export default function Suggestions() {
                                                     title="Review & Update Status"
                                                     onClick={() => setReviewTarget(s)}
                                                 >
-                                                    <LuCode2 size={14} />
+                                                    <LuTerminal size={14} />
                                                 </button>
                                                 <button
                                                     className="icon-btn delete"
                                                     title="Delete Request"
-                                                    onClick={() => handleDelete(s.id)}
+                                                    onClick={() => setConfirmModal({ isOpen: true, id: s.id })}
                                                     disabled={deleting === s.id}
                                                 >
                                                     {deleting === s.id ? <LuLoader size={13} /> : <LuTrash2 size={13} />}
@@ -389,6 +453,16 @@ export default function Suggestions() {
                     onSaved={fetchData}
                 />
             )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: null })}
+                onConfirm={handleDelete}
+                title="Delete Feature Request"
+                message="Are you sure you want to delete this feature request? This action cannot be undone."
+                confirmButtonClass="btn-danger"
+                isLoading={deleting === confirmModal.id}
+            />
         </div>
     );
 }
