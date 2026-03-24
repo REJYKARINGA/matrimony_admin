@@ -4,6 +4,7 @@ import Pagination from '../components/Pagination';
 
 export default function Preferences() {
     const [preferences, setPreferences] = useState([]);
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,6 +25,7 @@ export default function Preferences() {
                 }
             });
             setPreferences(response.data.data);
+            setStats(response.data.stats);
             setCurrentPage(response.data.current_page);
             setTotalPages(response.data.last_page);
             setTotalItems(response.data.total);
@@ -43,23 +45,96 @@ export default function Preferences() {
         return array.join(', ');
     };
 
+    const formatStatus = (status) => {
+        if (!status) return '-';
+        const cleaned = status.toLowerCase().replace(/_/g, ' ');
+        return ['never married', 'never_married', 'single'].includes(cleaned) ? 'Single' : status.replace(/_/g, ' ');
+    };
+
     const formatIncome = (income) => {
-        if (income === null || income === undefined) return '-';
+        if (income === null || income === undefined || isNaN(income)) return '-';
         return `₹${parseFloat(income).toLocaleString('en-IN')}`;
     };
 
     return (
         <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h2 style={{ margin: 0 }}>User Preferences</h2>
+                <div>
+                    <h2 style={{ margin: 0 }}>Global Insights & Preferences</h2>
+                    <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Aggregate data analysis across {totalItems} user profiles</p>
+                </div>
                 <input
                     type="text"
-                    placeholder="Search preferences..."
+                    placeholder="Search profiles..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     style={{ width: '300px', marginBottom: 0 }}
                 />
             </div>
+
+            {stats && (
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                    gap: '1.25rem', 
+                    marginBottom: '2.5rem' 
+                }}>
+                    <div className="card" style={{ padding: '1.25rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Status Pref. (Rank 1 & 2)</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', textTransform: 'capitalize' }}>
+                            1. {formatStatus(stats.status?.[0])}
+                        </div>
+                        {stats.status?.[1] && (
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px', textTransform: 'capitalize' }}>
+                                2. {formatStatus(stats.status[1])}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card" style={{ padding: '1.25rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Community (Rank 1 & 2)</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                            1. {stats.religion?.[0] || 'Any'}
+                            {stats.caste?.[0] && <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}> - {stats.caste[0]}</span>}
+                        </div>
+                        {stats.religion?.[1] && (
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                2. {stats.religion[1]}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card" style={{ padding: '1.25rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Age & Height (Avg)</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                           Age: {stats.avg_age?.min || '-'} - {stats.avg_age?.max || '-'} yrs
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            Height: {stats.avg_height?.min || '-'} - {stats.avg_height?.max || '-'} cm
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ padding: '1.25rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Income Preference (Avg)</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--success)' }}>
+                            {formatIncome(stats.avg_income?.min)} - {formatIncome(stats.avg_income?.max)}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Annual Package Target</div>
+                    </div>
+
+                    <div className="card" style={{ padding: '1.25rem', background: 'var(--hover-bg)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Lifestyle Trend</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', textTransform: 'capitalize' }}>
+                            1. {stats.lifestyle?.[0] || 'Any'} Drug Pref.
+                        </div>
+                        {stats.lifestyle?.[1] && (
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                2. {stats.lifestyle[1]}
+                            </div>
+                        )}
+                    </div>
+                </div>
+             )}
 
             {loading ? (
                 <p>Loading...</p>
