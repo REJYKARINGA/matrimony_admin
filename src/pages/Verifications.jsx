@@ -434,7 +434,7 @@ const modalOverlayStyle = {
 };
 
 const modalContentStyle = {
-    backgroundColor: 'var(--card-bg, #1a1a2e)',
+    backgroundColor: 'var(--card-bg)',
     width: '100%',
     maxWidth: '1000px',
     maxHeight: '90vh',

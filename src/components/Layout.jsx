@@ -72,7 +72,7 @@ export default function Layout() {
 
             <div style={{
                 flex: 1,
-                marginLeft: isMobile ? 0 : (collapsed && !sidebarHovered ? '80px' : '250px'),
+                marginLeft: isMobile ? 0 : (collapsed && !sidebarHovered ? 'calc(80px + 1rem)' : 'calc(250px + 1rem)'),
                 minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -85,7 +85,13 @@ export default function Layout() {
                     toggleTheme={toggleTheme}
                     isMobile={isMobile}
                 />
-                <main style={{ padding: isMobile ? '1rem' : '2rem', flex: 1, overflowX: 'hidden' }}>
+                <main style={{ 
+                    padding: isMobile ? '1rem' : '1.5rem', 
+                    paddingTop: isMobile ? '1rem' : '0.5rem', 
+                    marginLeft: isMobile ? 0 : '1rem',
+                    flex: 1, 
+                    overflowX: 'hidden' 
+                }}>
                     <Outlet context={{ theme, isMobile }} />
                 </main>
             </div>

@@ -58,9 +58,10 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     return (
         <div style={{
             width: sidebarWidth,
-            height: '100vh',
+            height: isMobile ? '100vh' : 'calc(100vh - 2rem)',
+            margin: isMobile ? 0 : '1rem 0 1rem 1rem',
             background: 'var(--sidebar-bg)',
-            borderRight: '1px solid var(--border-color)',
+            borderRadius: isMobile ? 0 : '24px',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
@@ -69,7 +70,8 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             transition: 'all 0.3s ease',
             zIndex: 20,
             transform: transform,
-            boxShadow: isMobile && !collapsed ? '4px 0 10px var(--shadow-color)' : 'none'
+            boxShadow: 'var(--shadow-lg)',
+            overflow: 'hidden'
         }}
             onMouseEnter={() => {
                 if (collapsed && !isMobile) {
@@ -82,23 +84,44 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 onHoverChange?.(false);
             }}>
             <div style={{
-                height: '64px',
+                height: '80px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
                 padding: (!isExpanded && !isMobile) ? '0' : '0 2rem',
-                borderBottom: '1px solid var(--border-color)'
+                borderBottom: '1px solid var(--border-color)',
+                marginBottom: '1rem'
             }}>
-                <h2 style={{
-                    margin: 0,
-                    color: 'var(--primary)',
-                    fontSize: '1.5rem'
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'var(--primary)',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: (!isExpanded && !isMobile) ? 0 : '12px',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    boxShadow: '0 4px 12px rgba(21, 101, 192, 0.3)'
                 }}>
-                    {(!isExpanded && !isMobile) ? 'M' : 'Matrimony'}
-                </h2>
+                    M
+                </div>
+                {(isExpanded || isMobile) && (
+                    <h2 style={{
+                        margin: 0,
+                        color: 'var(--text)',
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        letterSpacing: '-0.02em'
+                    }}>
+                        Matrimony
+                    </h2>
+                )}
             </div>
 
-            <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
+            <nav className="hide-scrollbar" style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {menuGroups.map((group, groupIndex) => (
                         <div key={group.title} style={{ marginBottom: '1.5rem' }}>
@@ -124,37 +147,82 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
-                                            padding: '0.75rem 1.5rem',
+                                            padding: '0.875rem 1.25rem',
+                                            margin: '0 0.75rem',
                                             textDecoration: 'none',
                                             color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                                            background: isActive ? (theme === 'dark' ? 'rgba(180, 127, 255, 0.2)' : '#F3E8FF') : 'transparent',
-                                            borderLeft: isActive ? '4px solid var(--primary)' : '4px solid transparent',
-                                            transition: 'all 0.2s'
+                                            background: isActive ? '#FFFFFF' : 'transparent',
+                                            borderRadius: '12px',
+                                            boxShadow: isActive ? 'var(--shadow-md)' : 'none',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            position: 'relative',
+                                            zIndex: isActive ? 2 : 1
                                         })}
                                         onMouseEnter={(e) => {
                                             const isActive = e.currentTarget.classList.contains('active');
                                             if (!isActive) {
-                                                e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                                                e.currentTarget.style.background = 'var(--hover-bg)';
+                                                e.currentTarget.style.transform = 'translateX(4px)';
                                             }
                                         }}
                                         onMouseLeave={(e) => {
                                             const isActive = e.currentTarget.classList.contains('active');
                                             if (!isActive) {
                                                 e.currentTarget.style.background = 'transparent';
+                                                e.currentTarget.style.transform = 'translateX(0)';
                                             }
                                         }}
                                         title={(!isExpanded && !isMobile) ? item.label : ''}
                                     >
-                                        <span style={{ marginRight: (!isExpanded && !isMobile) ? 0 : '1rem', display: 'flex' }}>
-                                            {item.icon}
-                                        </span>
-                                        {(isExpanded || isMobile) && <span style={{ fontWeight: 500 }}>{item.label}</span>}
+                                        {({ isActive }) => (
+                                            <>
+                                                <span style={{ 
+                                                    marginRight: (!isExpanded && !isMobile) ? 0 : '1rem', 
+                                                    display: 'flex',
+                                                    color: isActive ? 'var(--primary)' : 'var(--icon-muted)',
+                                                    transition: 'all 0.3s'
+                                                }}>
+                                                    {item.icon}
+                                                </span>
+                                                {(isExpanded || isMobile) && (
+                                                    <span style={{ 
+                                                        fontWeight: isActive ? 700 : 600, 
+                                                        fontSize: '0.9rem',
+                                                        letterSpacing: isActive ? '-0.01em' : 'normal'
+                                                    }}>
+                                                        {item.label}
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
                                     </NavLink>
                                 </li>
                             ))}
                         </div>
                     ))}
                 </ul>
+
+                {/* BOTTOM INDICATOR - SHOW END OF LIST */}
+                <div style={{ 
+                    padding: '2rem 0',
+                    textAlign: 'center',
+                    opacity: 0.4
+                }}>
+                    {(isExpanded || isMobile) ? (
+                        <>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                MATRIMONY ADMIN
+                            </div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                v1.0.4 • End of List
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                            END
+                        </div>
+                    )}
+                </div>
             </nav>
         </div>
     );

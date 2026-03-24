@@ -11,19 +11,19 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
 
     return (
         <header style={{
-            height: '64px',
+            height: '72px',
             background: 'var(--header-bg)',
-            backdropFilter: 'blur(8px)',
-            borderBottom: '1px solid var(--border-color)',
+            borderRadius: isMobile ? 0 : '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: isMobile ? '0 1rem' : '0 2rem',
+            padding: isMobile ? '0 1rem' : '0 1.5rem',
             position: 'sticky',
-            top: 0,
+            top: isMobile ? 0 : '1rem',
+            margin: isMobile ? 0 : '1rem 1rem 0 1rem',
             zIndex: 10,
-            boxShadow: '0 4px 6px -1px var(--shadow-color)',
-            transition: 'background-color 0.3s, border-color 0.3s'
+            boxShadow: 'var(--shadow-md)',
+            transition: 'all 0.3s ease'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button
@@ -51,7 +51,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: theme === 'dark' ? '#FCD34D' : '#64748B',
+                        color: theme === 'dark' ? '#FCD34D' : 'var(--icon-muted)',
                         fontSize: '1.25rem',
                         display: 'flex',
                         alignItems: 'center',
@@ -62,7 +62,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FaUserCircle size={24} color={theme === 'dark' ? '#94A3B8' : '#CBD5E1'} />
+                    <FaUserCircle size={24} color={theme === 'dark' ? '#94A3B8' : 'var(--icon-muted)'} />
                     {!isMobile && (
                         <span style={{ fontWeight: 500, color: 'var(--text)' }}>
                             {user.user_profile?.first_name || 'Admin'}

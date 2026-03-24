@@ -1,29 +1,42 @@
 :root {
-  --primary: #B47FFF;
-  --primary-dark: #9333ea;
-  --secondary: #5CB3FF;
-  --bg: #F8FAFC;
-  --text: #1E293B;
+  --primary: #1565c0;
+  --primary-rgb: 21, 101, 192;
+  --primary-dark: #0d47a1;
+  --secondary: #1e88e5;
+  --secondary-rgb: 30, 136, 229;
+  --bg: #dce8f5;
+  --text: #172554;
   --text-secondary: #64748B;
+  --icon-muted: #94A3B8;
   --card-bg: #FFFFFF;
   --sidebar-bg: #FFFFFF;
-  --header-bg: rgba(255, 255, 255, 0.8);
-  --border-color: #E2E8F0;
+  --header-bg: #FFFFFF;
+  --border-color: #e2e8f0;
   --input-bg: #FFFFFF;
-  --input-border: #E2E8F0;
-  --hover-bg: #F1F5F9;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-border: #90caf9;
+  --hover-bg: #f8fafc;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+  --shadow-xl: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
+  --shadow-color: rgba(21, 101, 192, 0.12);
+  --error: #dc3545;
+  --error-bg: #fff0f0;
+  --error-border: #ffcccc;
+  --error-text: #cc3333;
+  --success: #10B981;
+  --success-rgb: 16, 185, 129;
 }
 
 [data-theme='dark'] {
-  --bg: #0F172A;
-  --text: #F8FAFC;
+  --bg: #0f172a;
+  --text: #f0f9ff;
   --text-secondary: #94A3B8;
-  --card-bg: #1E293B;
-  --sidebar-bg: #1E293B;
-  --header-bg: rgba(30, 41, 59, 0.8);
+  --card-bg: #1e293b;
+  --sidebar-bg: #1e293b;
+  --header-bg: rgba(30, 41, 59, 0.9);
   --border-color: #334155;
-  --input-bg: #0F172A;
+  --input-bg: #0f172a;
   --input-border: #334155;
   --hover-bg: #334155;
   --shadow-color: rgba(0, 0, 0, 0.3);
@@ -264,7 +277,7 @@ textarea:focus,
   outline: none;
   border-color: var(--primary);
   background-color: var(--card-bg);
-  box-shadow: 0 0 0 4px rgba(180, 127, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15);
   transform: translateY(-1px);
 }
 
@@ -287,6 +300,15 @@ input::placeholder {
 }
 
 /* Scrollbar styling for dark mode */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -381,7 +403,7 @@ input:checked+.slider:before {
 }
 
 input:focus+.slider {
-  box-shadow: 0 0 0 4px rgba(180, 127, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15);
 }
 
 [data-theme='dark'] .slider {

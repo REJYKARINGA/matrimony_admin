@@ -277,7 +277,7 @@ export default function Login() {
 
                     {/* RIGHT WHITE PANEL */}
                     <div className="login-right">
-                        <h2 style={{ margin: '0 0 28px', fontSize: '26px', fontWeight: 700, color: '#1a1a2e', textAlign: 'center' }}>
+                        <h2 style={{ margin: '0 0 28px', fontSize: '26px', fontWeight: 700, color: 'var(--text)', textAlign: 'center' }}>
                             Sign In
                         </h2>
 

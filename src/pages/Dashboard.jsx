@@ -14,18 +14,18 @@ import { CONFIG } from '../config';
 const API_URL = CONFIG.API_URL;
 
 const COLORS = {
-    primary: '#B47FFF',
-    secondary: '#7C5CFF',
+    primary: '#1565c0',
+    secondary: '#1e88e5',
     success: '#10B981',
     warning: '#F59E0B',
     danger: '#EF4444',
-    info: '#3B82F6',
-    chart1: '#B47FFF',
-    chart2: '#7C5CFF',
-    chart3: '#10B981',
+    info: '#42a5f5',
+    chart1: '#1565c0',
+    chart2: '#1e88e5',
+    chart3: '#42a5f5',
     chart4: '#F59E0B',
     chart5: '#EF4444',
-    chart6: '#3B82F6',
+    chart6: '#10B981',
 };
 
 const containerVariants = {
@@ -287,24 +287,24 @@ export default function Dashboard() {
                     right: 0,
                     bottom: 0,
                     background: `
-                        radial-gradient(circle at 20% 80%, var(--primary)20 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, var(--secondary)20 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, var(--success)15 0%, transparent 50%)
+                        radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)
                     `,
                     pointerEvents: 'none',
                     zIndex: -1
                 }}
                 animate={{
                     background: [
-                        `radial-gradient(circle at 20% 80%, var(--primary)20 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, var(--secondary)20 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, var(--success)15 0%, transparent 50%)`,
-                        `radial-gradient(circle at 30% 70%, var(--primary)30 0%, transparent 50%),
-                         radial-gradient(circle at 70% 30%, var(--secondary)30 0%, transparent 50%),
-                         radial-gradient(circle at 50% 50%, var(--success)20 0%, transparent 50%)`,
-                        `radial-gradient(circle at 20% 80%, var(--primary)20 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, var(--secondary)20 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, var(--success)15 0%, transparent 50%)`
+                        `radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
+                         radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)`,
+                        `radial-gradient(circle at 30% 70%, rgba(var(--primary-rgb), 0.15) 0%, transparent 50%),
+                         radial-gradient(circle at 70% 30%, rgba(var(--secondary-rgb), 0.15) 0%, transparent 50%),
+                         radial-gradient(circle at 50% 50%, rgba(var(--success-rgb), 0.1) 0%, transparent 50%)`,
+                        `radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
+                         radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)`
                     ]
                 }}
                 transition={{ duration: 10, repeat: Infinity }}
@@ -355,12 +355,12 @@ export default function Dashboard() {
                     transition={{ duration: 2, repeat: Infinity }}
                     style={{
                         padding: '0.5rem 1rem',
-                        background: 'var(--primary)20',
+                        background: 'rgba(var(--primary-rgb), 0.1)',
                         borderRadius: '20px',
                         fontSize: '0.875rem',
                         color: 'var(--primary)',
                         fontWeight: '600',
-                        border: '1px solid var(--primary)30'
+                        border: '1px solid rgba(var(--primary-rgb), 0.2)'
                     }}
                 >
                     <FaArrowTrendUp style={{ marginRight: '0.5rem' }} />
@@ -384,23 +384,18 @@ export default function Dashboard() {
                     <motion.div
                         key={index}
                         variants={itemVariants}
-                        whileHover="hover"
+                        whileHover={{ y: -5, boxShadow: 'var(--shadow-lg)' }}
                         style={{
-                            background: `
-                                linear-gradient(135deg, 
-                                    var(--card-bg) 0%, 
-                                    var(--card-bg)cc 100%
-                                )`,
-                            border: `1px solid var(--border-color)`,
-                            borderRadius: '16px',
-                            padding: '1.5rem',
+                            background: 'var(--card-bg)',
+                            borderRadius: '24px',
+                            padding: '1.75rem',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '1rem',
-                            backdropFilter: 'blur(10px)',
                             position: 'relative',
                             overflow: 'hidden',
-                            boxShadow: '0 4px 24px var(--shadow-color)'
+                            boxShadow: 'var(--shadow-md)',
+                            transition: 'all 0.3s ease'
                         }}
                     >
                         {/* Decorative gradient background */}
