@@ -70,19 +70,14 @@ export default function Preferences() {
                             <thead>
                                 <tr>
                                     <th>User</th>
-                                    <th>Min Age</th>
-                                    <th>Max Age</th>
-                                    <th>Min Height</th>
-                                    <th>Max Height</th>
+                                    <th>Age & Height</th>
                                     <th>Marital Status</th>
-                                    <th>Religion</th>
-                                    <th>Caste</th>
-                                    <th>Education</th>
-                                    <th>Occupation</th>
-                                    <th>Min Income</th>
-                                    <th>Max Income</th>
-                                    <th>Max Distance</th>
-                                    <th>Preferred Locations</th>
+                                    <th>Community</th>
+                                    <th>Professional Details</th>
+                                    <th>Income</th>
+                                    <th>Location Prefs</th>
+                                    <th>Lifestyle</th>
+                                    <th>Settings</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,31 +97,67 @@ export default function Preferences() {
                                                 <span>-</span>
                                             )}
                                         </td>
-                                        <td>{preference.min_age || '-'}</td>
-                                        <td>{preference.max_age || '-'}</td>
-                                        <td>{preference.min_height ? `${preference.min_height} cm` : '-'}</td>
-                                        <td>{preference.max_height ? `${preference.max_height} cm` : '-'}</td>
+                                        <td>
+                                            <div style={{ fontWeight: '600' }}>Age: {preference.min_age || 'Any'} - {preference.max_age || 'Any'}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                                Ht: {(preference.min_height || preference.max_height) ? (
+                                                    `${preference.min_height || 'Any'} - ${preference.max_height || 'Any'} cm`
+                                                ) : 'Any'}
+                                            </div>
+                                        </td>
                                         <td>
                                             {preference.marital_status ? (
                                                 <span className="badge" style={{ textTransform: 'capitalize' }}>
-                                                    {preference.marital_status.replace('_', ' ')}
+                                                    {['never_married', 'never married', 'single'].includes(preference.marital_status.toLowerCase().replace('_', ' ')) ? 'Single' : preference.marital_status.replace('_', ' ')}
                                                 </span>
                                             ) : '-'}
                                         </td>
                                         <td>
-                                            {preference.religion_name ? (
-                                                <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
-                                                    {preference.religion_name}
-                                                </span>
-                                            ) : '-'}
+                                            <div style={{ fontWeight: '600', color: 'var(--primary)' }}>{preference.religion_name || 'Any'}</div>
+                                            <div style={{ fontSize: '0.85rem', marginTop: '4px' }}>
+                                                <strong>Caste:</strong> {formatArray(preference.caste_names)}
+                                            </div>
+                                            {preference.sub_caste_names?.length > 0 && (
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                                    <strong>Sub:</strong> {formatArray(preference.sub_caste_names)}
+                                                </div>
+                                            )}
                                         </td>
-                                        <td>{formatArray(preference.caste_names)}</td>
-                                        <td>{formatArray(preference.education_names)}</td>
-                                        <td>{formatArray(preference.occupation_names)}</td>
-                                        <td>{formatIncome(preference.min_income)}</td>
-                                        <td>{formatIncome(preference.max_income)}</td>
-                                        <td>{preference.max_distance ? `${preference.max_distance} km` : '-'}</td>
-                                        <td>{formatArray(preference.preferred_locations)}</td>
+                                        <td>
+                                            <div>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: '500' }}>Edu: {formatArray(preference.education_names)}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Occ: {formatArray(preference.occupation_names)}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ whiteSpace: 'nowrap' }}>
+                                                {formatIncome(preference.min_income)} - {formatIncome(preference.max_income)}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ fontSize: '0.85rem' }}>{formatArray(preference.preferred_locations)}</div>
+                                            {preference.max_distance && (
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                                    Range: {preference.max_distance} km
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div style={{ fontSize: '0.82rem' }}>
+                                                <div style={{ marginBottom: '2px' }}><strong>Drug:</strong> <span style={{ textTransform: 'capitalize' }}>{preference.drug_addiction || 'Any'}</span></div>
+                                                <div style={{ marginBottom: '2px' }}><strong>Smoke:</strong> {formatArray(preference.smoke)}</div>
+                                                <div><strong>Alcohol:</strong> {formatArray(preference.alcohol)}</div>
+                                            </div>
+                                        </td>
+                                         <td>
+                                            <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                                                <div style={{ marginBottom: '6px' }}><strong>Sort:</strong> <span style={{ textTransform: 'capitalize' }}>{preference.sort_by?.replace('_', ' ') || '-'}</span></div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                    {preference.hide_viewed && <span className="badge badge-secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', display: 'inline-block' }}>Hide Viewed</span>}
+                                                    {preference.hide_interested && <span className="badge badge-secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', display: 'inline-block' }}>Hide Interested</span>}
+                                                </div>
+                                            </div>
+                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
