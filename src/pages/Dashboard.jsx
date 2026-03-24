@@ -3,11 +3,13 @@ import { useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     BarChart, Bar, XAxis, YAxis,
-    CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart
+    CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+    PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
-    FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock
+    FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock,
+    FaWallet, FaGraduationCap, FaBullseye, FaArrowRotateLeft
 } from 'react-icons/fa6';
 import { CONFIG } from '../config';
 
@@ -51,8 +53,6 @@ const itemVariants = {
         }
     }
 };
-
-
 
 const numberVariants = {
     hidden: { scale: 0.5, opacity: 0 },
@@ -220,64 +220,90 @@ export default function Dashboard() {
     const statCards = [
         {
             title: 'Total Users',
-            value: stats.users.total,
+            value: stats?.users?.total ?? 0,
             icon: FaUsers,
             color: COLORS.primary,
-            subtitle: `${stats.users.active} active`,
-            trend: '+12%',
+            subtitle: `${stats?.users?.active ?? 0} active members`,
             delay: 0
         },
         {
             title: 'Verifications',
-            value: stats.verifications.pending,
+            value: stats?.verifications?.pending ?? 0,
             icon: FaUserShield,
             color: COLORS.warning,
-            subtitle: 'pending verification',
-            trend: '+8%',
+            subtitle: `${stats?.verifications?.approved ?? 0} verified total`,
             delay: 0.1
         },
         {
-            title: 'Total Profiles',
-            value: stats.profiles.total,
-            icon: FaUserCheck,
-            color: COLORS.info,
-            subtitle: `${stats.profiles.verified} verified`,
-            trend: '+15%',
+            title: 'Interests Sent',
+            value: stats?.interests?.total ?? 0,
+            icon: FaHeart,
+            color: '#6366f1',
+            subtitle: `${stats?.interests?.accepted ?? 0} connections`,
             delay: 0.2
         },
         {
-            title: 'Active Matches',
-            value: stats.matches.total,
-            icon: FaHeart,
-            color: COLORS.danger,
-            subtitle: `${stats.matches.accepted} accepted`,
-            trend: '+23%',
+            title: 'Total Revenue',
+            value: `₹${(stats?.payments?.totalRevenue ?? 0).toLocaleString()}`,
+            icon: FaMoneyBillWave,
+            color: COLORS.success,
+            subtitle: `₹${(stats?.payments?.revenueThisMonth ?? 0).toLocaleString()} this month`,
             delay: 0.3
         },
         {
-            title: 'Total Revenue',
-            value: `₹${stats.payments.totalRevenue.toLocaleString()}`,
-            icon: FaMoneyBillWave,
-            color: COLORS.success,
-            subtitle: `₹${stats.payments.revenueThisMonth.toLocaleString()} this month`,
-            trend: '+18%',
+            title: 'Wallet Balance',
+            value: `₹${(stats?.payments?.walletBalance ?? 0).toLocaleString()}`,
+            icon: FaWallet,
+            color: COLORS.secondary,
+            subtitle: `${stats?.payments?.walletTransactions ?? 0} transactions`,
             delay: 0.4
         },
         {
+            title: 'Posters',
+            value: stats?.content?.posters ?? 0,
+            icon: FaBullseye,
+            color: COLORS.info,
+            subtitle: `${stats?.content?.postersVerified ?? 0} verified announcements`,
+            delay: 0.5
+        },
+        {
+            title: 'Stories',
+            value: stats?.successStories?.total ?? 0,
+            icon: FaHeart,
+            color: COLORS.danger,
+            subtitle: `${stats?.successStories?.approved ?? 0} approved stories`,
+            delay: 0.6
+        },
+        {
+            title: 'Library Data',
+            value: (stats?.dataManagement?.education ?? 0) + (stats?.dataManagement?.occupation ?? 0),
+            icon: FaGraduationCap,
+            color: COLORS.warning,
+            subtitle: `${stats?.dataManagement?.interests ?? 0} interests in lib`,
+            delay: 0.7
+        },
+        {
             title: 'Reports',
-            value: stats.reports.total,
+            value: stats?.reports?.total ?? 0,
             icon: FaFlag,
             color: COLORS.danger,
-            subtitle: `${stats.reports.pending} pending`,
-            trend: '-5%',
-            delay: 0.5
+            subtitle: `${stats?.reports?.pending ?? 0} unresolved cases`,
+            delay: 0.8
+        },
+        {
+            title: 'Audit Logs',
+            value: stats?.audit?.activityLogs ?? 0,
+            icon: FaArrowRotateLeft,
+            color: COLORS.primary,
+            subtitle: `${stats?.audit?.logsToday ?? 0} logs recorded today`,
+            delay: 0.9
         },
     ];
 
     if (!mounted) return null;
 
     return (
-        <div style={{ padding: isMobile ? '1rem' : '2rem', position: 'relative' }}>
+        <div style={{ padding: isMobile ? '1rem 0' : '0 0 2rem 0', position: 'relative' }}>
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -287,27 +313,27 @@ export default function Dashboard() {
                     right: 0,
                     bottom: 0,
                     background: `
-                        radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)
+                        radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)
                     `,
                     pointerEvents: 'none',
                     zIndex: -1
                 }}
                 animate={{
                     background: [
-                        `radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)`,
-                        `radial-gradient(circle at 30% 70%, rgba(var(--primary-rgb), 0.15) 0%, transparent 50%),
-                         radial-gradient(circle at 70% 30%, rgba(var(--secondary-rgb), 0.15) 0%, transparent 50%),
-                         radial-gradient(circle at 50% 50%, rgba(var(--success-rgb), 0.1) 0%, transparent 50%)`,
-                        `radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.1) 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, rgba(var(--success-rgb), 0.08) 0%, transparent 50%)`
+                        `radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
+                         radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)`,
+                        `radial-gradient(circle at 30% 70%, rgba(21, 101, 192, 0.12) 0%, transparent 50%),
+                         radial-gradient(circle at 70% 30%, rgba(30, 136, 229, 0.12) 0%, transparent 50%),
+                         radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%)`,
+                        `radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
+                         radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)`
                     ]
                 }}
-                transition={{ duration: 10, repeat: Infinity }}
+                transition={{ duration: 15, repeat: Infinity }}
             />
 
             {/* Header */}
@@ -320,484 +346,335 @@ export default function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: '1rem',
-                    marginBottom: '2rem'
+                    marginBottom: '2.5rem'
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                     <motion.div
                         animate={{
                             rotate: [0, 10, -10, 0],
                             scale: [1, 1.1, 1]
                         }}
-                        transition={{
-                            duration: 4,
-                            repeat: Infinity,
-                            repeatDelay: 3
+                        transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+                        style={{
+                            width: '48px',
+                            height: '48px',
+                            background: 'white',
+                            borderRadius: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.05)'
                         }}
                     >
-                        <FaChartLine size={32} color={COLORS.primary} />
+                        <FaChartLine size={24} color={COLORS.primary} />
                     </motion.div>
                     <h1 style={{
                         margin: 0,
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: 'bold',
+                        fontSize: isMobile ? '1.5rem' : '2.2rem',
+                        fontWeight: '900',
+                        letterSpacing: '-1px',
                         background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text'
                     }}>
-                        Dashboard
+                        Premium Analytics
                     </h1>
                 </div>
 
                 <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    animate={{ opacity: [0.6, 1, 0.6] }}
                     transition={{ duration: 2, repeat: Infinity }}
                     style={{
-                        padding: '0.5rem 1rem',
-                        background: 'rgba(var(--primary-rgb), 0.1)',
-                        borderRadius: '20px',
+                        padding: '0.6rem 1.2rem',
+                        background: 'white',
+                        borderRadius: '24px',
                         fontSize: '0.875rem',
-                        color: 'var(--primary)',
-                        fontWeight: '600',
-                        border: '1px solid rgba(var(--primary-rgb), 0.2)'
+                        color: COLORS.primary,
+                        fontWeight: '700',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        border: '1px solid rgba(21, 101, 192, 0.1)'
                     }}
                 >
-                    <FaArrowTrendUp style={{ marginRight: '0.5rem' }} />
-                    Live Data
+                    <div style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%' }} />
+                    Live System Feed
                 </motion.div>
             </motion.div>
 
-            {/* Stat Cards Grid */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fit, minmax(100%, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '1.5rem',
-                    marginBottom: '2rem'
-                }}
-            >
-                {statCards.map((card, index) => (
+            {/* 12-Column Premium Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
+                gap: '1.5rem',
+                position: 'relative',
+                paddingBottom: '4rem'
+            }}>
+                
+                {/* Hero Stats (Top 4) */}
+                {statCards.slice(0, 4).map((card, index) => (
                     <motion.div
                         key={index}
                         variants={itemVariants}
-                        whileHover={{ y: -5, boxShadow: 'var(--shadow-lg)' }}
+                        initial="hidden"
+                        animate="visible"
+                        whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)' }}
                         style={{
-                            background: 'var(--card-bg)',
-                            borderRadius: '24px',
-                            padding: '1.75rem',
+                            gridColumn: isMobile ? 'span 1' : 'span 3',
+                            background: 'white',
+                            borderRadius: '32px',
+                            padding: '1.8rem',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '1rem',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            boxShadow: 'var(--shadow-md)',
-                            transition: 'all 0.3s ease'
+                            justifyContent: 'space-between',
+                            gap: '1.2rem',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                            border: '1px solid rgba(0,0,0,0.02)',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            minHeight: '160px'
                         }}
                     >
-                        {/* Decorative gradient background */}
-                        <motion.div
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                width: '100px',
-                                height: '100px',
-                                background: `radial-gradient(circle, ${card.color}30 0%, transparent 70%)`,
-                                filter: 'blur(20px)'
-                            }}
-                            animate={{
-                                scale: [1, 1.2, 1],
-                                opacity: [0.3, 0.6, 0.3]
-                            }}
-                            transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                        />
-
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-                            <div style={{ flex: 1 }}>
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: card.delay + 0.1 }}
-                                    style={{
-                                        fontSize: '0.875rem',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: '0.5rem',
-                                        fontWeight: '500'
-                                    }}
-                                >
-                                    {card.title}
-                                </motion.div>
-
-                                <motion.div
-                                    variants={numberVariants}
-                                    style={{
-                                        fontSize: '2rem',
-                                        fontWeight: 'bold',
-                                        color: 'var(--text-primary)',
-                                        marginBottom: '0.25rem'
-                                    }}
-                                >
-                                    {card.value}
-                                </motion.div>
-
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: card.delay + 0.3 }}
-                                    style={{
-                                        fontSize: '0.75rem',
-                                        color: 'var(--text-secondary)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    <span>{card.subtitle}</span>
-                                    <span className={`badge ${card.trend.startsWith('+') ? 'badge-success' : 'badge-danger'}`}>
-                                        {card.trend}
-                                    </span>
-                                </motion.div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{
+                                width: '56px',
+                                height: '56px',
+                                borderRadius: '20px',
+                                background: `${card.color}15`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: card.color
+                            }}>
+                                <card.icon size={26} />
                             </div>
-
-                            <motion.div
-                                initial={{ scale: 0, rotate: -180 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                transition={{
-                                    type: 'spring',
-                                    delay: card.delay + 0.2,
-                                    stiffness: 200
-                                }}
-                                whileHover={{ scale: 1.1, rotate: 10 }}
-                                style={{
-                                    width: '64px',
-                                    height: '64px',
-                                    borderRadius: '50%',
-                                    background: `linear-gradient(135deg, ${card.color}40, ${card.color}20)`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: `0 8px 24px ${card.color}30`
-                                }}
-                            >
-                                <card.icon size={28} color={card.color} />
-                            </motion.div>
+                            <div style={{
+                                fontSize: '0.75rem',
+                                color: COLORS.success,
+                                fontWeight: 'bold',
+                                padding: '0.4rem 0.8rem',
+                                background: `${COLORS.success}15`,
+                                borderRadius: '12px'
+                            }}>
+                                +12% 
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>{card.title}</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#1e293b', marginTop: '0.2rem' }}>
+                                {card.value}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.3rem' }}>{card.subtitle}</div>
                         </div>
                     </motion.div>
                 ))}
-            </motion.div>
 
-            {/* Charts Grid */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(500px, 1fr))',
-                    gap: '2rem'
-                }}
-            >
-                {/* User Growth Chart */}
+                {/* Growth Chart (Main) */}
                 <motion.div
                     variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
                     style={{
-                        background: 'var(--card-bg)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
+                        gridColumn: isMobile ? 'span 1' : 'span 8',
+                        background: 'white',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid rgba(0,0,0,0.02)'
                     }}
                 >
-                    <motion.h2
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 }}
-                        style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 'bold',
-                            marginBottom: '1.5rem',
-                            color: 'var(--text-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <FaUsers color={COLORS.primary} />
-                        User Growth Trend
-                    </motion.h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={stats.users.growth}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#1e293b' }}>Engagement Matrix</h2>
+                            <p style={{ margin: '0.3rem 0 0', color: '#94a3b8', fontSize: '0.9rem', fontWeight: '500' }}>Real-time user interaction analysis</p>
+                        </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={380}>
+                        <AreaChart data={stats?.users?.growth || []}>
                             <defs>
-                                <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
+                                <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.25} />
+                                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.01} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="month" stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
-                            <YAxis stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dy={15} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dx={-15} />
                             <Tooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-primary)',
-                                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
-                                }}
+                                contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '1.2rem' }}
+                                cursor={{ stroke: COLORS.primary, strokeWidth: 2, strokeDasharray: '6 6' }}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="count"
                                 stroke={COLORS.primary}
-                                strokeWidth={3}
-                                fill="url(#colorUsers)"
-                                animationDuration={2000}
+                                strokeWidth={5}
+                                fill="url(#colorEngagement)"
+                                dot={{ fill: '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 7 }}
+                                activeDot={{ r: 9, strokeWidth: 0, fill: COLORS.secondary }}
+                                animationDuration={2500}
                             />
                         </AreaChart>
                     </ResponsiveContainer>
                 </motion.div>
 
-                {/* Revenue Growth Chart */}
+                {/* System Pulse (Radar) */}
                 <motion.div
                     variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
                     style={{
-                        background: 'var(--card-bg)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
+                        gridColumn: isMobile ? 'span 1' : 'span 4',
+                        background: 'white',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid rgba(0,0,0,0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        gap: '2.5rem'
                     }}
                 >
-                    <motion.h2
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.7 }}
-                        style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 'bold',
-                            marginBottom: '1.5rem',
-                            color: 'var(--text-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <FaMoneyBillWave color={COLORS.success} />
-                        Revenue Analytics
-                    </motion.h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={stats.payments.revenueGrowth}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="month" stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
-                            <YAxis stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--card-bg)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-primary)',
-                                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
-                                }}
-                            />
-                            <Bar
-                                dataKey="amount"
-                                fill={COLORS.success}
-                                name="Revenue (₹)"
-                                radius={[8, 8, 0, 0]}
-                                animationDuration={2000}
-                            />
-                        </BarChart>
+                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: '#1e293b' }}>Network Health</h2>
+                    <ResponsiveContainer width="100%" height={320}>
+                        <RadarChart cx="50%" cy="55%" outerRadius="80%" data={[
+                            { subject: 'Users', A: stats?.users?.active || 0, fullMark: stats?.users?.total || 100 },
+                            { subject: 'Verified', A: stats?.verifications?.approved || 0, fullMark: stats?.users?.total || 100 },
+                            { subject: 'Revenue', A: stats?.payments?.revenueThisMonth || 0, fullMark: 10000 },
+                            { subject: 'Interests', A: stats?.interests?.accepted || 0, fullMark: stats?.interests?.total || 100 },
+                            { subject: 'Stories', A: stats?.successStories?.approved || 0, fullMark: stats?.successStories?.total || 100 },
+                        ]}>
+                            <PolarGrid stroke="#e2e8f0" />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12, fontWeight: '600' }} />
+                            <Radar name="System" dataKey="A" stroke={COLORS.secondary} fill={COLORS.secondary} fillOpacity={0.4} animationDuration={3000} />
+                        </RadarChart>
                     </ResponsiveContainer>
-                </motion.div>
-
-                {/* Gender Distribution */}
-                <motion.div
-                    variants={itemVariants}
-                    style={{
-                        background: 'var(--card-bg)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        boxShadow: '0 4px 24px var(--shadow-color)',
-                    }}
-                >
-                    <motion.h2
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.8 }}
-                        style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 'bold',
-                            marginBottom: '1.5rem',
-                            color: 'var(--text-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <FaUserCheck color={COLORS.info} />
-                        Gender Distribution
-                    </motion.h2>
-                    <div style={{ padding: '1rem 0' }}>
-                        {/* Summary Stats */}
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginBottom: '1.5rem',
-                            gap: '1rem'
-                        }}>
-                            {stats.profiles.genderDistribution.map((item, index) => (
-                                <div key={index} style={{ textAlign: 'center', flex: 1 }}>
-                                    <div style={{
-                                        fontSize: '1.5rem',
-                                        fontWeight: 'bold',
-                                        color: index === 0 ? COLORS.info : COLORS.danger
-                                    }}>
-                                        {item.count}
-                                    </div>
-                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                        {item.gender}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div style={{
-                            height: '24px',
-                            width: '100%',
-                            background: 'var(--border-color)',
-                            borderRadius: '12px',
-                            overflow: 'hidden',
-                            display: 'flex',
-                            position: 'relative'
-                        }}>
-                            {stats.profiles.genderDistribution.map((item, index) => {
-                                const total = stats.profiles.genderDistribution.reduce((a, b) => a + b.count, 0);
-                                const percent = (item.count / total) * 100;
-                                return (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${percent}%` }}
-                                        transition={{ duration: 1, delay: 0.5 + (index * 0.2) }}
-                                        style={{
-                                            background: index === 0 ? COLORS.info : COLORS.danger,
-                                            height: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
-                                        title={`${item.gender}: ${percent.toFixed(1)}%`}
-                                    />
-                                );
-                            })}
-                        </div>
-
-                        {/* Legend */}
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            marginTop: '0.5rem',
-                            fontSize: '0.75rem',
-                            color: 'var(--text-secondary)'
-                        }}>
-                            {stats.profiles.genderDistribution.map((item, index) => {
-                                const total = stats.profiles.genderDistribution.reduce((a, b) => a + b.count, 0);
-                                const percent = (item.count / total) * 100;
-                                return (
-                                    <span key={index}>
-                                        {percent.toFixed(1)}%
-                                    </span>
-                                );
-                            })}
-                        </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ color: COLORS.success, fontWeight: '900', fontSize: '2rem' }}>A+</div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '600' }}>Overall Reliability Score</div>
                     </div>
                 </motion.div>
 
-                {/* Verification Status */}
+                {/* Verification Breakdown (Bar) */}
                 <motion.div
                     variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
                     style={{
-                        background: 'var(--card-bg)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        boxShadow: '0 4px 24px var(--shadow-color)',
+                        gridColumn: isMobile ? 'span 1' : 'span 7',
+                        background: 'white',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid rgba(0,0,0,0.02)'
                     }}
                 >
-                    <motion.h2
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.9 }}
-                        style={{
-                            fontSize: '1.25rem',
-                            fontWeight: 'bold',
-                            marginBottom: '1.5rem',
-                            color: 'var(--text-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        <FaUserShield color={COLORS.warning} />
-                        Verification Status
-                    </motion.h2>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
-                        {stats.verifications.distribution.map((item, index) => {
-                            const total = stats.verifications.distribution.reduce((a, b) => a + b.count, 0);
-                            const percent = total > 0 ? (item.count / total) * 100 : 0;
-                            const color = [COLORS.warning, COLORS.success, COLORS.danger][index % 3];
-
-                            return (
-                                <div key={index}>
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        marginBottom: '0.5rem',
-                                        fontSize: '0.875rem',
-                                        color: 'var(--text-primary)',
-                                        fontWeight: '500'
-                                    }}>
-                                        <span>{item.status}</span>
-                                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>
-                                    </div>
-                                    <div style={{
-                                        height: '10px',
-                                        width: '100%',
-                                        background: 'var(--border-color)',
-                                        borderRadius: '5px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${percent}%` }}
-                                            transition={{ duration: 1, delay: 0.8 + (index * 0.1) }}
-                                            style={{
-                                                height: '100%',
-                                                background: color,
-                                                borderRadius: '5px'
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{
-                                        textAlign: 'right',
-                                        fontSize: '0.75rem',
-                                        color: 'var(--text-secondary)',
-                                        marginTop: '0.25rem'
-                                    }}>
-                                        {percent.toFixed(1)}%
-                                    </div>
-                                </div>
-                            );
+                    <h2 style={{ margin: '0 0 2rem', fontSize: '1.3rem', fontWeight: '800', color: '#1e293b' }}>Data Pipeline</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        {stats?.verifications?.distribution.map((item, index) => {
+                             const total = stats.verifications.distribution.reduce((a, b) => a + b.count, 0) || 1;
+                             const percent = (item.count / total) * 100;
+                             const colors = [COLORS.warning, COLORS.success, COLORS.danger];
+                             return (
+                                 <div key={index}>
+                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.7rem', fontSize: '1rem', fontWeight: '700', color: '#334155' }}>
+                                         <span>{item.status}</span>
+                                         <span>{item.count}</span>
+                                     </div>
+                                     <div style={{ height: '16px', background: '#f8fafc', borderRadius: '8px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
+                                         <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }} transition={{ duration: 1.5, delay: 0.5 }} style={{ height: '100%', background: colors[index % 3], borderRadius: '8px' }} />
+                                     </div>
+                                 </div>
+                             );
                         })}
                     </div>
                 </motion.div>
-            </motion.div>
+
+                {/* Donut with Percentage */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 5',
+                        background: 'white',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid rgba(0,0,0,0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                    }}
+                >
+                    <h2 style={{ position: 'absolute', top: '2.5rem', left: '2.5rem', margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>Overall Trust</h2>
+                    <div style={{ position: 'relative', width: '260px', height: '260px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie 
+                                    data={[
+                                        {v: stats?.verifications?.approved || 0}, 
+                                        {v: (stats?.verifications?.total || 1) - (stats?.verifications?.approved || 0)}
+                                    ]} 
+                                    innerRadius={90} 
+                                    outerRadius={115} 
+                                    paddingAngle={8} 
+                                    dataKey="v" 
+                                    stroke="none" 
+                                    animationDuration={3000}
+                                    startAngle={90}
+                                    endAngle={450}
+                                >
+                                    <Cell fill={COLORS.primary} />
+                                    <Cell fill="#f4f7fa" />
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                            <div style={{ fontSize: '3.2rem', fontWeight: '900', color: '#1e293b', lineHeight: 1 }}>
+                                {Math.round((stats?.verifications?.approved / (stats?.verifications?.total || 1)) * 100)}%
+                            </div>
+                            <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: '700', marginTop: '4px' }}>VERIFIED</div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Secondary Stats Grid */}
+                <div style={{ gridColumn: 'span 12', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '1.5rem' }}>
+                    {statCards.slice(4, 8).map((card, index) => (
+                        <motion.div key={index} variants={itemVariants} initial="hidden" animate="visible" whileHover={{ y: -8, scale: 1.02 }} style={{ background: 'white', borderRadius: '28px', padding: '1.8rem', boxShadow: '0 10px 25px rgba(0,0,0,0.02)', border: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+                            <div>
+                                <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: '600' }}>{card.title}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '900', marginTop: '0.4rem', color: '#1e293b' }}>{card.value}</div>
+                            </div>
+                            <div style={{ width: '52px', height: '52px', borderRadius: '18px', background: `${card.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
+                                <card.icon size={24} />
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Final Row Metrics */}
+                <div style={{ gridColumn: 'span 12', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '1.5rem', marginTop: '1.5rem' }}>
+                    {statCards.slice(8, 10).map((card, index) => (
+                        <motion.div key={index} variants={itemVariants} initial="hidden" animate="visible" style={{ background: 'white', borderRadius: '40px', padding: '2.5rem', boxShadow: '0 15px 40px rgba(0,0,0,0.04)', border: '1px solid #f8fafc', display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: `${card.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
+                                <card.icon size={36} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '1rem', color: '#64748b', fontWeight: '600' }}>{card.title}</div>
+                                <div style={{ fontSize: '2.4rem', fontWeight: '1000', color: '#1e293b', letterSpacing: '-1.5px', lineHeight: 1.1 }}>{card.value}</div>
+                                <div style={{ fontSize: '0.95rem', color: '#94a3b8', fontWeight: '500', marginTop: '0.4rem' }}>{card.subtitle}</div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }

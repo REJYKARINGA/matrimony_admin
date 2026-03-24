@@ -88,7 +88,6 @@ export default function Layout() {
                 <main style={{ 
                     padding: isMobile ? '1rem' : '1.5rem', 
                     paddingTop: isMobile ? '1rem' : '0.5rem', 
-                    marginLeft: isMobile ? 0 : '1rem',
                     flex: 1, 
                     overflowX: 'hidden' 
                 }}>

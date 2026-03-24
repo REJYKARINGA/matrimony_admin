@@ -20,7 +20,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
             padding: isMobile ? '0 1rem' : '0 1.5rem',
             position: 'sticky',
             top: isMobile ? 0 : '1rem',
-            margin: isMobile ? 0 : '1rem 1rem 0 1rem',
+            margin: isMobile ? 0 : '1rem 1.5rem 0 1.5rem',
             zIndex: 10,
             boxShadow: 'var(--shadow-md)',
             transition: 'all 0.3s ease'
