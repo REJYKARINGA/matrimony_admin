@@ -598,7 +598,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
+                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="amount" fill={COLORS.success} radius={[6, 6, 0, 0]} animationDuration={3000} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -952,7 +952,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} hide />
                             <YAxis dataKey="religion" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 14, fontWeight: '700' }} width={120} />
-                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
+                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40} animationDuration={3000}>
                                 {(stats?.profiles?.religionDistribution || []).map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][index % 7]} />
@@ -1008,7 +1008,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 13, fontWeight: '700' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} />
-                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
+                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="count" radius={[12, 12, 0, 0]} barSize={60} animationDuration={3000}>
                                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                                     <Cell key={i} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][i % 7]} />
