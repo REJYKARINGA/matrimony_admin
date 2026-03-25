@@ -378,36 +378,41 @@ export default function PhotoVerifications() {
                                                 />
                                                 {photo.is_primary && <span style={primaryBadgeStyle}>PRIMARY</span>}
                                             </div>
-                                            <div style={{ padding: '1rem', display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
-                                                {activeTab === 'pending' ? (
-                                                    <>
-                                                        <button 
-                                                            className="btn btn-success" 
-                                                            style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', fontWeight: 'bold' }}
-                                                            onClick={() => handleApprove(photo.id)}
-                                                            disabled={isBulkProcessing}
-                                                        >
-                                                            Approve
-                                                        </button>
-                                                        <button 
-                                                            className="btn btn-danger" 
-                                                            style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', fontWeight: 'bold' }}
-                                                            onClick={() => handleReject(photo.id)}
-                                                            disabled={isBulkProcessing}
-                                                        >
-                                                            Reject
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                                            <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+                                                {/* Status Display for Moderated Photos */}
+                                                {activeTab !== 'pending' && (
+                                                    <div style={{ width: '100%', textAlign: 'center', marginBottom: '0.25rem' }}>
                                                         {getStatusBadge(activeTab)}
                                                         {activeTab === 'rejected' && photo.rejection_reason && (
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', fontStyle: 'italic', padding: '0 0.5rem' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', fontStyle: 'italic', padding: '0.4rem 0.5rem 0' }}>
                                                                 "{photo.rejection_reason}"
                                                             </div>
                                                         )}
                                                     </div>
                                                 )}
+
+                                                <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                                    {(activeTab === 'pending' || activeTab === 'rejected') && (
+                                                        <button 
+                                                            className="btn btn-success" 
+                                                            style={{ flex: 1, padding: '0.6rem', fontSize: '0.75rem', fontWeight: '800' }}
+                                                            onClick={(e) => { e.stopPropagation(); handleApprove(photo.id); }}
+                                                            disabled={isBulkProcessing}
+                                                        >
+                                                            {activeTab === 'rejected' ? 'APPROVE INSTEAD' : 'APPROVE'}
+                                                        </button>
+                                                    )}
+                                                    {(activeTab === 'pending' || activeTab === 'verified' || activeTab === 'rejected') && (
+                                                        <button 
+                                                            className="btn btn-danger" 
+                                                            style={{ flex: 1, padding: '0.6rem', fontSize: '0.75rem', fontWeight: '800' }}
+                                                            onClick={(e) => { e.stopPropagation(); handleReject(photo.id); }}
+                                                            disabled={isBulkProcessing}
+                                                        >
+                                                            {activeTab === 'verified' ? 'REJECT INSTEAD' : (activeTab === 'rejected' ? 'UPDATE REASON' : 'REJECT')}
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
