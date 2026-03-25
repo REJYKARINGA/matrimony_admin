@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -11,6 +11,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 { path: '/dashboard', label: 'Dashboard', icon: <FaChartLine size={20} /> },
                 { path: '/users', label: 'Users', icon: <FaUsers size={20} /> },
                 { path: '/verifications', label: 'Verifications', icon: <FaUserShield size={20} /> },
+                { path: '/photo-verifications', label: 'Photo Verifications', icon: <FaImage size={20} /> },
                 { path: '/reports', label: 'Reports', icon: <FaFlag size={20} /> },
                 { path: '/user-profiles', label: 'User Profiles', icon: <FaIdCard size={20} /> },
             ]

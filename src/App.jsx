@@ -23,6 +23,7 @@ import Personalities from './pages/Personalities';
 import AuditLogs from './pages/AuditLogs';
 import ContactUnlocks from './pages/ContactUnlocks';
 import Suggestions from './pages/Suggestions';
+import PhotoVerifications from './pages/PhotoVerifications';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
           <Route path="/mediator-promotions" element={<MediatorPromotions />} />
           <Route path="/wallet-transactions" element={<WalletTransactions />} />
           <Route path="/suggestions" element={<Suggestions />} />
+          <Route path="/photo-verifications" element={<PhotoVerifications />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -18,7 +18,7 @@ export default function ConfirmModal({
     if (!isOpen) return null;
 
     const handleConfirm = () => {
-        onConfirm();
+        onConfirm(inputValue);
     };
 
     return createPortal(
@@ -94,8 +94,23 @@ export default function ConfirmModal({
                             placeholder={inputPlaceholder}
                             value={inputValue}
                             onChange={(e) => onInputChange(e.target.value)}
-                            style={{ marginTop: '1rem', marginBottom: 0 }}
                             autoFocus
+                            style={{ 
+                                marginTop: '1.25rem', 
+                                marginBottom: 0,
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '0.75rem',
+                                border: '2px solid var(--border-color)',
+                                background: 'rgba(255,255,255,0.05)',
+                                color: 'var(--text)',
+                                fontSize: '0.9rem',
+                                outline: 'none',
+                                transition: 'all 0.2s',
+                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
                         />
                     )}
                 </div>
