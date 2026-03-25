@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     BarChart, Bar, XAxis, YAxis,
     CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
@@ -9,7 +9,8 @@ import {
 import {
     LuUsers, LuUserCheck, LuUserPlus, LuHeart, LuCreditCard,
     LuTriangleAlert, LuTrendingUp, LuLoader, LuClock,
-    LuWallet, LuGraduationCap, LuTarget, LuShieldCheck, LuMessageSquare
+    LuWallet, LuGraduationCap, LuTarget, LuShieldCheck, LuMessageSquare,
+    LuLightbulb, LuTerminal, LuZap, LuCircleX, LuExternalLink, LuEye
 } from 'react-icons/lu';
 import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
@@ -125,11 +126,20 @@ function SkeletonCard() {
     );
 }
 
+const FR_STATUS = {
+    pending:     { label: 'Under Review',   color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  icon: LuEye       },
+    in_progress: { label: 'In Development', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)',  icon: LuTerminal  },
+    completed:   { label: 'Shipped ✓',      color: '#10B981', bg: 'rgba(16,185,129,0.12)',  icon: LuZap       },
+    rejected:    { label: 'Declined',       color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   icon: LuCircleX   },
+};
+
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [hoverFR, setHoverFR] = useState(false);
     const { theme, isMobile } = useOutletContext();
+    const navigate = useNavigate();
     const isDark = theme === 'dark';
 
     useEffect(() => {
@@ -639,7 +649,7 @@ export default function Dashboard() {
                     initial="hidden"
                     animate="visible"
                     style={{
-                        gridColumn: isMobile ? 'span 1' : 'span 7',
+                        gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
@@ -675,7 +685,7 @@ export default function Dashboard() {
                     initial="hidden"
                     animate="visible"
                     style={{
-                        gridColumn: isMobile ? 'span 1' : 'span 5',
+                        gridColumn: isMobile ? 'span 1' : 'span 3',
                         background: 'var(--card-bg)',
                         borderRadius: '40px',
                         padding: '2.5rem',
@@ -722,26 +732,184 @@ export default function Dashboard() {
                     </div>
                 </motion.div>
 
-                {/* Row 5: Community Demographics */}
+                {/* Feature Requests Single Card Widget */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    onMouseEnter={() => setHoverFR(true)}
+                    onMouseLeave={() => setHoverFR(false)}
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 3',
+                        background: 'var(--card-bg)',
+                        borderRadius: '40px',
+                        padding: '2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border-color)',
+                        display: 'flex', flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        minHeight: '420px',
+                        position: 'relative', overflow: 'hidden'
+                    }}
+                >
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+                            <div style={{
+                                width: 38, height: 38, borderRadius: 12,
+                                background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(59,130,246,0.2))',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#6366f1', border: '1px solid rgba(99,102,241,0.25)', flexShrink: 0
+                            }}>
+                                <LuLightbulb size={20} />
+                            </div>
+                            <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--text)' }}>FR Pipeline</h2>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', position: 'relative', width: '100%' }}>
+                        {/* Centered Gauge Chart */}
+                        {(() => {
+                            const completedFR = stats?.featureRequests?.completed || 0;
+                            const inProgressFR = stats?.featureRequests?.in_progress || 0;
+                            const pendingFR = stats?.featureRequests?.pending || 0;
+                            const rejectedFR = stats?.featureRequests?.rejected || 0;
+                            const totalFR = stats?.featureRequests?.total || 0;
+                            
+                            const activeData = totalFR > 0 ? [
+                                { name: 'Shipped', value: completedFR, fill: '#10B981' },
+                                { name: 'In Developer', value: inProgressFR, fill: '#3B82F6' },
+                                { name: 'Under Review', value: pendingFR, fill: '#F59E0B' },
+                                { name: 'Declined', value: rejectedFR, fill: '#EF4444' }
+                            ] : [
+                                { name: 'No Data', value: 1, fill: isDark ? '#374151' : '#e5e7eb' }
+                            ];
+
+                            return (
+                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ position: 'relative', height: 160, display: 'flex', justifyContent: 'center' }}>
+                                        <ResponsiveContainer width="100%" height={160}>
+                                            <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                                                <Pie
+                                                    data={activeData}
+                                                    cx="50%"
+                                                    cy="100%"
+                                                    startAngle={180}
+                                                    endAngle={0}
+                                                    innerRadius={70}
+                                                    outerRadius={110}
+                                                    paddingAngle={2}
+                                                    stroke="none"
+                                                    dataKey="value"
+                                                    isAnimationActive={true}
+                                                    cornerRadius={6}
+                                                >
+                                                    {activeData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                                    ))}
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        {/* Center Number */}
+                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' }}>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{totalFR}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px', textTransform: 'uppercase' }}>Total</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Legend */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginTop: '1.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B' }} />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Review: {pendingFR}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6' }} />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dev: {inProgressFR}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Ship: {completedFR}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444' }} />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Drop: {rejectedFR}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
+
+                    {/* Expandable Hover List - Absolute positioning to overlay potentially */}
+                    <AnimatePresence>
+                        {hoverFR && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    background: 'var(--card-bg)', zIndex: 10, padding: '1.5rem',
+                                    display: 'flex', flexDirection: 'column'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800', color: 'var(--text)' }}>Awaiting Review ({stats?.featureRequests?.pending ?? 0})</h3>
+                                    <LuExternalLink size={14} style={{ cursor: 'pointer', color: '#6366f1' }} onClick={() => navigate('/suggestions')} />
+                                </div>
+
+                                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                    {stats?.featureRequests?.recent?.map((s) => (
+                                        <div
+                                            key={s.id}
+                                            onClick={() => navigate('/suggestions')}
+                                            style={{
+                                                padding: '0.6rem', borderRadius: 10,
+                                                background: 'var(--hover-bg)', border: '1px solid var(--border-color)',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <p style={{ margin: 0, fontWeight: 700, fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
+                                            <p style={{ margin: '1px 0 0', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{s.matrimony_id}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => navigate('/suggestions')}
+                                    style={{
+                                        width: '100%', marginTop: '0.5rem', padding: '0.4rem',
+                                        borderRadius: 8, background: 'rgba(99,102,241,0.1)',
+                                        border: '1px solid rgba(99,102,241,0.2)', color: '#6366f1',
+                                        fontSize: '0.7rem', fontWeight: 700
+                                    }}
+                                >
+                                    Manage All Requests
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
-                        gridColumn: 'span 12',
+                        gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
                         borderRadius: '40px',
-                        padding: '3rem',
+                        padding: '2.5rem',
                         boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
                         border: '1px solid var(--border-color)',
-                        minHeight: '400px',
-                        marginTop: '1.5rem'
+                        minHeight: '400px'
                     }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '900', color: 'var(--text)' }}>Community Diversity</h2>
-                            <p style={{ margin: '0.4rem 0 0', color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: '500' }}>Active member distribution by religious background</p>
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Community Diversity</h2>
+                            <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>Active member distribution</p>
                         </div>
                     </div>
 
@@ -760,35 +928,33 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                 </motion.div>
 
-                {/* Final Row: Repository & Security Metrics */}
                 <motion.div
                     variants={itemVariants}
                     initial="hidden"
                     animate="visible"
                     style={{
-                        gridColumn: 'span 12',
+                        gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
                         borderRadius: '40px',
-                        padding: '3rem',
+                        padding: '2.5rem',
                         boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
                         border: '1px solid var(--border-color)',
-                        minHeight: '400px',
-                        marginTop: '1rem'
+                        minHeight: '400px'
                     }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: 'var(--text)' }}>Database Repository Hub</h2>
-                            <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: '500' }}>Master data distribution across mandatory system entities</p>
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Repository Hub</h2>
+                            <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>System data distribution</p>
                         </div>
-                        <div style={{ display: 'flex', gap: '3rem' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: COLORS.primary }}>{stats?.audit?.activityLogs?.toLocaleString() ?? 0}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Log Capacity</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.primary }}>{stats?.audit?.activityLogs?.toLocaleString() ?? 0}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Logs</div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: COLORS.secondary }}>{stats?.audit?.logsToday ?? 0}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Activity Today</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.secondary }}>{stats?.audit?.logsToday ?? 0}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Today</div>
                             </div>
                         </div>
                     </div>
@@ -817,6 +983,7 @@ export default function Dashboard() {
                         </BarChart>
                     </ResponsiveContainer>
                 </motion.div>
+
             </div>
         </div>
     );
