@@ -133,6 +133,38 @@ const FR_STATUS = {
     rejected:    { label: 'Declined',       color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   icon: LuCircleX   },
 };
 
+const CustomTooltip = ({ active, payload, label, isDark }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div style={{
+                background: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                padding: '12px 16px',
+                border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                borderRadius: '16px',
+                boxShadow: '0 20px 40px -4px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)',
+                zIndex: 1000
+            }}>
+                <p style={{ margin: 0, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', fontSize: '0.9rem', fontFamily: 'Inter, sans-serif' }}>
+                    {label}
+                </p>
+                {payload.map((item, index) => (
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color || item.fill }} />
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isDark ? '#94a3b8' : '#475569' }}>
+                            {item.name} : 
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isDark ? '#fff' : '#0f172a' }}>
+                            {item.value?.toLocaleString()}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -489,7 +521,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dy={15} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dx={-15} />
-                            <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '1.2rem' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             <Area type="monotone" dataKey="count" stroke={COLORS.primary} strokeWidth={5} fill="url(#colorEngagement)" dot={{ fill: '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 7 }} activeDot={{ r: 9, strokeWidth: 0, fill: COLORS.secondary }} animationDuration={2500} />
                         </AreaChart>
                     </ResponsiveContainer>
@@ -566,7 +598,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', background: 'var(--card-bg)', color: 'var(--text)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="amount" fill={COLORS.success} radius={[6, 6, 0, 0]} animationDuration={3000} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -709,6 +741,7 @@ export default function Dashboard() {
                                         <Cell key={`cell-${index}`} fill={[COLORS.warning, COLORS.success, COLORS.danger][index % 3]} />
                                     ))}
                                 </Pie>
+                                <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             </PieChart>
                         </ResponsiveContainer>
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
@@ -809,6 +842,7 @@ export default function Dashboard() {
                                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                                     ))}
                                                 </Pie>
+                                                <Tooltip content={<CustomTooltip isDark={isDark} />} />
                                             </PieChart>
                                         </ResponsiveContainer>
                                         {/* Center Number */}
@@ -918,7 +952,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} hide />
                             <YAxis dataKey="religion" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 14, fontWeight: '700' }} width={120} />
-                            <Tooltip cursor={{ fill: 'var(--hover-bg)' }} contentStyle={{ background: 'var(--card-bg)', border: 'none', borderRadius: '20px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40} animationDuration={3000}>
                                 {(stats?.profiles?.religionDistribution || []).map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][index % 7]} />
@@ -974,7 +1008,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 13, fontWeight: '700' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} />
-                            <Tooltip cursor={{ fill: 'var(--hover-bg)' }} contentStyle={{ background: 'var(--card-bg)', border: 'none', borderRadius: '20px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             <Bar dataKey="count" radius={[12, 12, 0, 0]} barSize={60} animationDuration={3000}>
                                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                                     <Cell key={i} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][i % 7]} />
