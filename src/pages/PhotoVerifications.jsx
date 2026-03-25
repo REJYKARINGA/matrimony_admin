@@ -570,8 +570,8 @@ const userCardStyle = {
 
 const stackedImagesStyle = {
     position: 'relative',
-    height: '240px',
-    margin: '15px'
+    height: '350px',
+    margin: '20px'
 };
 
 const stackedImageWrapperStyle = (index) => ({
