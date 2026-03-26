@@ -17,6 +17,8 @@ export default function Users() {
     const [phoneFilter, setPhoneFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [genderFilter, setGenderFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
 
     // Form Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +30,7 @@ export default function Users() {
 
     useEffect(() => {
         fetchUsers(1);
-    }, [search, activeTab, emailFilter, phoneFilter, statusFilter, genderFilter]);
+    }, [search, activeTab, emailFilter, phoneFilter, statusFilter, genderFilter, sortBy, sortDir]);
 
     const fetchUsers = async (page = 1) => {
         try {
@@ -42,6 +44,8 @@ export default function Users() {
                     ...(phoneFilter !== 'all' && { phone_verified: phoneFilter }),
                     ...(statusFilter !== 'all' && { status: statusFilter }),
                     ...(genderFilter !== 'all' && { gender: genderFilter }),
+                    sort_by: sortBy,
+                    sort_dir: sortDir,
                 }
             });
             setUsers(response.data.data);
@@ -256,6 +260,21 @@ export default function Users() {
                             <option value="all">Gender: All</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
+                        </select>
+                        <select
+                            value={`${sortBy}-${sortDir}`}
+                            onChange={(e) => {
+                                const [by, dir] = e.target.value.split('-');
+                                setSortBy(by);
+                                setSortDir(dir);
+                            }}
+                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}
+                        >
+                            <option value="created_at-desc">Sort: Newest</option>
+                            <option value="created_at-asc">Sort: Oldest</option>
+                            <option value="updated_at-desc">Sort: Last Updated</option>
+                            <option value="name-asc">Sort: Name (A-Z)</option>
+                            <option value="name-desc">Sort: Name (Z-A)</option>
                         </select>
                     </div>
                     <button

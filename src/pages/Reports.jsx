@@ -16,6 +16,8 @@ export default function Reports() {
     const [reporterSearch, setReporterSearch] = useState('');
     const [reportedSearch, setReportedSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
 
     useEffect(() => {
         fetchParticipants();
@@ -35,7 +37,7 @@ export default function Reports() {
             fetchReports(1);
         }, 500); 
         return () => clearTimeout(timeoutId);
-    }, [statusFilter, reporterSearch, reportedSearch]);
+    }, [statusFilter, reporterSearch, reportedSearch, sortBy, sortDir]);
 
     const fetchReports = async (page = 1) => {
         try {
@@ -45,7 +47,9 @@ export default function Reports() {
                     page, 
                     reporter_search: reporterSearch,
                     reported_search: reportedSearch,
-                    status: statusFilter
+                    status: statusFilter,
+                    sort_by: sortBy,
+                    sort_dir: sortDir
                 } 
             });
             setReports(response.data.data);
@@ -99,7 +103,33 @@ export default function Reports() {
                     <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>User Reports</h2>
                     <p style={{ margin: 0, opacity: 0.6, fontSize: '0.9rem' }}>Manage and review community reports</p>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <select
+                        value={`${sortBy}-${sortDir}`}
+                        onChange={(e) => {
+                            const [by, dir] = e.target.value.split('-');
+                            setSortBy(by);
+                            setSortDir(dir);
+                        }}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '0.25rem',
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--card-bg)',
+                            color: 'var(--text-primary)',
+                            outline: 'none',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            fontWeight: '500',
+                            height: '35px'
+                        }}
+                    >
+                        <option value="created_at-desc">Sort: Newest</option>
+                        <option value="created_at-asc">Sort: Oldest</option>
+                        <option value="updated_at-desc">Sort: Last Updated</option>
+                        <option value="name-asc">Sort: Reporter Name (A-Z)</option>
+                        <option value="name-desc">Sort: Reporter Name (Z-A)</option>
+                    </select>
                     <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ position: 'relative' }}>
                             <input 

@@ -29,9 +29,12 @@ export default function PhotoVerifications() {
         onConfirm: () => {}
     });
 
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
+
     useEffect(() => {
         fetchUsers(1);
-    }, [searchTerm, activeTab]);
+    }, [searchTerm, activeTab, sortBy, sortDir]);
 
     // Reset selection when switching users or tabs
     useEffect(() => {
@@ -45,7 +48,9 @@ export default function PhotoVerifications() {
                 params: { 
                     page,
                     search: searchTerm,
-                    status: activeTab
+                    status: activeTab,
+                    sort_by: sortBy,
+                    sort_dir: sortDir
                 }
             });
             const fetchedUsers = response.data.data;
@@ -194,7 +199,31 @@ export default function PhotoVerifications() {
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <h2 style={{ margin: 0 }}>Photo Verifications</h2>
-                    <div className="search-box">
+                    <div className="search-box" style={{ display: 'flex', gap: '0.75rem' }}>
+                        <select
+                            value={`${sortBy}-${sortDir}`}
+                            onChange={(e) => {
+                                const [by, dir] = e.target.value.split('-');
+                                setSortBy(by);
+                                setSortDir(dir);
+                            }}
+                            style={{
+                                padding: '0.6rem 1rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--card-bg)',
+                                color: 'var(--text-primary)',
+                                outline: 'none',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <option value="created_at-desc">Sort: Newest</option>
+                            <option value="created_at-asc">Sort: Oldest</option>
+                            <option value="name-asc">Sort: Name (A-Z)</option>
+                            <option value="name-desc">Sort: Name (Z-A)</option>
+                        </select>
                         <input
                             type="text"
                             placeholder="Search by name, email, matrimony ID..."

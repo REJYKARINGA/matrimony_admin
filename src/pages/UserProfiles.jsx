@@ -179,6 +179,8 @@ export default function UserProfiles() {
     const [verificationFilter, setVerificationFilter] = useState('all');
     const [ageMin, setAgeMin] = useState('');
     const [ageMax, setAgeMax] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
 
     // Dropdown option lists
     const [religions, setReligions] = useState([]);
@@ -220,7 +222,7 @@ export default function UserProfiles() {
 
     useEffect(() => {
         fetchProfiles(1);
-    }, [search, activeTab, genderFilter, religionFilter, educationFilter, occupationFilter, statusFilter, verificationFilter, ageMin, ageMax]);
+    }, [search, activeTab, genderFilter, religionFilter, educationFilter, occupationFilter, statusFilter, verificationFilter, ageMin, ageMax, sortBy, sortDir]);
 
     const fetchProfiles = async (page = 1) => {
         try {
@@ -238,6 +240,8 @@ export default function UserProfiles() {
                     ...(verificationFilter !== 'all' && { verification_status: verificationFilter }),
                     ...(ageMin && { age_min: ageMin }),
                     ...(ageMax && { age_max: ageMax }),
+                    sort_by: sortBy,
+                    sort_dir: sortDir,
                 }
             });
             setProfiles(response.data.data);
@@ -515,6 +519,16 @@ export default function UserProfiles() {
 
             {/* Filter row */}
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
+                    const [by, dir] = e.target.value.split('-');
+                    setSortBy(by); setSortDir(dir);
+                }} style={{ ...SELECT_STYLE, fontWeight: '500' }}>
+                    <option value="created_at-desc">Sort: Newest</option>
+                    <option value="created_at-asc">Sort: Oldest</option>
+                    <option value="updated_at-desc">Sort: Last Updated</option>
+                    <option value="name-asc">Sort: Name (A-Z)</option>
+                    <option value="name-desc">Sort: Name (Z-A)</option>
+                </select>
                 <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)} style={SELECT_STYLE}>
                     <option value="all">Gender: All</option>
                     <option value="male">Male</option>

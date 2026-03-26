@@ -9,6 +9,8 @@ export default function AuditLogs() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -17,8 +19,8 @@ export default function AuditLogs() {
         try {
             setLoading(true);
             const response = activeTab === 'login_history' 
-                ? await auditApi.getLoginHistories({ page, search })
-                : await auditApi.getActivityLogs({ page, search });
+                ? await auditApi.getLoginHistories({ page, search, sort_by: sortBy, sort_dir: sortDir })
+                : await auditApi.getActivityLogs({ page, search, sort_by: sortBy, sort_dir: sortDir });
             
             setData(response.data.data || []);
             setCurrentPage(response.data.current_page || 1);
@@ -33,7 +35,7 @@ export default function AuditLogs() {
 
     useEffect(() => {
         fetchData(1);
-    }, [activeTab, search]);
+    }, [activeTab, search, sortBy, sortDir]);
 
     const handlePageChange = (page) => {
         fetchData(page);
@@ -138,6 +140,32 @@ export default function AuditLogs() {
                     boxShadow: '0 4px 15px var(--shadow-color)'
                 }}
             >
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <select
+                        value={`${sortBy}-${sortDir}`}
+                        onChange={(e) => {
+                            const [by, dir] = e.target.value.split('-');
+                            setSortBy(by);
+                            setSortDir(dir);
+                        }}
+                        style={{
+                            padding: '0.6rem 1rem',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            background: 'transparent',
+                            color: 'var(--text-primary)',
+                            outline: 'none',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            fontWeight: '500'
+                        }}
+                    >
+                        <option value="created_at-desc">Sort: Newest</option>
+                        <option value="created_at-asc">Sort: Oldest</option>
+                        <option value="name-asc">Sort: Name (A-Z)</option>
+                        <option value="name-desc">Sort: Name (Z-A)</option>
+                    </select>
+                </div>
                 <div style={{ position: 'relative', flex: 1 }}>
                     <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input

@@ -16,10 +16,12 @@ export default function Verifications() {
     const [currentIDPart, setCurrentIDPart] = useState(0); // 0: Front, 1: Back
     const [zoomedImage, setZoomedImage] = useState(null);
     const [activeTab, setActiveTab] = useState('pending'); // pending, verified, rejected
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDir, setSortDir] = useState('desc');
 
     useEffect(() => {
         fetchVerifications(1);
-    }, [searchTerm, activeTab]);
+    }, [searchTerm, activeTab, sortBy, sortDir]);
 
     const fetchVerifications = async (page = 1) => {
         try {
@@ -28,7 +30,9 @@ export default function Verifications() {
                 params: { 
                     page,
                     search: searchTerm,
-                    status: activeTab
+                    status: activeTab,
+                    sort_by: sortBy,
+                    sort_dir: sortDir
                 }
             });
             setVerifications(response.data.data);
@@ -84,7 +88,32 @@ export default function Verifications() {
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <h2 style={{ margin: 0 }}>ID Verifications</h2>
-                    <div className="search-box">
+                    <div className="search-box" style={{ display: 'flex', gap: '0.75rem' }}>
+                        <select
+                            value={`${sortBy}-${sortDir}`}
+                            onChange={(e) => {
+                                const [by, dir] = e.target.value.split('-');
+                                setSortBy(by);
+                                setSortDir(dir);
+                            }}
+                            style={{
+                                padding: '0.6rem 1rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--card-bg)',
+                                color: 'var(--text-primary)',
+                                outline: 'none',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <option value="created_at-desc">Sort: Newest</option>
+                            <option value="created_at-asc">Sort: Oldest</option>
+                            <option value="updated_at-desc">Sort: Last Updated</option>
+                            <option value="name-asc">Sort: Name (A-Z)</option>
+                            <option value="name-desc">Sort: Name (Z-A)</option>
+                        </select>
                         <input
                             type="text"
                             placeholder="Search by name, email, matrimony ID..."
