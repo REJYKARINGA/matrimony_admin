@@ -440,8 +440,31 @@ export default function PhotoVerifications() {
                                         </div>
                                     </div>
 
+                                    {activeTab === 'pending' && selectedUser.approved_profile_photos && selectedUser.approved_profile_photos.length > 0 && (
+                                        <div style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                Previously Approved Photos
+                                            </h4>
+                                            <p style={{ margin: '0 0 1rem 0', fontSize: '0.8rem', color: 'var(--primary)' }}>
+                                                Use these to verify identity
+                                            </p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                                                {selectedUser.approved_profile_photos.map(photo => (
+                                                    <div key={photo.id} style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+                                                        <img 
+                                                            src={photo.full_photo_url} 
+                                                            alt="Approved" 
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid rgba(34, 197, 94, 0.4)' }}
+                                                            onClick={(e) => { e.stopPropagation(); setZoomedImage(photo.full_photo_url); }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {activeTab === 'pending' && (
-                                        <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                             {selectedPhotoIds.length > 0 ? (
                                                 <>
                                                     <div style={{ background: 'rgba(21, 101, 192, 0.1)', padding: '1rem', borderRadius: '0.75rem', textAlign: 'center' }}>
