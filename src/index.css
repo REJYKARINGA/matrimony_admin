@@ -281,9 +281,21 @@ th {
   color: #64748B;
 }
 
+.badge-primary {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+}
+
 [data-theme='dark'] .badge-secondary {
   background: rgba(148, 163, 184, 0.2);
   color: #94A3B8;
+}
+
+[data-theme='dark'] .badge-primary {
+  background: rgba(var(--primary-rgb), 0.2);
+  color: #60a5fa;
+  border-color: rgba(var(--primary-rgb), 0.3);
 }
 
 .form-group {

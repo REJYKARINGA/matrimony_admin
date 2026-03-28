@@ -147,7 +147,7 @@ export default function Users() {
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                         <input
                             type="text"
-                            placeholder="Search by name, email, phone..."
+                            placeholder="Search by name, email, phone, matrimony ID, reference code..."
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); }}
                             style={{ width: '260px', marginBottom: 0 }}
@@ -308,6 +308,7 @@ export default function Users() {
                                         <th>Gender</th>
                                         <th>Contact</th>
                                         <th>Matrimony ID</th>
+                                        <th>Reference Code</th>
                                         <th>Role</th>
                                         <th>Email Status</th>
                                         <th>Phone Status</th>
@@ -360,6 +361,11 @@ export default function Users() {
                                             <td>
                                                 <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
                                                     {user.matrimony_id}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="badge badge-primary">
+                                                    {user.reference_code || '—'}
                                                 </span>
                                             </td>
                                             <td>
