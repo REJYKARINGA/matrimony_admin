@@ -4,6 +4,7 @@ import { FaBan, FaUnlock, FaPlus, FaEdit, FaTrash, FaUndo } from 'react-icons/fa
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import ConfirmModal from '../components/ConfirmModal';
+import TimeFormatCell from '../components/TimeFormatCell';
 
 export default function Users() {
     const [users, setUsers] = useState([]);
@@ -272,6 +273,8 @@ export default function Users() {
                         >
                             <option value="created_at-desc">Sort: Newest</option>
                             <option value="created_at-asc">Sort: Oldest</option>
+                            <option value="last_active_at-desc">Sort: Last Active</option>
+                            <option value="last_active_at-asc">Sort: Oldest Active</option>
                             <option value="updated_at-desc">Sort: Last Updated</option>
                             <option value="name-asc">Sort: Name (A-Z)</option>
                             <option value="name-desc">Sort: Name (Z-A)</option>
@@ -312,7 +315,7 @@ export default function Users() {
                                         <th>Role</th>
                                         <th>Email Status</th>
                                         <th>Phone Status</th>
-                                        <th>Status</th>
+                                        <th>Status / Activity</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -323,13 +326,13 @@ export default function Users() {
                                                 {user.user_profile?.profile_picture ? (
                                                     <img
                                                         className="profile-img-zoom"
-                                                        src={user.user_profile.profile_picture.startsWith('http') 
-                                                            ? user.user_profile.profile_picture 
+                                                        src={user.user_profile.profile_picture.startsWith('http')
+                                                            ? user.user_profile.profile_picture
                                                             : `${import.meta.env.VITE_API_BASE_URL}/storage/${user.user_profile.profile_picture}`}
                                                         alt="Profile"
                                                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                                                         onError={(e) => {
-                                                            e.target.onerror = null; 
+                                                            e.target.onerror = null;
                                                             const isMale = ['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase());
                                                             const color1 = isMale ? '%2360a5fa' : '%23f472b6';
                                                             const color2 = isMale ? '%232563eb' : '%23db2777';
@@ -337,7 +340,7 @@ export default function Users() {
                                                         }}
                                                     />
                                                 ) : (
-                                                    <img 
+                                                    <img
                                                         src={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase()) ? '%2360a5fa' : '%23f472b6'}'/%3E%3Cstop offset='100%25' stop-color='${['male', 'm', 'groom'].includes(String(user.user_profile?.gender).toLowerCase()) ? '%232563eb' : '%23db2777'}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`}
                                                         alt="Fallback Avatar"
                                                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
@@ -387,6 +390,10 @@ export default function Users() {
                                                 <span className={`badge ${user.status === 'active' ? 'badge-verified' : 'badge-rejected'}`}>
                                                     {user.status}
                                                 </span>
+                                                <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', gap: '4px' }}>
+                                                    <span style={{ opacity: 0.7 }}>Activity:</span>
+                                                    <TimeFormatCell date={user.last_active_at} />
+                                                </div>
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -400,8 +407,8 @@ export default function Users() {
                                                     {activeTab !== 'trashed' && (
                                                         <button
                                                             onClick={() => openConfirmModal(
-                                                                user.id, 
-                                                                'toggleBlock', 
+                                                                user.id,
+                                                                'toggleBlock',
                                                                 `Are you sure you want to ${user.status === 'active' ? 'block' : 'unblock'} this user?`
                                                             )}
                                                             className={`btn ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
@@ -413,29 +420,29 @@ export default function Users() {
                                                     {activeTab === 'trashed' && (
                                                         <button
                                                             onClick={() => openConfirmModal(
-                                                                user.id, 
-                                                                'restore', 
+                                                                user.id,
+                                                                'restore',
                                                                 'Are you sure you want to completely restore this user to their original role?'
                                                             )}
                                                             className="btn btn-success"
                                                             title="Restore User"
                                                         >
-                                                            <FaUndo /> 
+                                                            <FaUndo />
                                                         </button>
                                                     )}
                                                     <button
-                                                    onClick={() => openConfirmModal(
-                                                        user.id, 
-                                                        'delete', 
-                                                        activeTab === 'trashed' 
-                                                            ? 'Are you sure you want to completely erase this user? This cannot be undone.' 
-                                                            : 'Are you sure you want to delete this user? They will be moved to the Deleted Users list.'
-                                                    )}
-                                                    className="btn btn-danger"
-                                                    title={activeTab === 'trashed' ? "Permadelete" : "Trash User"}
-                                                >
-                                                    <FaTrash />
-                                                </button>
+                                                        onClick={() => openConfirmModal(
+                                                            user.id,
+                                                            'delete',
+                                                            activeTab === 'trashed'
+                                                                ? 'Are you sure you want to completely erase this user? This cannot be undone.'
+                                                                : 'Are you sure you want to delete this user? They will be moved to the Deleted Users list.'
+                                                        )}
+                                                        className="btn btn-danger"
+                                                        title={activeTab === 'trashed' ? "Permadelete" : "Trash User"}
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -474,7 +481,7 @@ export default function Users() {
                     setFormErrors({});
                     const formData = new FormData(e.target);
                     const data = Object.fromEntries(formData.entries());
-                    
+
                     let errors = {};
                     userFormFields.forEach(field => {
                         if (field.required && !data[field.name]) {

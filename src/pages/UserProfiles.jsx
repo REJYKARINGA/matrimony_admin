@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
+import TimeFormatCell from '../components/TimeFormatCell';
 import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaExclamationTriangle } from 'react-icons/fa';
 
 const SELECT_STYLE = {
@@ -525,6 +526,8 @@ export default function UserProfiles() {
                 }} style={{ ...SELECT_STYLE, fontWeight: '500' }}>
                     <option value="created_at-desc">Sort: Newest</option>
                     <option value="created_at-asc">Sort: Oldest</option>
+                    <option value="last_active_at-desc">Sort: Last Active</option>
+                    <option value="last_active_at-asc">Sort: Oldest Active</option>
                     <option value="updated_at-desc">Sort: Last Updated</option>
                     <option value="name-asc">Sort: Name (A-Z)</option>
                     <option value="name-desc">Sort: Name (Z-A)</option>
@@ -587,7 +590,7 @@ export default function UserProfiles() {
                                     <th>Location</th>
                                     <th>Education</th>
                                     <th>Occupation</th>
-                                    <th>Status</th>
+                                    <th>Status / Activity</th>
                                     <th>Verification</th>
                                     <th>Actions</th>
                                 </tr>
@@ -636,6 +639,10 @@ export default function UserProfiles() {
                                             <span className={`badge ${profile.is_active_verified ? 'badge-verified' : 'badge-rejected'}`}>
                                                 {profile.is_active_verified ? 'Yes' : 'No'}
                                             </span>
+                                            <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', gap: '4px' }}>
+                                                <span style={{ opacity: 0.7 }}>Activity:</span>
+                                                <TimeFormatCell date={profile.user?.last_active_at} />
+                                            </div>
                                         </td>
                                         <td>
                                             {(() => {

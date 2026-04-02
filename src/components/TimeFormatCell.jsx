@@ -2,7 +2,7 @@ import React from 'react';
 
 const TimeFormatCell = ({ date }) => {
   if (!date) {
-    return <span>-</span>;
+    return <span style={{ opacity: 0.5 }}>N/A</span>;
   }
 
   try {
