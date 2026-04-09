@@ -84,6 +84,8 @@ function SkeletonCard() {
             className="skeleton-card"
             style={{
                 background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '16px',
                 padding: '1.5rem',
@@ -322,38 +324,6 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: isMobile ? '1rem 0' : '0 0 2rem 0', position: 'relative' }}>
-            {/* Animated Background */}
-            <motion.div
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: `
-                        radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)
-                    `,
-                    pointerEvents: 'none',
-                    zIndex: -1
-                }}
-                animate={{
-                    background: [
-                        `radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
-                         radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)`,
-                        `radial-gradient(circle at 30% 70%, rgba(21, 101, 192, 0.12) 0%, transparent 50%),
-                         radial-gradient(circle at 70% 30%, rgba(30, 136, 229, 0.12) 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%)`,
-                        `radial-gradient(circle at 20% 80%, rgba(21, 101, 192, 0.08) 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.08) 0%, transparent 50%),
-                         radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)`
-                    ]
-                }}
-                transition={{ duration: 15, repeat: Infinity }}
-            />
-
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -30 }}
@@ -407,6 +377,8 @@ export default function Dashboard() {
                     style={{
                         padding: '0.6rem 1.2rem',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '24px',
                         fontSize: '0.875rem',
                         color: COLORS.primary,
@@ -443,6 +415,8 @@ export default function Dashboard() {
                         style={{
                             gridColumn: isMobile ? 'span 1' : 'span 3',
                             background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                             borderRadius: '32px',
                             padding: '1.8rem',
                             display: 'flex',
@@ -497,6 +471,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 8',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -535,6 +511,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 4',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -574,6 +552,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -612,6 +592,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -647,6 +629,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -683,6 +667,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -719,6 +705,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -775,6 +763,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
@@ -885,7 +875,9 @@ export default function Dashboard() {
                                 exit={{ opacity: 0, y: 10 }}
                                 style={{
                                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                    background: 'var(--card-bg)', zIndex: 10, padding: '1.5rem',
+                                    background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)', zIndex: 10, padding: '1.5rem',
                                     display: 'flex', flexDirection: 'column'
                                 }}
                             >
@@ -933,6 +925,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
@@ -969,6 +963,8 @@ export default function Dashboard() {
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
                         background: 'var(--card-bg)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
                         borderRadius: '40px',
                         padding: '2.5rem',
                         boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
