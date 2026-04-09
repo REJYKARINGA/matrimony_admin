@@ -167,15 +167,15 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                             display: 'flex',
                                             alignItems: 'center',
                                             padding: '0.875rem 0',
-                                            paddingLeft: (!isExpanded && !isMobile) ? '25px' : '1.25rem',
-                                            paddingRight: '1.25rem',
+                                            paddingLeft: (!isExpanded && !isMobile) ? '18px' : '1.25rem',
+                                            paddingRight: (!isExpanded && !isMobile) ? '18px' : '1.25rem',
                                             margin: '0 0.75rem',
                                             textDecoration: 'none',
                                             color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
                                             background: isActive ? '#FFFFFF' : 'transparent',
                                             borderRadius: '12px',
                                             boxShadow: isActive ? 'var(--shadow-md)' : 'none',
-                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            transition: 'padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
                                             position: 'relative',
                                             zIndex: isActive ? 2 : 1
                                         })}
@@ -198,11 +198,11 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                         {({ isActive }) => (
                                             <>
                                                 <span style={{ 
-                                                    marginRight: '1rem', 
+                                                    marginRight: (!isExpanded && !isMobile) ? '0px' : '1rem', 
                                                     flexShrink: 0,
                                                     display: 'flex',
                                                     color: isActive ? 'var(--primary)' : 'var(--icon-muted)',
-                                                    transition: 'all 0.3s ease'
+                                                    transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease'
                                                 }}>
                                                     {item.icon}
                                                 </span>
