@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck } from 'react-icons/fa';
+import { Sidebar3DLogo, Sidebar3DBackground } from './Sidebar3DElements';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -63,7 +64,9 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             width: sidebarWidth,
             height: isMobile ? '100vh' : 'calc(100vh - 2rem)',
             margin: isMobile ? 0 : '1rem 0 1rem 1rem',
-            background: 'var(--sidebar-bg)',
+            background: theme === 'dark' ? 'rgba(30, 41, 59, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(15px)',
+            WebkitBackdropFilter: 'blur(15px)',
             borderRadius: isMobile ? 0 : '24px',
             display: 'flex',
             flexDirection: 'column',
@@ -74,7 +77,8 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             zIndex: 20,
             transform: transform,
             boxShadow: 'var(--shadow-lg)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            border: '1px solid var(--border-color)',
         }}
             onMouseEnter={() => {
                 if (collapsed && !isMobile) {
@@ -86,62 +90,75 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 setIsHovered(false);
                 onHoverChange?.(false);
             }}>
+            
+            {/* INJECTED 3D BACKGROUND */}
+            <Sidebar3DBackground />
+
             <div style={{
                 height: '80px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
-                padding: (!isExpanded && !isMobile) ? '0' : '0 2rem',
+                justifyContent: 'flex-start',
+                paddingLeft: (!isExpanded && !isMobile) ? '18px' : '2rem',
                 borderBottom: '1px solid var(--border-color)',
-                marginBottom: '1rem'
+                marginBottom: '1rem',
+                transition: 'padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
                 <div style={{
-                    width: '40px',
-                    height: '40px',
-                    background: 'var(--primary)',
-                    borderRadius: '10px',
+                    width: '44px',
+                    height: '44px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: (!isExpanded && !isMobile) ? 0 : '12px',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '1.2rem',
-                    boxShadow: '0 4px 12px rgba(21, 101, 192, 0.3)'
+                    marginRight: '12px',
+                    flexShrink: 0,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                    transition: 'margin 0.3s ease'
                 }}>
-                    M
+                    <Sidebar3DLogo />
                 </div>
-                {(isExpanded || isMobile) && (
+                <div style={{
+                    overflow: 'hidden',
+                    maxWidth: (!isExpanded && !isMobile) ? 0 : '200px',
+                    opacity: (!isExpanded && !isMobile) ? 0 : 1,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}>
                     <h2 style={{
                         margin: 0,
                         color: 'var(--text)',
                         fontSize: '1.25rem',
                         fontWeight: 700,
-                        letterSpacing: '-0.02em'
+                        letterSpacing: '-0.02em',
+                        whiteSpace: 'nowrap'
                     }}>
                         Matrimony
                     </h2>
-                )}
+                </div>
             </div>
 
             <nav className="hide-scrollbar" style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {menuGroups.map((group, groupIndex) => (
                         <div key={group.title} style={{ marginBottom: '1.5rem' }}>
-                            {isExpanded && (
-                                <div style={{ 
-                                    paddingLeft: '1.5rem', 
-                                    marginBottom: '0.75rem', 
-                                    fontSize: '0.7rem', 
-                                    fontWeight: 'bold', 
-                                    color: 'var(--text-secondary)', 
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                    opacity: 0.6
-                                }}>
-                                    {group.title}
-                                </div>
-                            )}
+                            <div style={{ 
+                                paddingLeft: (!isExpanded && !isMobile) ? '0' : '1.5rem', 
+                                marginBottom: '0.75rem', 
+                                fontSize: '0.7rem', 
+                                fontWeight: 'bold', 
+                                color: 'var(--text-secondary)', 
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                overflow: 'hidden',
+                                maxWidth: (!isExpanded && !isMobile) ? 0 : '200px',
+                                opacity: (!isExpanded && !isMobile) ? 0 : 0.6,
+                                whiteSpace: 'nowrap',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                height: (!isExpanded && !isMobile) ? 0 : 'auto',
+                            }}>
+                                {group.title}
+                            </div>
                             {group.items.map((item) => (
                                 <li key={item.path} style={{ marginBottom: '0.25rem' }}>
                                     <NavLink
@@ -149,8 +166,9 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                         style={({ isActive }) => ({
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: (!isExpanded && !isMobile) ? 'center' : 'flex-start',
-                                            padding: '0.875rem 1.25rem',
+                                            padding: '0.875rem 0',
+                                            paddingLeft: (!isExpanded && !isMobile) ? '25px' : '1.25rem',
+                                            paddingRight: '1.25rem',
                                             margin: '0 0.75rem',
                                             textDecoration: 'none',
                                             color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
@@ -180,22 +198,29 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                         {({ isActive }) => (
                                             <>
                                                 <span style={{ 
-                                                    marginRight: (!isExpanded && !isMobile) ? 0 : '1rem', 
+                                                    marginRight: '1rem', 
+                                                    flexShrink: 0,
                                                     display: 'flex',
                                                     color: isActive ? 'var(--primary)' : 'var(--icon-muted)',
-                                                    transition: 'all 0.3s'
+                                                    transition: 'all 0.3s ease'
                                                 }}>
                                                     {item.icon}
                                                 </span>
-                                                {(isExpanded || isMobile) && (
+                                                <div style={{
+                                                    overflow: 'hidden',
+                                                    maxWidth: (!isExpanded && !isMobile) ? 0 : '180px',
+                                                    opacity: (!isExpanded && !isMobile) ? 0 : 1,
+                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                                }}>
                                                     <span style={{ 
                                                         fontWeight: isActive ? 700 : 600, 
                                                         fontSize: '0.9rem',
-                                                        letterSpacing: isActive ? '-0.01em' : 'normal'
+                                                        letterSpacing: isActive ? '-0.01em' : 'normal',
+                                                        whiteSpace: 'nowrap'
                                                     }}>
                                                         {item.label}
                                                     </span>
-                                                )}
+                                                </div>
                                             </>
                                         )}
                                     </NavLink>
@@ -211,20 +236,21 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                     textAlign: 'center',
                     opacity: 0.4
                 }}>
-                    {(isExpanded || isMobile) ? (
-                        <>
-                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                                MATRIMONY ADMIN
-                            </div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                v1.0.4 • End of List
-                            </div>
-                        </>
-                    ) : (
-                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                            END
+                    <div style={{
+                        overflow: 'hidden',
+                        maxWidth: (!isExpanded && !isMobile) ? 0 : '150px',
+                        opacity: (!isExpanded && !isMobile) ? 0 : 1,
+                        whiteSpace: 'nowrap',
+                        margin: '0 auto',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            MATRIMONY ADMIN
                         </div>
-                    )}
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            v1.0.4 • End of List
+                        </div>
+                    </div>
                 </div>
             </nav>
         </div>
