@@ -100,6 +100,8 @@ export default function Reports() {
         }
     };
 
+    const [blockReason, setBlockReason] = useState('');
+
     const handleToggleBlock = async () => {
         if (!confirmModal.userId) {
             alert('Cannot perform action: Reported User data is missing or inaccessible.');
@@ -107,13 +109,16 @@ export default function Reports() {
             return;
         }
         try {
-            await api.post(`/admin/users/${confirmModal.userId}/toggle-block`);
+            await api.post(`/admin/users/${confirmModal.userId}/toggle-block`, {
+                block_reason: blockReason || undefined
+            });
             fetchReports(currentPage);
         } catch (error) {
             console.error('Action failed:', error);
             alert('Failed to perform action');
         } finally {
             setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
+            setBlockReason('');
         }
     };
 
@@ -123,13 +128,25 @@ export default function Reports() {
         const profile = reportedUser?.user_profile || reportedUser?.userProfile;
         const name = profile?.first_name || reportedUser?.matrimony_id || 'this user';
 
+        setBlockReason('');
         setConfirmModal({
             isOpen: true,
             id: report.id,
             userId: reportedUser?.id,
             action: 'toggleBlock',
-            message: `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} ${name}?`,
-            isBlocked: isBlocked
+            message: isBlocked 
+                ? `Are you sure you want to unblock ${name}?`
+                : `You are about to block ${name}. All users who interact with this profile will be notified. Reason for blocking:`,
+            isBlocked: isBlocked,
+            suggestions: isBlocked ? [] : [
+                report.reason,
+                'Fake Profile',
+                'Harassment',
+                'Indecent Content',
+                'Scammer/Fraud',
+                'Commercial Activity',
+                'Repeated non-response'
+            ].filter(Boolean)
         });
     };
 
@@ -422,6 +439,11 @@ export default function Reports() {
                 title="Confirm Action"
                 message={confirmModal.message}
                 confirmButtonClass={confirmModal.isBlocked ? 'btn-success' : 'btn-danger'}
+                showInput={confirmModal.action === 'toggleBlock' && !confirmModal.isBlocked}
+                inputPlaceholder="Enter blocking reason (e.g. Repeated non-response, Fraud)"
+                inputValue={blockReason}
+                onInputChange={setBlockReason}
+                suggestions={confirmModal.suggestions}
             />
         </div>
     );

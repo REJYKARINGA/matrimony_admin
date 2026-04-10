@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
+import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
 
 export default function Verifications() {
@@ -18,6 +19,10 @@ export default function Verifications() {
     const [activeTab, setActiveTab] = useState('pending'); // pending, verified, rejected
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+
+    // Confirm Modal state
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '', userId: null });
+    const [blockingReason, setBlockingReason] = useState('');
 
     useEffect(() => {
         fetchVerifications(1);
@@ -253,6 +258,31 @@ export default function Verifications() {
                                             <div style={{ display: 'inline-block', background: 'var(--primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
                                                 ID: {selectedVerification.user?.matrimony_id}
                                             </div>
+                                            
+                                            {/* Block User Button */}
+                                            <div style={{ marginTop: '1rem' }}>
+                                                <button 
+                                                    className={`btn ${selectedVerification.user?.status === 'blocked' ? 'btn-success' : 'btn-danger'}`}
+                                                    style={{ width: '100%', padding: '0.4rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                                    onClick={() => {
+                                                        const user = selectedVerification.user;
+                                                        const isBlocked = user?.status === 'blocked';
+                                                        setBlockingReason('');
+                                                        setConfirmModal({
+                                                            isOpen: true,
+                                                            userId: user?.id,
+                                                            action: 'toggleBlock',
+                                                            message: isBlocked 
+                                                                ? `Unblock ${user?.user_profile?.first_name}?`
+                                                                : `Block ${user?.user_profile?.first_name}? Please provide a reason:`,
+                                                            isBlocked
+                                                        });
+                                                    }}
+                                                >
+                                                    {selectedVerification.user?.status === 'blocked' ? <FaUserCheck /> : <FaUserTimes />}
+                                                    {selectedVerification.user?.status === 'blocked' ? 'Unblock User' : 'Block User'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -414,6 +444,37 @@ export default function Verifications() {
                     />
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null })}
+                onConfirm={async () => {
+                    try {
+                        await api.post(`/admin/users/${confirmModal.userId}/toggle-block`, {
+                            block_reason: blockingReason || undefined
+                        });
+                        fetchVerifications(currentPage);
+                        // Refresh the selected verification user data
+                        if (selectedVerification?.user?.id === confirmModal.userId) {
+                            setSelectedVerification(prev => ({
+                                ...prev,
+                                user: { ...prev.user, status: prev.user.status === 'active' ? 'blocked' : 'active' }
+                            }));
+                        }
+                    } catch (error) {
+                        alert('Action failed');
+                    } finally {
+                        setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
+                    }
+                }}
+                title="Confirm Action"
+                message={confirmModal.message}
+                confirmButtonClass={confirmModal.isBlocked ? 'btn-success' : 'btn-danger'}
+                showInput={confirmModal.action === 'toggleBlock' && !confirmModal.isBlocked}
+                inputPlaceholder="Reason for blocking..."
+                inputValue={blockingReason}
+                onInputChange={setBlockingReason}
+            />
         </>
     );
 }

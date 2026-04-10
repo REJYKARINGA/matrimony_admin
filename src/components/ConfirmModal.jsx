@@ -13,7 +13,8 @@ export default function ConfirmModal({
     showInput = false,
     inputPlaceholder = '',
     inputValue = '',
-    onInputChange
+    onInputChange,
+    suggestions = []
 }) {
     if (!isOpen) return null;
 
@@ -112,6 +113,44 @@ export default function ConfirmModal({
                             onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
                             onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
                         />
+                    )}
+
+                    {showInput && suggestions.length > 0 && (
+                        <div style={{ 
+                            marginTop: '0.75rem', 
+                            display: 'flex', 
+                            flexWrap: 'wrap', 
+                            gap: '0.5rem' 
+                        }}>
+                            {suggestions.map((s, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => onInputChange(s)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '20px',
+                                        padding: '0.35rem 0.75rem',
+                                        fontSize: '0.75rem',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.target.style.background = 'rgba(255,255,255,0.1)';
+                                        e.target.style.borderColor = 'var(--primary)';
+                                        e.target.style.color = 'var(--white)';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.target.style.background = 'rgba(255,255,255,0.05)';
+                                        e.target.style.borderColor = 'var(--border-color)';
+                                        e.target.style.color = 'var(--text-secondary)';
+                                    }}
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </div>
                     )}
                 </div>
 

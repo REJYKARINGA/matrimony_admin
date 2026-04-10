@@ -3,7 +3,8 @@ import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
-import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaExclamationTriangle } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaExclamationTriangle, FaBan, FaUnlock } from 'react-icons/fa';
+import ConfirmModal from '../components/ConfirmModal';
 
 const SELECT_STYLE = {
     padding: '0.35rem 0.65rem',
@@ -198,6 +199,9 @@ export default function UserProfiles() {
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [formErrors, setFormErrors] = useState({});
     const [formLoading, setFormLoading] = useState(false);
+
+    // Block Reason state for confirm modal
+    const [blockingReason, setBlockingReason] = useState('');
 
     // Confirm modal
     const [confirm, setConfirm] = useState({ open: false, id: null, action: '', message: '' });
@@ -458,6 +462,38 @@ export default function UserProfiles() {
         }
     };
 
+    const handleToggleBlock = async (profile) => {
+        const user = profile.user;
+        const isBlocked = user?.status === 'blocked';
+        setBlockingReason('');
+        setConfirm({
+            open: true,
+            id: profile.id,
+            userId: user?.id,
+            action: 'toggleBlock',
+            message: isBlocked 
+                ? `Are you sure you want to unblock ${profile.first_name}?`
+                : `You are about to block ${profile.first_name}. Please provide a reason:`,
+            isBlocked
+        });
+    };
+
+    const handleConfirmBlock = async () => {
+        setConfirmLoading(true);
+        try {
+            await api.post(`/admin/users/${confirm.userId}/toggle-block`, {
+                block_reason: blockingReason || undefined
+            });
+            showToast(confirm.isBlocked ? 'User unblocked' : 'User blocked');
+            setConfirm({ open: false, id: null, action: '', message: '' });
+            fetchProfiles(currentPage);
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Action failed', 'error');
+        } finally {
+            setConfirmLoading(false);
+        }
+    };
+
     const clearFilters = () => {
         setGenderFilter('all'); setReligionFilter('all');
         setEducationFilter('all'); setOccupationFilter('all');
@@ -593,6 +629,7 @@ export default function UserProfiles() {
                                     <th>Created By</th>
                                     <th>Status / Activity</th>
                                     <th>Verification</th>
+                                    <th>Block Reason</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -674,6 +711,13 @@ export default function UserProfiles() {
                                             })()}
                                         </td>
                                         <td>
+                                            {profile.user?.status === 'blocked' && (
+                                                <div style={{ maxWidth: '120px', fontSize: '0.75rem', color: '#EF4444', fontStyle: 'italic' }}>
+                                                    {profile.user.block_reason || 'Blocked'}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
                                             <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                                                 {activeTab === 'trashed' ? (
                                                     <>
@@ -691,6 +735,10 @@ export default function UserProfiles() {
                                                         <button onClick={() => handleEdit(profile)} title="Edit"
                                                             style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                                                             <FaEdit />
+                                                        </button>
+                                                        <button onClick={() => handleToggleBlock(profile)} title={profile.user?.status === 'blocked' ? "Unblock" : "Block"}
+                                                            style={{ background: profile.user?.status === 'blocked' ? '#10B981' : '#F59E0B', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                            {profile.user?.status === 'blocked' ? <FaUnlock /> : <FaBan />}
                                                         </button>
                                                         <button onClick={() => handleDelete(profile)} title="Trash"
                                                             style={{ background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
@@ -715,6 +763,19 @@ export default function UserProfiles() {
                     />
                 </>
             )}
+
+            <ConfirmModal
+                isOpen={confirm.open}
+                onClose={() => setConfirm({ open: false, id: null, action: '', message: '' })}
+                onConfirm={confirm.action === 'toggleBlock' ? handleConfirmBlock : handleConfirm}
+                title="Confirm Action"
+                message={confirm.message}
+                confirmButtonClass={confirm.isBlocked ? 'btn-success' : 'btn-danger'}
+                showInput={confirm.action === 'toggleBlock' && !confirm.isBlocked}
+                inputPlaceholder="Reason for blocking..."
+                inputValue={blockingReason}
+                onInputChange={setBlockingReason}
+            />
 
             {/* Add / Edit Modal */}
             <FormModal

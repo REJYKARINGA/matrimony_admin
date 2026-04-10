@@ -467,6 +467,36 @@ export default function PhotoVerifications() {
                                             <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>PHONE NUMBER</p>
                                             <p style={{ margin: 0, fontWeight: '600' }}>{selectedUser.phone}</p>
                                         </div>
+                                        {/* Block User Action */}
+                                        <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <button 
+                                                className={`btn ${selectedUser.status === 'blocked' ? 'btn-success' : 'btn-danger'}`}
+                                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '0.6rem' }}
+                                                onClick={() => showConfirm({
+                                                    title: selectedUser.status === 'blocked' ? 'Unblock User' : 'Block User',
+                                                    message: selectedUser.status === 'blocked' 
+                                                        ? `Are you sure you want to unblock ${selectedUser.user_profile?.first_name}?`
+                                                        : `You are about to block ${selectedUser.user_profile?.first_name}. Please provide a reason:`,
+                                                    confirmText: selectedUser.status === 'blocked' ? 'Unblock Account' : 'Block Account',
+                                                    confirmButtonClass: selectedUser.status === 'blocked' ? 'btn-success' : 'btn-danger',
+                                                    showInput: selectedUser.status !== 'blocked',
+                                                    inputPlaceholder: 'Reason for blocking...',
+                                                    onConfirm: async (reason) => {
+                                                        try {
+                                                            await api.post(`/admin/users/${selectedUser.id}/toggle-block`, { 
+                                                                block_reason: reason || undefined 
+                                                            });
+                                                            fetchUsers(currentPage);
+                                                        } catch (err) {
+                                                            alert('Action failed');
+                                                        }
+                                                    }
+                                                })}
+                                            >
+                                                {selectedUser.status === 'blocked' ? <FaUserCheck /> : <FaTimes />}
+                                                {selectedUser.status === 'blocked' ? 'Unblock User' : 'Block User Account'}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {activeTab === 'pending' && selectedUser.approved_profile_photos && selectedUser.approved_profile_photos.length > 0 && (

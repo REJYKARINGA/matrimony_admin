@@ -28,6 +28,7 @@ export default function Users() {
 
     // Confirm Modal state
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '' });
+    const [blockReason, setBlockReason] = useState('');
 
     useEffect(() => {
         fetchUsers(1);
@@ -65,6 +66,7 @@ export default function Users() {
     };
 
     const openConfirmModal = (id, action, message) => {
+        setBlockReason('');
         setConfirmModal({ isOpen: true, id, action, message });
     };
 
@@ -72,7 +74,9 @@ export default function Users() {
         if (!confirmModal.id) return;
         try {
             if (confirmModal.action === 'toggleBlock') {
-                await api.post(`/admin/users/${confirmModal.id}/toggle-block`);
+                await api.post(`/admin/users/${confirmModal.id}/toggle-block`, {
+                    block_reason: blockReason || undefined
+                });
             } else if (confirmModal.action === 'delete') {
                 await api.delete(`/admin/users/${confirmModal.id}`);
             } else if (confirmModal.action === 'restore') {
@@ -84,6 +88,7 @@ export default function Users() {
             alert('Failed to perform action');
         } finally {
             setConfirmModal({ isOpen: false, id: null, action: '', message: '' });
+            setBlockReason('');
         }
     };
 
@@ -96,6 +101,7 @@ export default function Users() {
             }
             fetchUsers(currentPage);
             setIsModalOpen(false);
+            setBlockReason(''); // Reset block reason after saving
         } catch (error) {
             console.error('Failed to save user:', error);
             throw error; // Let FormModal handle the error display if it has logic for it
@@ -316,6 +322,7 @@ export default function Users() {
                                         <th>Email Status</th>
                                         <th>Phone Status</th>
                                         <th>Status / Activity</th>
+                                        <th>Block Reason</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -396,6 +403,13 @@ export default function Users() {
                                                 </div>
                                             </td>
                                             <td>
+                                                {user.status === 'blocked' && (
+                                                    <div style={{ maxWidth: '150px', fontSize: '0.8rem', color: '#EF4444', fontStyle: 'italic' }}>
+                                                        {user.block_reason || 'No reason provided'}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                     <button
                                                         onClick={() => handleEditUser(user)}
@@ -409,7 +423,9 @@ export default function Users() {
                                                             onClick={() => openConfirmModal(
                                                                 user.id,
                                                                 'toggleBlock',
-                                                                `Are you sure you want to ${user.status === 'active' ? 'block' : 'unblock'} this user?`
+                                                                user.status === 'active' 
+                                                                    ? `You are about to block "${user.user_profile?.first_name} ${user.user_profile?.last_name}". All users who unlocked this contact will be notified. Please provide a reason:`
+                                                                    : `Are you sure you want to unblock "${user.user_profile?.first_name} ${user.user_profile?.last_name}"?`
                                                             )}
                                                             className={`btn ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
                                                             title={user.status === 'active' ? 'Block User' : 'Unblock User'}
@@ -470,6 +486,18 @@ export default function Users() {
                 title={confirmModal.action === 'delete' ? 'Delete User' : 'Confirm Action'}
                 message={confirmModal.message}
                 confirmButtonClass={confirmModal.action === 'delete' || confirmModal.action === 'toggleBlock' ? 'btn-danger' : 'btn-primary'}
+                showInput={confirmModal.action === 'toggleBlock' && users.find(u => u.id === confirmModal.id)?.status === 'active'}
+                inputPlaceholder="Reason for blocking..."
+                inputValue={blockReason}
+                onInputChange={setBlockReason}
+                suggestions={[
+                    'Fake Profile',
+                    'Harassment',
+                    'Spam/Fraud',
+                    'Commercial Use',
+                    'Inappropriate Behavior',
+                    'Multiple Accounts'
+                ]}
             />
 
             {/* Form Modal for Add/Edit User */}
@@ -503,10 +531,17 @@ export default function Users() {
                     data.status = formData.get('status') ? 'active' : 'blocked';
                     data.email_verified = formData.get('email_verified') ? 1 : 0;
                     data.phone_verified = formData.get('phone_verified') ? 1 : 0;
+                    
+                    if (data.status === 'blocked' && formData.get('block_reason')) {
+                        data.block_reason = formData.get('block_reason');
+                    }
 
                     handleSaveUser(data);
                 }}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setBlockReason('');
+                }}
             >
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                     {userFormFields.map((field) => (
@@ -563,11 +598,39 @@ export default function Users() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-secondary)', margin: 0 }}>Active User</label>
                         <label className="switch">
-                            <input type="checkbox" name="status" defaultChecked={!selectedUser || selectedUser.status === 'active'} />
+                            <input 
+                                type="checkbox" 
+                                name="status" 
+                                defaultChecked={!selectedUser || selectedUser.status === 'active'} 
+                                onChange={(e) => {
+                                    // We need to trigger a re-render to show/hide the block reason field
+                                    // Since we're using uncontrolled inputs, we'll force it with a state update
+                                    setConfirmModal(prev => ({ ...prev })); 
+                                }}
+                            />
                             <span className="slider"></span>
                         </label>
                     </div>
                 </div>
+
+                {/* Conditional Block Reason Field inside FormModal */}
+                {selectedUser && (
+                    <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <label className="form-label" style={{ fontWeight: 'bold', color: '#EF4444' }}>
+                           Block Reason (visible to user)
+                        </label>
+                        <input
+                            type="text"
+                            name="block_reason"
+                            className="form-input"
+                            placeholder="Why is this account being blocked/restricted?"
+                            defaultValue={selectedUser.block_reason || ''}
+                        />
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                            If you set the user to inactive/blocked, they will see this reason when they try to log in.
+                        </p>
+                    </div>
+                )}
             </FormModal>
         </>
     );
