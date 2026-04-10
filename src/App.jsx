@@ -25,6 +25,7 @@ import ContactUnlocks from './pages/ContactUnlocks';
 import Suggestions from './pages/Suggestions';
 import PhotoVerifications from './pages/PhotoVerifications';
 import ProfileVerifications from './pages/ProfileVerifications';
+import PhotoRequests from './pages/PhotoRequests';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -70,6 +71,7 @@ function App() {
                   <Route path="/suggestions" element={<Suggestions />} />
                   <Route path="/photo-verifications" element={<PhotoVerifications />} />
                   <Route path="/profile-verifications" element={<ProfileVerifications />} />
+                  <Route path="/photo-requests" element={<PhotoRequests />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

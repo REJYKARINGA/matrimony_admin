@@ -590,6 +590,7 @@ export default function UserProfiles() {
                                     <th>Location</th>
                                     <th>Education</th>
                                     <th>Occupation</th>
+                                    <th>Created By</th>
                                     <th>Status / Activity</th>
                                     <th>Verification</th>
                                     <th>Actions</th>
@@ -635,6 +636,26 @@ export default function UserProfiles() {
                                         <td>{[profile.city, profile.state].filter(Boolean).join(', ') || '-'}</td>
                                         <td>{profile.education_model?.name || '-'}</td>
                                         <td>{profile.occupation_model?.name || '-'}</td>
+                                        <td>
+                                            {profile.created_by ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <div style={{ 
+                                                            width: '6px', height: '6px', borderRadius: '50%', 
+                                                            background: profile.created_by?.role === 'admin' ? '#8B5CF6' : (profile.created_by?.role === 'mediator' ? '#F59E0B' : '#3B82F6')
+                                                        }} />
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>
+                                                            {profile.created_by?.role === 'user' ? 'Self' : profile.created_by?.role}
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }} title={profile.created_by?.email}>
+                                                        {profile.created_by?.email}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', opacity: 0.6 }}>Legacy (Self)</span>
+                                            )}
+                                        </td>
                                         <td>
                                             <span className={`badge ${profile.is_active_verified ? 'badge-verified' : 'badge-rejected'}`}>
                                                 {profile.is_active_verified ? 'Yes' : 'No'}

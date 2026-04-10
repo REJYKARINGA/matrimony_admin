@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck, FaCamera } from 'react-icons/fa';
 import { Sidebar3DLogo, Sidebar3DBackground } from './Sidebar3DElements';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
@@ -11,11 +11,17 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             items: [
                 { path: '/dashboard', label: 'Dashboard', icon: <FaChartLine size={20} /> },
                 { path: '/users', label: 'Users', icon: <FaUsers size={20} /> },
-                { path: '/verifications', label: 'Verifications', icon: <FaUserShield size={20} /> },
-                { path: '/photo-verifications', label: 'Photo Verifications', icon: <FaImage size={20} /> },
-                { path: '/profile-verifications', label: 'Profile Verifications', icon: <FaUserCheck size={20} /> },
-                { path: '/reports', label: 'Reports', icon: <FaFlag size={20} /> },
                 { path: '/user-profiles', label: 'User Profiles', icon: <FaIdCard size={20} /> },
+            ]
+        },
+        {
+            title: 'Safety & Security',
+            items: [
+                { path: '/photo-requests', label: 'Photo Access Monitoring', icon: <FaCamera size={20} /> },
+                { path: '/verifications', label: 'ID Verifications', icon: <FaUserShield size={20} /> },
+                { path: '/photo-verifications', label: 'Photo Verifications', icon: <FaImage size={20} /> },
+                { path: '/profile-verifications', label: 'Profile Modifications', icon: <FaUserCheck size={20} /> },
+                { path: '/reports', label: 'User Reports & Flags', icon: <FaFlag size={20} /> },
             ]
         },
         {
