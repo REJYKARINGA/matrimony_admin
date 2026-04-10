@@ -29,56 +29,48 @@ import PhotoRequests from './pages/PhotoRequests';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import SplashScreen from './components/SplashScreen';
+
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+
 
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AnimatePresence mode="wait">
-          {showSplash ? (
-            <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />
-          ) : (
-            <div key="app-content">
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/mediator/dashboard" element={<MediatorDashboard />} />
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/mediator/dashboard" element={<MediatorDashboard />} />
 
-                {/* Protected Admin Routes */}
-                <Route element={<Layout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/verifications" element={<Verifications />} />
-                  <Route path="/users" element={<Users />} />
-                  <Route path="/user-profiles" element={<UserProfiles />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/success-stories" element={<SuccessStories />} />
-                  <Route path="/engagement-posters" element={<EngagementPosters />} />
-                  <Route path="/payments" element={<Payments />} />
-                  <Route path="/education" element={<Education />} />
-                  <Route path="/occupation" element={<Occupation />} />
-                  <Route path="/interests" element={<Interests />} />
-                  <Route path="/personalities" element={<Personalities />} />
-                  <Route path="/audit-logs" element={<AuditLogs />} />
-                  <Route path="/contact-unlocks" element={<ContactUnlocks />} />
-                  <Route path="/religion-management" element={<ReligionManagement />} />
-                  <Route path="/family-details" element={<FamilyDetails />} />
-                  <Route path="/preferences" element={<Preferences />} />
-                  <Route path="/promotion-settings" element={<PromotionSettings />} />
-                  <Route path="/mediator-promotions" element={<MediatorPromotions />} />
-                  <Route path="/wallet-transactions" element={<WalletTransactions />} />
-                  <Route path="/suggestions" element={<Suggestions />} />
-                  <Route path="/photo-verifications" element={<PhotoVerifications />} />
-                  <Route path="/profile-verifications" element={<ProfileVerifications />} />
-                  <Route path="/photo-requests" element={<PhotoRequests />} />
-                </Route>
+          {/* Protected Admin Routes */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/verifications" element={<Verifications />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/user-profiles" element={<UserProfiles />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/success-stories" element={<SuccessStories />} />
+            <Route path="/engagement-posters" element={<EngagementPosters />} />
+            <Route path="/payments" element={<Payments />} />
+            <Route path="/education" element={<Education />} />
+            <Route path="/occupation" element={<Occupation />} />
+            <Route path="/interests" element={<Interests />} />
+            <Route path="/personalities" element={<Personalities />} />
+            <Route path="/audit-logs" element={<AuditLogs />} />
+            <Route path="/contact-unlocks" element={<ContactUnlocks />} />
+            <Route path="/religion-management" element={<ReligionManagement />} />
+            <Route path="/family-details" element={<FamilyDetails />} />
+            <Route path="/preferences" element={<Preferences />} />
+            <Route path="/promotion-settings" element={<PromotionSettings />} />
+            <Route path="/mediator-promotions" element={<MediatorPromotions />} />
+            <Route path="/wallet-transactions" element={<WalletTransactions />} />
+            <Route path="/suggestions" element={<Suggestions />} />
+            <Route path="/photo-verifications" element={<PhotoVerifications />} />
+            <Route path="/profile-verifications" element={<ProfileVerifications />} />
+            <Route path="/photo-requests" element={<PhotoRequests />} />
+          </Route>
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-          )}
-        </AnimatePresence>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   );

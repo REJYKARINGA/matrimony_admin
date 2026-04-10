@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import Dashboard3DBackground from './Dashboard3DBackground';
-
 export default function Layout() {
     const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -51,9 +49,6 @@ export default function Layout() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', transition: 'background-color 0.3s' }}>
-            {/* 3D Background active on all pages */}
-            <Dashboard3DBackground />
-            
             {/* Mobile Backdrop */}
             {isMobile && !collapsed && (
                 <div

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck, FaCamera } from 'react-icons/fa';
-import { Sidebar3DLogo, Sidebar3DBackground } from './Sidebar3DElements';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle } from 'react-icons/fa';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -97,8 +96,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 onHoverChange?.(false);
             }}>
             
-            {/* INJECTED 3D BACKGROUND */}
-            <Sidebar3DBackground />
+
 
             <div style={{
                 height: '80px',
@@ -123,7 +121,11 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
                     transition: 'margin 0.3s ease'
                 }}>
-                    <Sidebar3DLogo />
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="10" r="6" fill="#1565c0" />
+                        <circle cx="12" cy="10" r="2.5" fill="white" />
+                        <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="#1565c0" />
+                    </svg>
                 </div>
                 <div style={{
                     overflow: 'hidden',
