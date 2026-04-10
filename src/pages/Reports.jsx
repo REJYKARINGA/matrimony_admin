@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
-import { FaCheckCircle, FaTimes, FaShieldAlt } from 'react-icons/fa';
+import { FaCheckCircle, FaTimes, FaShieldAlt, FaBan, FaUnlock } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import TimeFormatCell from '../components/TimeFormatCell';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Reports() {
     const [reports, setReports] = useState([]);
@@ -18,6 +19,9 @@ export default function Reports() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+
+    // Confirm Modal state
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '', userId: null });
 
     useEffect(() => {
         fetchParticipants();
@@ -94,6 +98,39 @@ export default function Reports() {
         } finally {
             setIsResolving(false);
         }
+    };
+
+    const handleToggleBlock = async () => {
+        if (!confirmModal.userId) {
+            alert('Cannot perform action: Reported User data is missing or inaccessible.');
+            setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
+            return;
+        }
+        try {
+            await api.post(`/admin/users/${confirmModal.userId}/toggle-block`);
+            fetchReports(currentPage);
+        } catch (error) {
+            console.error('Action failed:', error);
+            alert('Failed to perform action');
+        } finally {
+            setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
+        }
+    };
+
+    const openBlockConfirm = (report) => {
+        const isBlocked = report.reported?.status === 'blocked';
+        const reportedUser = report.reported;
+        const profile = reportedUser?.user_profile || reportedUser?.userProfile;
+        const name = profile?.first_name || reportedUser?.matrimony_id || 'this user';
+
+        setConfirmModal({
+            isOpen: true,
+            id: report.id,
+            userId: reportedUser?.id,
+            action: 'toggleBlock',
+            message: `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} ${name}?`,
+            isBlocked: isBlocked
+        });
     };
 
     return (
@@ -219,13 +256,16 @@ export default function Reports() {
                                 {reports.map((report) => (
                                     <tr key={report.id}>
                                         <td>
-                                            <div>{report.reporter?.user_profile?.first_name} {report.reporter?.user_profile?.last_name}</div>
+                                            <div>{(report.reporter?.user_profile?.first_name || report.reporter?.userProfile?.first_name) || 'N/A'} {(report.reporter?.user_profile?.last_name || report.reporter?.userProfile?.last_name) || ''}</div>
                                             <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>ID: {report.reporter?.matrimony_id}</div>
                                         </td>
                                         <td>
-                                            <div>{report.reported?.user_profile?.first_name} {report.reported?.user_profile?.last_name}</div>
-                                            <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                                            <div>{(report.reported?.user_profile?.first_name || report.reported?.userProfile?.first_name) || 'N/A'} {(report.reported?.user_profile?.last_name || report.reported?.userProfile?.last_name) || ''}</div>
+                                            <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px', flexWrap: 'wrap' }}>
                                                 <span style={{ opacity: 0.6 }}>ID: {report.reported?.matrimony_id}</span>
+                                                <span className={`badge ${report.reported?.status === 'blocked' ? 'badge-rejected' : 'badge-verified'}`} style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
+                                                    {report.reported?.status}
+                                                </span>
                                                 {report.reported?.received_user_reports_count > 1 && (
                                                     <span style={{ 
                                                         background: 'rgba(239, 68, 68, 0.1)', 
@@ -270,11 +310,22 @@ export default function Reports() {
                                             )}
                                         </td>
                                         <td>
-                                            {report.status === 'pending' && (
-                                                <button onClick={() => handleResolveClick(report)} className="btn btn-success" title="Resolve">
-                                                    <FaCheckCircle /> Resolve
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                {report.status === 'pending' && (
+                                                    <button onClick={() => handleResolveClick(report)} className="btn btn-success" title="Resolve">
+                                                        <FaCheckCircle /> Resolve
+                                                    </button>
+                                                )}
+                                                <button 
+                                                    onClick={() => openBlockConfirm(report)} 
+                                                    className={`btn ${report.reported?.status === 'blocked' ? 'btn-success' : 'btn-danger'}`}
+                                                    title={report.reported?.status === 'blocked' ? 'Unblock User' : 'Block User'}
+                                                    style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
+                                                >
+                                                    {report.reported?.status === 'blocked' ? <FaUnlock /> : <FaBan />}
+                                                    {report.reported?.status === 'blocked' ? ' Unblock' : ' Block'}
                                                 </button>
-                                            )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -363,6 +414,15 @@ export default function Reports() {
                 </AnimatePresence>,
                 document.body
             )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null })}
+                onConfirm={handleToggleBlock}
+                title="Confirm Action"
+                message={confirmModal.message}
+                confirmButtonClass={confirmModal.isBlocked ? 'btn-success' : 'btn-danger'}
+            />
         </div>
     );
 }
