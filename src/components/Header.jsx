@@ -52,7 +52,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                         background: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
-                        color: theme === 'dark' ? '#FCD34D' : 'var(--icon-muted)',
+                        color: theme === 'dark' ? 'var(--secondary)' : 'var(--icon-muted)',
                         fontSize: '1.25rem',
                         display: 'flex',
                         alignItems: 'center',
@@ -63,7 +63,7 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <LuUser size={24} color={theme === 'dark' ? '#94A3B8' : 'var(--icon-muted)'} />
+                    <LuUser size={24} color={theme === 'dark' ? 'var(--secondary)' : 'var(--icon-muted)'} />
                     {!isMobile && (
                         <span style={{ fontWeight: 500, color: 'var(--text)' }}>
                             {user.user_profile?.first_name || 'Admin'}

@@ -135,14 +135,14 @@ Component Stack: ${this.state.errorInfo?.componentStack}
                                     alignItems: 'center',
                                     gap: '0.75rem',
                                     padding: '0.875rem 1.5rem',
-                                    background: '#1565c0',
+                                    background: 'var(--primary)',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '12px',
                                     fontWeight: '600',
                                     cursor: 'pointer',
                                     transition: 'transform 0.2s',
-                                    boxShadow: '0 4px 12px rgba(21, 101, 192, 0.2)'
+                                    boxShadow: '0 4px 12px rgba(13, 94, 69, 0.2)'
                                 }}
                                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}

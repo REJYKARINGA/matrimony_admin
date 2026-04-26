@@ -83,7 +83,7 @@ export default function Login() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: #dce8f5;
+                    background: var(--bg);
                     padding: 20px;
                     font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                     box-sizing: border-box;
@@ -102,7 +102,7 @@ export default function Login() {
 
                 .login-left {
                     flex: 0 0 42%;
-                    background: linear-gradient(160deg, #1565c0 0%, #1e88e5 60%, #42a5f5 100%);
+                    background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -123,7 +123,7 @@ export default function Login() {
 
                 .login-right {
                     flex: 1;
-                    background: white;
+                    background: var(--card-bg);
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
@@ -135,44 +135,44 @@ export default function Login() {
                     padding: 10px 36px 10px 8px;
                     font-size: 14px;
                     border: none;
-                    border-bottom: 2px solid #90caf9;
+                    border-bottom: 2px solid var(--input-border);
                     outline: none;
                     background: transparent;
-                    color: #333;
+                    color: var(--text);
                     box-sizing: border-box;
                     transition: border-color 0.25s;
                 }
-                .login-input:focus { border-bottom-color: #1565c0; }
+                .login-input:focus { border-bottom-color: var(--primary); }
 
                 .btn-signin {
                     flex: 1;
                     padding: 11px 0;
                     font-size: 14px;
                     font-weight: 600;
-                    color: white;
-                    background: linear-gradient(135deg, #1565c0 0%, #1e88e5 100%);
+                    color: var(--primary-dark);
+                    background: linear-gradient(135deg, var(--secondary) 0%, #F0CC5A 100%);
                     border: none;
                     border-radius: 25px;
                     cursor: pointer;
-                    box-shadow: 0 4px 14px rgba(21,101,192,0.35);
+                    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
                     transition: box-shadow 0.25s;
                 }
-                .btn-signin:disabled { background: #90caf9; cursor: not-allowed; }
-                .btn-signin:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(21,101,192,0.5); }
+                .btn-signin:disabled { background: var(--input-border); opacity: 0.7; cursor: not-allowed; }
+                .btn-signin:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5); }
 
                 .btn-signup {
                     flex: 1;
                     padding: 11px 0;
                     font-size: 14px;
                     font-weight: 600;
-                    color: #1565c0;
-                    background: white;
-                    border: 2px solid #1565c0;
+                    color: var(--secondary);
+                    background: transparent;
+                    border: 2px solid var(--secondary);
                     border-radius: 25px;
                     cursor: pointer;
                     transition: background 0.25s;
                 }
-                .btn-signup:hover { background: #f0f5ff; }
+                .btn-signup:hover { background: rgba(212, 175, 55, 0.1); }
 
                 /* ── MOBILE: stack vertically ── */
                 @media (max-width: 600px) {
@@ -204,7 +204,7 @@ export default function Login() {
                         left: 0;
                         width: 100%;
                         height: 44px;
-                        background: white;
+                        background: var(--bg);
                         border-radius: 50% 50% 0 0 / 100% 100% 0 0;
                     }
 
@@ -237,9 +237,9 @@ export default function Login() {
                                 boxShadow: '0 8px 24px rgba(0,0,0,0.18)'
                             }}>
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="10" r="6" fill="#1565c0" />
-                                    <circle cx="12" cy="10" r="2.5" fill="white" />
-                                    <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="#1565c0" />
+                                    <circle cx="12" cy="10" r="6" fill="var(--primary)" />
+                                    <circle cx="12" cy="10" r="2.5" fill="var(--secondary)" />
+                                    <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="var(--primary)" />
                                 </svg>
                             </div>
                             <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: 'white' }}>
@@ -270,8 +270,8 @@ export default function Login() {
 
                         {/* Desktop wave */}
                         <svg className="wave-svg" viewBox="0 0 80 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-                            <path d="M80,0 C60,0 40,30 55,80 C70,130 80,150 65,200 C50,250 30,270 50,330 C70,390 80,400 60,450 C40,500 55,510 80,520 L80,0Z" fill="white" />
-                            <path d="M80,0 C65,10 50,40 62,90 C74,140 80,160 68,210 C56,260 38,280 55,340 C72,400 80,410 62,460 C44,510 60,516 80,520 L80,0Z" fill="rgba(255,255,255,0.15)" />
+                            <path d="M80,0 C60,0 40,30 55,80 C70,130 80,150 65,200 C50,250 30,270 50,330 C70,390 80,400 60,450 C40,500 55,510 80,520 L80,0Z" fill="var(--bg)" />
+                            <path d="M80,0 C65,10 50,40 62,90 C74,140 80,160 68,210 C56,260 38,280 55,340 C72,400 80,410 62,460 C44,510 60,516 80,520 L80,0Z" fill="rgba(255,255,255,0.05)" />
                         </svg>
                     </div>
 
@@ -296,7 +296,7 @@ export default function Login() {
 
                         <form onSubmit={handleLogin} noValidate>
                             <div style={{ marginBottom: '18px' }}>
-                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#333' }}>
+                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
                                     E-mail Address
                                 </label>
                                 <div style={{ position: 'relative' }}>
@@ -319,7 +319,7 @@ export default function Login() {
                             </div>
 
                             <div style={{ marginBottom: '18px' }}>
-                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#333' }}>
+                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
                                     Password
                                 </label>
                                 <div style={{ position: 'relative' }}>
@@ -354,10 +354,10 @@ export default function Login() {
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '26px' }}>
-                                <input type="checkbox" id="terms" style={{ accentColor: '#1565c0', marginTop: '2px', width: '14px', height: '14px', flexShrink: 0 }} />
-                                <label htmlFor="terms" style={{ fontSize: '12px', color: '#666', lineHeight: '1.5' }}>
+                                <input type="checkbox" id="terms" style={{ accentColor: 'var(--primary)', marginTop: '2px', width: '14px', height: '14px', flexShrink: 0 }} />
+                                <label htmlFor="terms" style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                                     By Signing In, I Agree with the{' '}
-                                    <span style={{ color: '#1565c0', cursor: 'pointer', fontWeight: 600 }}>Terms &amp; Conditions</span>
+                                    <span style={{ color: 'var(--secondary)', cursor: 'pointer', fontWeight: 600 }}>Terms &amp; Conditions</span>
                                 </label>
                             </div>
 

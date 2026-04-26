@@ -280,10 +280,10 @@ export default function MediatorDashboard() {
 
     const getStatusColor = (status) => {
         const colors = {
-            pending: '#FFA500',
-            verified: '#4CAF50',
-            paid: '#2196F3',
-            rejected: '#F44336'
+            pending: '#F59E0B',
+            verified: '#10B981',
+            paid: '#0D5E45',
+            rejected: '#EF4444'
         };
         return colors[status] || '#999';
     };
@@ -361,7 +361,7 @@ export default function MediatorDashboard() {
                                     border: '1px solid var(--border-color)'
                                 }}>
                                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Promo Units</div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10B981' }}>
                                         {promotions.filter(p => p.status === 'verified').length}
                                     </div>
                                 </div>
@@ -413,7 +413,7 @@ export default function MediatorDashboard() {
                                     border: '1px solid var(--border-color)'
                                 }}>
                                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Paid</div>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4CAF50' }}>
+                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10B981' }}>
                                         ₹{totalCombinedPaid.toLocaleString()}
                                     </div>
                                 </div>
@@ -525,9 +525,9 @@ export default function MediatorDashboard() {
                                                     </td>
                                                     <td>
                                                         <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
-                                                            <span title="Views" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaEye size={12} color="#2196F3" /> {Number(promo.views_count).toLocaleString()}</span>
-                                                            <span title="Likes" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaThumbsUp size={12} color="#E91E63" /> {Number(promo.likes_count).toLocaleString()}</span>
-                                                            <span title="Comments" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaComment size={12} color="var(--primary)" /> {Number(promo.comments_count).toLocaleString()}</span>
+                                                            <span title="Views" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaEye size={12} color="var(--primary)" /> {Number(promo.views_count).toLocaleString()}</span>
+                                                            <span title="Likes" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaThumbsUp size={12} color="var(--secondary)" /> {Number(promo.likes_count).toLocaleString()}</span>
+                                                            <span title="Comments" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaComment size={12} color="var(--text-secondary)" /> {Number(promo.comments_count).toLocaleString()}</span>
                                                         </div>
                                                         {promo.setting && (
                                                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.8 }}>
@@ -541,13 +541,13 @@ export default function MediatorDashboard() {
                                                         <div style={{
                                                             fontWeight: 'bold',
                                                             fontSize: '1rem',
-                                                            color: calculatePayable(promo) > 0 ? '#4CAF50' : 'var(--text-secondary)',
-                                                            background: calculatePayable(promo) > 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                                                            color: calculatePayable(promo) > 0 ? '#10B981' : 'var(--text-secondary)',
+                                                            background: calculatePayable(promo) > 0 ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
                                                             padding: '6px 12px',
                                                             borderRadius: '8px',
                                                             display: 'inline-block',
                                                             minWidth: '80px',
-                                                            border: calculatePayable(promo) > 0 ? '1px solid rgba(76, 175, 80, 0.2)' : 'none'
+                                                            border: calculatePayable(promo) > 0 ? '1px solid rgba(16, 185, 129, 0.2)' : 'none'
                                                         }}>
                                                             ₹{calculatePayable(promo).toLocaleString()}
                                                         </div>
@@ -571,7 +571,7 @@ export default function MediatorDashboard() {
 
                                                             if (payable > 0) {
                                                                 return (
-                                                                    <div style={{ color: '#4CAF50' }}>
+                                                                    <div style={{ color: '#10B981' }}>
                                                                         <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>Eligible: {pendingUnits} more unit(s)</div>
                                                                         <div style={{ fontSize: '0.7rem', marginTop: '2px', opacity: 0.8 }}>
                                                                             {pendingUnits} × ₹{payout_rate}
@@ -641,7 +641,7 @@ export default function MediatorDashboard() {
 
                                 {/* Reference Code Card */}
                                 <div style={{
-                                    background: 'linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%)',
+                                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
                                     borderRadius: '14px',
                                     padding: '1.75rem',
                                     color: 'white',
@@ -687,9 +687,9 @@ export default function MediatorDashboard() {
                                 {/* Total Purchases */}
                                 <div style={{ background: 'var(--bg)', borderRadius: '14px', padding: '1.75rem', border: '1px solid var(--border-color)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-                                        <FaRupeeSign color="#4CAF50" /> Total Purchases
+                                        <FaRupeeSign color="#10B981" /> Total Purchases
                                     </div>
-                                    <div style={{ fontSize: '2.4rem', fontWeight: '800', color: '#4CAF50' }}>
+                                    <div style={{ fontSize: '2.4rem', fontWeight: '800', color: '#10B981' }}>
                                         {referralStats.total_purchases}
                                     </div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>times your referred profiles were unlocked</div>
@@ -697,10 +697,10 @@ export default function MediatorDashboard() {
 
                                 {/* Total Earnings */}
                                 <div style={{
-                                    background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)',
+                                    background: 'linear-gradient(135deg, var(--secondary) 0%, #F0CC5A 100%)',
                                     borderRadius: '14px',
                                     padding: '1.75rem',
-                                    color: 'white',
+                                    color: 'var(--primary-dark)',
                                     position: 'relative',
                                     overflow: 'hidden'
                                 }}>
@@ -789,13 +789,13 @@ export default function MediatorDashboard() {
                                                     </td>
                                                     <td style={{ textAlign: 'center' }}>
                                                         <span style={{
-                                                            background: ref.purchased_count > 0 ? 'rgba(76,175,80,0.12)' : 'var(--bg)',
-                                                            color: ref.purchased_count > 0 ? '#4CAF50' : 'var(--text-secondary)',
+                                                            background: ref.purchased_count > 0 ? 'rgba(16,185,129,0.12)' : 'var(--bg)',
+                                                            color: ref.purchased_count > 0 ? '#10B981' : 'var(--text-secondary)',
                                                             fontWeight: '700',
                                                             padding: '4px 14px',
                                                             borderRadius: '20px',
                                                             fontSize: '0.9rem',
-                                                            border: ref.purchased_count > 0 ? '1px solid rgba(76,175,80,0.3)' : '1px solid var(--border-color)',
+                                                            border: ref.purchased_count > 0 ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--border-color)',
                                                             display: 'inline-block'
                                                         }}>
                                                             {ref.purchased_count}

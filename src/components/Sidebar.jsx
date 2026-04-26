@@ -69,7 +69,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
             width: sidebarWidth,
             height: isMobile ? '100vh' : 'calc(100vh - 2rem)',
             margin: isMobile ? 0 : '1rem 0 1rem 1rem',
-            background: theme === 'dark' ? 'rgba(30, 41, 59, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+            background: theme === 'dark' ? 'rgba(28, 28, 28, 0.75)' : 'rgba(255, 255, 255, 0.75)',
             backdropFilter: 'blur(15px)',
             WebkitBackdropFilter: 'blur(15px)',
             borderRadius: isMobile ? 0 : '24px',
@@ -122,9 +122,9 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                     transition: 'margin 0.3s ease'
                 }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="10" r="6" fill="#1565c0" />
-                        <circle cx="12" cy="10" r="2.5" fill="white" />
-                        <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="#1565c0" />
+                        <circle cx="12" cy="10" r="6" fill="var(--primary)" />
+                        <circle cx="12" cy="10" r="2.5" fill="var(--secondary)" />
+                        <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="var(--primary)" />
                     </svg>
                 </div>
                 <div style={{
@@ -180,7 +180,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                             margin: '0 0.75rem',
                                             textDecoration: 'none',
                                             color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                                            background: isActive ? '#FFFFFF' : 'transparent',
+                                            background: isActive ? 'var(--bg)' : 'transparent',
                                             borderRadius: '12px',
                                             boxShadow: isActive ? 'var(--shadow-md)' : 'none',
                                             transition: 'padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
