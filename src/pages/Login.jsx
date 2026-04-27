@@ -149,16 +149,16 @@ export default function Login() {
                     padding: 11px 0;
                     font-size: 14px;
                     font-weight: 600;
-                    color: var(--primary-dark);
-                    background: linear-gradient(135deg, var(--secondary) 0%, #F0CC5A 100%);
+                    color: white;
+                    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
                     border: none;
                     border-radius: 25px;
                     cursor: pointer;
-                    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+                    box-shadow: 0 4px 14px rgba(0, 200, 151, 0.35);
                     transition: box-shadow 0.25s;
                 }
                 .btn-signin:disabled { background: var(--input-border); opacity: 0.7; cursor: not-allowed; }
-                .btn-signin:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5); }
+                .btn-signin:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(0, 200, 151, 0.5); }
 
                 .btn-signup {
                     flex: 1;
@@ -309,10 +309,10 @@ export default function Login() {
                                         }}
                                         placeholder="Enter your email" 
                                         className="login-input" 
-                                        style={{ borderBottomColor: formErrors.email ? '#dc3545' : '#90caf9' }}
+                                        style={{ borderBottomColor: formErrors.email ? '#dc3545' : 'var(--primary)' }}
                                     />
                                     <svg style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }} width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12l2 2 4-4" stroke={formErrors.email ? '#dc3545' : '#90caf9'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M9 12l2 2 4-4" stroke={formErrors.email ? '#dc3545' : 'var(--primary)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </div>
                                 {formErrors.email && <div style={{ color: '#dc3545', fontSize: '11px', marginTop: '4px', fontWeight: '500' }}>{formErrors.email}</div>}
@@ -332,7 +332,7 @@ export default function Login() {
                                         }}
                                         placeholder="Enter your password" 
                                         className="login-input" 
-                                        style={{ borderBottomColor: formErrors.password ? '#dc3545' : '#90caf9' }}
+                                        style={{ borderBottomColor: formErrors.password ? '#dc3545' : 'var(--primary)' }}
                                     />
                                     <div 
                                         onClick={() => setShowPassword(!showPassword)}
@@ -342,7 +342,7 @@ export default function Login() {
                                             top: '50%', 
                                             transform: 'translateY(-50%)', 
                                             cursor: 'pointer',
-                                            color: formErrors.password ? '#dc3545' : '#90caf9',
+                                            color: formErrors.password ? '#dc3545' : 'var(--primary)',
                                             display: 'flex',
                                             alignItems: 'center'
                                         }}

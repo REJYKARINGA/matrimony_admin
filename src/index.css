@@ -1,44 +1,45 @@
 :root {
-  --primary: #0D5E45;
-  --primary-rgb: 13, 94, 69;
-  --primary-dark: #0A3A2A;
-  --secondary: #D4AF37;
-  --secondary-rgb: 212, 175, 55;
-  --bg: #F9F5EC;
-  --text: #0A3A2A;
-  --text-secondary: #1A7A5A;
-  --icon-muted: #2A9970;
-  --card-bg: rgba(255, 255, 255, 0.9);
+  --primary: #00C897;
+  --primary-rgb: 0, 200, 151;
+  --primary-dark: #00875F;
+  --primary-deep: #00A87D;
+  --secondary: #00A87D;
+  --secondary-rgb: 0, 168, 125;
+  --bg: #F5FBF9;
+  --text: #212121;
+  --text-secondary: #9E9E9E;
+  --icon-muted: #00875F;
+  --card-bg: #FFFFFF;
   --sidebar-bg: #FFFFFF;
-  --header-bg: rgba(255, 255, 255, 0.9);
-  --border-color: rgba(184, 148, 31, 0.2);
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --border-color: #E0E0E0;
   --input-bg: #FFFFFF;
-  --input-border: #D4AF37;
-  --hover-bg: #C8EAD8;
+  --input-border: #D4F5EB;
+  --hover-bg: #E8FBF5;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
   --shadow-lg: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
   --shadow-xl: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
-  --shadow-color: rgba(13, 94, 69, 0.12);
-  --error: #dc3545;
-  --error-bg: #fff0f0;
-  --error-border: #ffcccc;
-  --error-text: #cc3333;
-  --success: #10B981;
-  --success-rgb: 16, 185, 129;
+  --shadow-color: rgba(0, 200, 151, 0.1);
+  --error: #EF4444;
+  --error-bg: #FEE2E2;
+  --error-border: #FCA5A5;
+  --error-text: #B91C1C;
+  --success: #00C897;
+  --success-rgb: 0, 200, 151;
 }
 
 [data-theme='dark'] {
-  --bg: #0A3A2A;
-  --text: #F5E6A3;
-  --text-secondary: #D4AF37;
-  --card-bg: rgba(28, 28, 28, 0.8);
-  --sidebar-bg: #1C1C1C;
-  --header-bg: rgba(28, 28, 28, 0.9);
-  --border-color: rgba(212, 175, 55, 0.3);
-  --input-bg: #1C1C1C;
-  --input-border: #B8941F;
-  --hover-bg: #1A7A5A;
+  --bg: #0F172A;
+  --text: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --card-bg: #1E293B;
+  --sidebar-bg: #1E293B;
+  --header-bg: rgba(30, 41, 59, 0.95);
+  --border-color: #334155;
+  --input-bg: #1E293B;
+  --input-border: #334155;
+  --hover-bg: #334155;
   --shadow-color: rgba(0, 0, 0, 0.4);
 }
 

@@ -22,20 +22,20 @@ import { CONFIG } from '../config';
 const API_URL = CONFIG.API_URL;
 
 const COLORS = {
-    primary: '#0D5E45',
-    secondary: '#D4AF37',
-    success: '#10B981',
+    primary: '#00C897',
+    secondary: '#00A87D',
+    success: '#00C897',
     warning: '#F59E0B',
     danger: '#EF4444',
-    info: '#2A9970',
-    chart1: '#0D5E45',
-    chart2: '#D4AF37',
-    chart3: '#1A7A5A',
-    chart4: '#B8941F',
-    chart5: '#EF4444',
-    chart6: '#10B981',
+    info: '#00875F',
+    chart1: '#00C897',
+    chart2: '#00A87D',
+    chart3: '#00875F',
+    chart4: '#D4F5EB',
+    chart5: '#E8FBF5',
+    chart6: '#212121',
     female: '#ec4899',
-    male: '#0D5E45'
+    male: '#00C897'
 };
 
 const containerVariants = {

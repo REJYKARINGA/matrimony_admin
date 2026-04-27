@@ -281,8 +281,8 @@ export default function MediatorDashboard() {
     const getStatusColor = (status) => {
         const colors = {
             pending: '#F59E0B',
-            verified: '#10B981',
-            paid: '#0D5E45',
+            verified: '#00C897',
+            paid: '#00A87D',
             rejected: '#EF4444'
         };
         return colors[status] || '#999';
@@ -697,10 +697,10 @@ export default function MediatorDashboard() {
 
                                 {/* Total Earnings */}
                                 <div style={{
-                                    background: 'linear-gradient(135deg, var(--secondary) 0%, #F0CC5A 100%)',
+                                    background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-deep) 100%)',
                                     borderRadius: '14px',
                                     padding: '1.75rem',
-                                    color: 'var(--primary-dark)',
+                                    color: 'white',
                                     position: 'relative',
                                     overflow: 'hidden'
                                 }}>
