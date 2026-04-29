@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaUniversity, FaSave, FaEye, FaThumbsUp, FaComment, FaTrash, FaCheckCircle, FaStar, FaWallet, FaShareAlt, FaCopy, FaUsers, FaRupeeSign } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 import './MediatorDashboard.css';
@@ -293,7 +294,15 @@ export default function MediatorDashboard() {
             {/* Header */}
             <div className="mediator-header">
                 <div className="header-left">
-                    <FaBullhorn size={24} color="var(--primary)" />
+                    <img 
+                        src={logo} 
+                        alt="Logo" 
+                        style={{ 
+                            width: '32px', 
+                            height: '32px', 
+                            objectFit: 'contain' 
+                        }} 
+                    />
                     <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text)' }}>Mediator Dashboard</h1>
                 </div>
                 <div className="header-right">

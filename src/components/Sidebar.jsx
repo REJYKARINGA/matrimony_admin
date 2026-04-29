@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -121,11 +122,15 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
                     transition: 'margin 0.3s ease'
                 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="10" r="6" fill="var(--primary)" />
-                        <circle cx="12" cy="10" r="2.5" fill="var(--secondary)" />
-                        <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="var(--primary)" />
-                    </svg>
+                    <img 
+                        src={logo} 
+                        alt="Logo" 
+                        style={{ 
+                            width: '32px', 
+                            height: '32px', 
+                            objectFit: 'contain' 
+                        }} 
+                    />
                 </div>
                 <div style={{
                     overflow: 'hidden',

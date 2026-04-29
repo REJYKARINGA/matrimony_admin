@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { FaUserCheck, FaSearch, FaTimes, FaEdit, FaInfoCircle, FaCheck, FaSave } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
+import ConfirmModal from '../components/ConfirmModal';
 
 const SELECT_STYLE = {
     width: '100%',
@@ -34,6 +35,21 @@ const ProfileVerifications = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [editingField, setEditingField] = useState(null);
     const [tempValue, setTempValue] = useState('');
+    const [selectedProfileIds, setSelectedProfileIds] = useState([]);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        confirmText: 'Confirm',
+        confirmButtonClass: 'btn-primary'
+    });
+    const [toast, setToast] = useState(null);
+
+    const showToast = (msg, type = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     // Dropdown options
     const [religions, setReligions] = useState([]);
@@ -100,13 +116,88 @@ const ProfileVerifications = () => {
         try {
             setIsProcessing(true);
             await api.post(`/admin/profile-verifications/${profileId}/approve`);
+            showToast('Profile approved successfully');
             setSelectedProfile(null);
             fetchProfiles(currentPage);
         } catch (error) {
-            alert('Failed to approve profile changes');
+            showToast('Failed to approve profile changes', 'error');
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const toggleProfileSelection = (e, profileId) => {
+        e.stopPropagation();
+        setSelectedProfileIds(prev => 
+            prev.includes(profileId) 
+                ? prev.filter(id => id !== profileId) 
+                : [...prev, profileId]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectedProfileIds.length === profiles.length && profiles.length > 0) {
+            setSelectedProfileIds([]);
+        } else {
+            setSelectedProfileIds(profiles.map(p => p.id));
+        }
+    };
+
+    const handleBulkApprove = async () => {
+        setIsProcessing(true);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 0; i < selectedProfileIds.length; i++) {
+            const profileId = selectedProfileIds[i];
+            try {
+                // Show progressive progress for bulk hits
+                showToast(`Processing approval ${i + 1}/${selectedProfileIds.length}...`);
+                await api.post(`/admin/profile-verifications/${profileId}/approve`);
+                successCount++;
+            } catch (error) {
+                console.error(`Failed to approve profile ${profileId}:`, error);
+                errorCount++;
+            }
+        }
+
+        setIsProcessing(false);
+        setSelectedProfileIds([]);
+        fetchProfiles(currentPage);
+        
+        if (errorCount === 0) {
+            showToast(`Successfully approved ${successCount} profiles`);
+        } else {
+            showToast(`Bulk approval finished. Success: ${successCount}, Failed: ${errorCount}`, 'error');
+        }
+    };
+
+    const confirmBulkApprove = () => {
+        if (selectedProfileIds.length === 0) return;
+        setConfirmModal({
+            isOpen: true,
+            title: 'Bulk Profile Approval',
+            message: `You are about to approve ${selectedProfileIds.length} profiles. This will verify all modified fields and activate these profiles. Do you want to continue?`,
+            onConfirm: handleBulkApprove,
+            confirmText: `Approve ${selectedProfileIds.length} Profiles`,
+            confirmButtonClass: 'btn-success'
+        });
+    };
+
+    const confirmSingleApprove = (profileId) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Approve Profile',
+            message: 'Are you sure you want to approve this profile? This will verify all changed fields.',
+            onConfirm: () => {
+                handleApprove(profileId);
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            },
+            confirmText: 'Approve Now',
+            confirmButtonClass: 'btn-success'
+        });
     };
 
     const handleStartEdit = (field, value) => {
@@ -124,11 +215,12 @@ const ProfileVerifications = () => {
             };
             
             await api.put(`/admin/user-profiles/${selectedProfile.id}`, payload);
+            showToast(`${formatFieldName(editingField)} updated`);
             await fetchProfiles(currentPage);
             setEditingField(null);
         } catch (error) {
             console.error('Failed to update field:', error);
-            alert('Failed to update field. Please check validation rules.');
+            showToast('Failed to update field. Please check validation rules.', 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -343,7 +435,7 @@ const ProfileVerifications = () => {
                     background: 'rgba(56, 189, 248, 0.1)', 
                     padding: '1rem', 
                     borderRadius: '0.75rem', 
-                    marginBottom: '2rem',
+                    marginBottom: '1.5rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
@@ -355,6 +447,54 @@ const ProfileVerifications = () => {
                         Moderators can review and edit user-modified profile fields. District is limited to Kerala State.
                     </span>
                 </div>
+
+                {profiles.length > 0 && (
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '1rem',
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '0.75rem',
+                        border: '1px solid var(--border-color)',
+                        marginBottom: '1.5rem'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedProfileIds.length === profiles.length && profiles.length > 0}
+                                    onChange={handleSelectAll}
+                                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                                />
+                                Select All ({profiles.length})
+                            </label>
+                            {selectedProfileIds.length > 0 && (
+                                <span style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: '600' }}>
+                                    {selectedProfileIds.length} Selected
+                                </span>
+                            )}
+                        </div>
+                        
+                        {selectedProfileIds.length > 0 && (
+                            <button 
+                                onClick={confirmBulkApprove}
+                                disabled={isProcessing}
+                                className="btn btn-success"
+                                style={{ 
+                                    padding: '0.6rem 1.5rem', 
+                                    fontSize: '0.875rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.2)'
+                                }}
+                            >
+                                <FaCheck /> {isProcessing ? 'Processing...' : 'Bulk Approve Selected'}
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {loading ? (
                     <div style={{ padding: '2rem', textAlign: 'center' }}>Loading profile changes...</div>
@@ -374,13 +514,29 @@ const ProfileVerifications = () => {
                                     className="verification-card"
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                        <div>
-                                            <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>
-                                                {profile.first_name || 'Incomplete'} {profile.last_name || 'Profile'}
-                                            </h4>
-                                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                                {profile.user?.matrimony_id}
-                                            </p>
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedProfileIds.includes(profile.id)}
+                                                onChange={(e) => toggleProfileSelection(e, profile.id)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{ 
+                                                    width: '20px', 
+                                                    height: '20px', 
+                                                    marginTop: '4px',
+                                                    cursor: 'pointer', 
+                                                    accentColor: 'var(--primary)',
+                                                    flexShrink: 0
+                                                }}
+                                            />
+                                            <div>
+                                                <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>
+                                                    {profile.first_name || 'Incomplete'} {profile.last_name || 'Profile'}
+                                                </h4>
+                                                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                                    {profile.user?.matrimony_id}
+                                                </p>
+                                            </div>
                                         </div>
                                         <div style={{ 
                                             ...badgeStyle, 
@@ -553,7 +709,7 @@ const ProfileVerifications = () => {
                             <button 
                                 className="btn btn-success" 
                                 style={{ flex: 1, padding: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
-                                onClick={() => handleApprove(selectedProfile.id)}
+                                onClick={() => confirmSingleApprove(selectedProfile.id)}
                                 disabled={isProcessing || !!editingField}
                             >
                                 <FaCheck />
@@ -569,6 +725,34 @@ const ProfileVerifications = () => {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                confirmText={confirmModal.confirmText}
+                confirmButtonClass={confirmModal.confirmButtonClass}
+            />
+
+            {/* Toast */}
+            {toast && (
+                <div style={{
+                    position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 1000000,
+                    padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.9rem',
+                    background: toast.type === 'error' ? '#EF4444' : '#10B981', color: 'white',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    animation: 'modalSlideUp 0.3s ease-out',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
+                    {toast.msg}
                 </div>
             )}
 

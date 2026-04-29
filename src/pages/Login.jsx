@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -236,11 +237,15 @@ export default function Login() {
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 boxShadow: '0 8px 24px rgba(0,0,0,0.18)'
                             }}>
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="10" r="6" fill="var(--primary)" />
-                                    <circle cx="12" cy="10" r="2.5" fill="var(--secondary)" />
-                                    <path d="M12 16 L9 22 L12 20 L15 22 Z" fill="var(--primary)" />
-                                </svg>
+                                <img 
+                                    src={logo} 
+                                    alt="Logo" 
+                                    style={{ 
+                                        width: '48px', 
+                                        height: '48px', 
+                                        objectFit: 'contain' 
+                                    }} 
+                                />
                             </div>
                             <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: 'white' }}>
                                 Admin Panel
