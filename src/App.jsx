@@ -20,6 +20,7 @@ import WalletTransactions from './pages/WalletTransactions';
 import ReligionManagement from './pages/ReligionManagement';
 import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
+import AdminSettings from './pages/AdminSettings';
 import AuditLogs from './pages/AuditLogs';
 import ContactUnlocks from './pages/ContactUnlocks';
 import Suggestions from './pages/Suggestions';
@@ -55,6 +56,7 @@ function App() {
             <Route path="/occupation" element={<Occupation />} />
             <Route path="/interests" element={<Interests />} />
             <Route path="/personalities" element={<Personalities />} />
+            <Route path="/admin-settings" element={<AdminSettings />} />
             <Route path="/audit-logs" element={<AuditLogs />} />
             <Route path="/contact-unlocks" element={<ContactUnlocks />} />
             <Route path="/religion-management" element={<ReligionManagement />} />
