@@ -123,6 +123,7 @@ export default function AdminSettings() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.75rem',
+
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ background: 'var(--primary)', width: '8px', height: '8px', borderRadius: '50%' }} />
@@ -133,7 +134,13 @@ export default function AdminSettings() {
                                 <input
                                     type="checkbox"
                                     checked={formData.user_contact_permission_unlock}
-                                    onChange={e => setFormData({ ...formData, user_contact_permission_unlock: e.target.checked })}
+                                    onChange={e => {
+                                        if (e.target.checked) {
+                                            setFormData({ ...formData, user_contact_permission_unlock: true, mandatory_permission_for_unlock: false });
+                                        } else {
+                                            setFormData({ ...formData, user_contact_permission_unlock: false });
+                                        }
+                                    }}
                                 />
                                 <span className="slider"></span>
                             </span>
@@ -165,7 +172,13 @@ export default function AdminSettings() {
                                 <input
                                     type="checkbox"
                                     checked={formData.mandatory_permission_for_unlock}
-                                    onChange={e => setFormData({ ...formData, mandatory_permission_for_unlock: e.target.checked })}
+                                    onChange={e => {
+                                        if (e.target.checked) {
+                                            setFormData({ ...formData, mandatory_permission_for_unlock: true, user_contact_permission_unlock: false });
+                                        } else {
+                                            setFormData({ ...formData, mandatory_permission_for_unlock: false });
+                                        }
+                                    }}
                                 />
                                 <span className="slider"></span>
                             </span>
