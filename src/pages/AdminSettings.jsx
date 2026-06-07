@@ -11,6 +11,9 @@ export default function AdminSettings() {
     const [formData, setFormData] = useState({
         daily_contact_unlock_limit: 10,
         user_contact_permission_unlock: false,
+        mandatory_permission_for_unlock: false,
+        free_unlock_enabled: false,
+        free_unlock_expires_at: '',
     });
 
     const showToast = (msg, type = 'success') => {
@@ -30,6 +33,9 @@ export default function AdminSettings() {
             setFormData({
                 daily_contact_unlock_limit: s.daily_contact_unlock_limit,
                 user_contact_permission_unlock: Boolean(s.user_contact_permission_unlock),
+                mandatory_permission_for_unlock: Boolean(s.mandatory_permission_for_unlock),
+                free_unlock_enabled: Boolean(s.free_unlock_enabled),
+                free_unlock_expires_at: s.free_unlock_expires_at ? s.free_unlock_expires_at.slice(0, 16) : '',
             });
         } catch (error) {
             console.error('Failed to fetch settings:', error);
@@ -76,10 +82,26 @@ export default function AdminSettings() {
             </div>
 
             <form onSubmit={handleSave}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '600px' }}>
-                    <div className="form-group">
-                        <label>Daily Contact Unlock Limit</label>
-                        <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '1.5rem',
+                }}>
+                    <div style={{
+                        background: 'var(--card-bg, #1e1e2e)',
+                        borderRadius: '16px',
+                        padding: '1.5rem',
+                        border: '1px solid var(--border-color, #2d2d3d)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ background: 'var(--primary)', width: '8px', height: '8px', borderRadius: '50%' }} />
+                            <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Daily Contact Unlock Limit</label>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                             Maximum number of contacts a user can unlock per day
                         </p>
                         <input
@@ -88,12 +110,25 @@ export default function AdminSettings() {
                             value={formData.daily_contact_unlock_limit}
                             onChange={e => setFormData({ ...formData, daily_contact_unlock_limit: parseInt(e.target.value) || 0 })}
                             min="0"
-                            style={{ maxWidth: '200px' }}
+                            style={{ maxWidth: '100%', marginTop: 'auto' }}
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-toggle">
+                    <div style={{
+                        background: 'var(--card-bg, #1e1e2e)',
+                        borderRadius: '16px',
+                        padding: '1.5rem',
+                        border: '1px solid var(--border-color, #2d2d3d)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ background: 'var(--primary)', width: '8px', height: '8px', borderRadius: '50%' }} />
+                            <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>User Contact Permission Unlock</label>
+                        </div>
+                        <label className="form-toggle" style={{ marginTop: '0.25rem' }}>
                             <span className="switch">
                                 <input
                                     type="checkbox"
@@ -102,24 +137,102 @@ export default function AdminSettings() {
                                 />
                                 <span className="slider"></span>
                             </span>
-                            <span>User Contact Permission Unlock</span>
+                            <span style={{ fontSize: '0.85rem' }}>
+                                {formData.user_contact_permission_unlock ? 'Enabled' : 'Disabled'}
+                            </span>
                         </label>
-                        <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            Allow users to request permission before paying to unlock contacts. When enabled, users can ask for mutual interest before spending wallet money.
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Allow users to request permission before paying to unlock contacts.
                         </p>
                     </div>
 
-                    <div style={{ marginTop: '1rem' }}>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={saving}
-                            style={{ borderRadius: '12px', padding: '0.75rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-                        >
-                            {saving ? <FaSpinner className="spinner" /> : <LuSave size={18} />}
-                            {saving ? 'Saving...' : 'Save Settings'}
-                        </button>
+                    <div style={{
+                        background: 'var(--card-bg, #1e1e2e)',
+                        borderRadius: '16px',
+                        padding: '1.5rem',
+                        border: '1px solid var(--border-color, #2d2d3d)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ background: 'var(--primary)', width: '8px', height: '8px', borderRadius: '50%' }} />
+                            <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Mandatory Permission for Unlock</label>
+                        </div>
+                        <label className="form-toggle" style={{ marginTop: '0.25rem' }}>
+                            <span className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.mandatory_permission_for_unlock}
+                                    onChange={e => setFormData({ ...formData, mandatory_permission_for_unlock: e.target.checked })}
+                                />
+                                <span className="slider"></span>
+                            </span>
+                            <span style={{ fontSize: '0.85rem' }}>
+                                {formData.mandatory_permission_for_unlock ? 'Enabled' : 'Disabled'}
+                            </span>
+                        </label>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Users must have an approved permission request before unlocking via Wallet or Pay Now.
+                        </p>
                     </div>
+
+                    <div style={{
+                        background: 'var(--card-bg, #1e1e2e)',
+                        borderRadius: '16px',
+                        padding: '1.5rem',
+                        border: '1px solid var(--border-color, #2d2d3d)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ background: '#FF6B35', width: '8px', height: '8px', borderRadius: '50%' }} />
+                            <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Free Unlock Offer</label>
+                        </div>
+                        <label className="form-toggle" style={{ marginTop: '0.25rem' }}>
+                            <span className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.free_unlock_enabled}
+                                    onChange={e => setFormData({ ...formData, free_unlock_enabled: e.target.checked })}
+                                />
+                                <span className="slider"></span>
+                            </span>
+                            <span style={{ fontSize: '0.85rem' }}>
+                                {formData.free_unlock_enabled ? 'Free' : 'Paid'}
+                            </span>
+                        </label>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Users can unlock contacts for free (₹0). Useful for promotions or trial periods.
+                        </p>
+                        {formData.free_unlock_enabled && (
+                            <div style={{ marginTop: '0.5rem' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 500, display: 'block', marginBottom: '0.35rem' }}>Expiry (optional)</label>
+                                <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    value={formData.free_unlock_expires_at}
+                                    onChange={e => setFormData({ ...formData, free_unlock_expires_at: e.target.value })}
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={saving}
+                        style={{ borderRadius: '12px', padding: '0.75rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        {saving ? <FaSpinner className="spinner" /> : <LuSave size={18} />}
+                        {saving ? 'Saving...' : 'Save Settings'}
+                    </button>
                 </div>
             </form>
 
