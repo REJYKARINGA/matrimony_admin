@@ -28,6 +28,7 @@ import Suggestions from './pages/Suggestions';
 import PhotoVerifications from './pages/PhotoVerifications';
 import ProfileVerifications from './pages/ProfileVerifications';
 import PhotoRequests from './pages/PhotoRequests';
+import Festivals from './pages/Festivals';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -71,6 +72,7 @@ function App() {
             <Route path="/photo-verifications" element={<PhotoVerifications />} />
             <Route path="/profile-verifications" element={<ProfileVerifications />} />
             <Route path="/photo-requests" element={<PhotoRequests />} />
+            <Route path="/festivals" element={<Festivals />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

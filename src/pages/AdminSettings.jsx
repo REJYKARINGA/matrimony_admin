@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { LuSettings2, LuSave, LuCheck, LuTriangleAlert } from 'react-icons/lu';
+import { LuSettings2, LuSave, LuCheck, LuTriangleAlert, LuIndianRupee } from 'react-icons/lu';
 import { FaSpinner } from 'react-icons/fa';
 
 export default function AdminSettings() {
@@ -10,6 +10,7 @@ export default function AdminSettings() {
     const [toast, setToast] = useState(null);
     const [formData, setFormData] = useState({
         daily_contact_unlock_limit: 10,
+        contact_unlock_price: 49,
         user_contact_permission_unlock: false,
         mandatory_permission_for_unlock: false,
         free_unlock_enabled: false,
@@ -32,6 +33,7 @@ export default function AdminSettings() {
             setSetting(s);
             setFormData({
                 daily_contact_unlock_limit: s.daily_contact_unlock_limit,
+                contact_unlock_price: s.contact_unlock_price ?? 49,
                 user_contact_permission_unlock: Boolean(s.user_contact_permission_unlock),
                 mandatory_permission_for_unlock: Boolean(s.mandatory_permission_for_unlock),
                 free_unlock_enabled: Boolean(s.free_unlock_enabled),
@@ -112,6 +114,38 @@ export default function AdminSettings() {
                             min="0"
                             style={{ maxWidth: '100%', marginTop: 'auto' }}
                         />
+                    </div>
+
+                    {/* Contact Unlock Price Card */}
+                    <div style={{
+                        background: 'var(--card-bg, #1e1e2e)',
+                        borderRadius: '16px',
+                        padding: '1.5rem',
+                        border: '1px solid var(--border-color, #2d2d3d)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <LuIndianRupee size={18} style={{ color: '#10B981' }} />
+                            <label style={{ fontWeight: 600, fontSize: '0.95rem' }}>Contact Unlock Price</label>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Base price users pay to unlock a contact (before discounts)
+                        </p>
+                        <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 600, color: 'var(--text-secondary)' }}>₹</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="form-control"
+                                value={formData.contact_unlock_price}
+                                onChange={e => setFormData({ ...formData, contact_unlock_price: parseFloat(e.target.value) || 0 })}
+                                style={{ width: '100%', paddingLeft: '2rem', marginTop: 'auto' }}
+                            />
+                        </div>
                     </div>
 
                     <div style={{
@@ -234,7 +268,7 @@ export default function AdminSettings() {
                             </div>
                         )}
                     </div>
-                </div>
+                    </div>
 
                 <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
                     <button
