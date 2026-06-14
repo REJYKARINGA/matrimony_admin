@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf, FaEye, FaImages } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 export default function PhotoVerifications() {
     const [users, setUsers] = useState([]);
@@ -32,6 +33,7 @@ export default function PhotoVerifications() {
 
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchUsers(1);
@@ -103,8 +105,8 @@ export default function PhotoVerifications() {
             await api.post(`/admin/profile-photos/${photoId}/verify`);
             fetchUsers(currentPage);
         } catch (error) {
-            alert('Failed to approve photo');
-        }
+            showToast('Failed to approve photo', 'error');
+            }
     };
 
     const handleReject = async (photoId) => {
@@ -120,8 +122,8 @@ export default function PhotoVerifications() {
                     await api.post(`/admin/profile-photos/${photoId}/reject`, { reason });
                     fetchUsers(currentPage);
                 } catch (error) {
-                    alert('Failed to reject photo');
-                }
+                showToast('Failed to reject photo', 'error');
+                    }
             }
         });
     };
@@ -157,7 +159,7 @@ export default function PhotoVerifications() {
                     setSelectedPhotoIds([]);
                     fetchUsers(currentPage);
                 } catch (error) {
-                    alert(`Failed to bulk ${action} photos`);
+                    showToast(`Failed to bulk ${action} photos`, 'error');
                 } finally {
                     setIsBulkProcessing(false);
                 }
@@ -179,7 +181,7 @@ export default function PhotoVerifications() {
                     setSelectedUser(null);
                     fetchUsers(currentPage);
                 } catch (error) {
-                    alert('Failed to approve all photos');
+                    showToast('Failed to approve all photos', 'error');
                 } finally {
                     setIsBulkProcessing(false);
                 }
@@ -296,16 +298,8 @@ export default function PhotoVerifications() {
                                         ))}
                                     </div>
                                     <div style={userInfoStyle}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                                            <UserAvatar user={user} size={44} />
-                                            <div>
-                                                <div style={{ fontWeight: '600', fontSize: '1rem' }}>
-                                                    {user.user_profile?.first_name} {user.user_profile?.last_name}
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                                    {user.matrimony_id}
-                                                </div>
-                                            </div>
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <UserCell user={user} profile={user.user_profile} avatarSize={44} />
                                         </div>
                                         
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -494,7 +488,7 @@ export default function PhotoVerifications() {
                                                             });
                                                             fetchUsers(currentPage);
                                                         } catch (err) {
-                                                            alert('Action failed');
+                                                            showToast('Action failed', 'error');
                                                         }
                                                     }
                                                 })}
@@ -607,6 +601,7 @@ export default function PhotoVerifications() {
                 inputValue={rejectionReason}
                 onInputChange={setRejectionReason}
             />
+            {ToastComponent}
         </div>
     );
 }
