@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
@@ -24,6 +25,8 @@ export default function Verifications() {
     // Confirm Modal state
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '', userId: null });
     const [blockingReason, setBlockingReason] = useState('');
+
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchVerifications(1);
@@ -62,13 +65,13 @@ export default function Verifications() {
             setSelectedVerification(null);
             fetchVerifications(currentPage);
         } catch (error) {
-            alert('Failed to approve');
+            showToast('Failed to approve', 'error');
         }
     };
 
     const handleReject = async (id, reason) => {
         if (!reason.trim()) {
-            alert('Please provide a reason for rejection');
+            showToast('Please provide a reason for rejection', 'error');
             return;
         }
         try {
@@ -77,7 +80,7 @@ export default function Verifications() {
             setRejectReason('');
             fetchVerifications(currentPage);
         } catch (error) {
-            alert('Failed to reject');
+            showToast('Failed to reject', 'error');
         }
     };
 
@@ -186,15 +189,7 @@ export default function Verifications() {
                                     {verifications.map((v) => (
                                         <tr key={v.id}>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <UserAvatar user={v.user} size={36} />
-                                                    <div>
-                                                        <div style={{ fontWeight: '600' }}>
-                                                            {v.user?.user_profile?.first_name} {v.user?.user_profile?.last_name}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{v.user?.email}</div>
-                                                    </div>
-                                                </div>
+                                                <UserCell user={v.user} profile={v.user?.user_profile} />
                                             </td>
                                             <td>{v.id_proof_type}</td>
                                             <td>{v.id_proof_number || 'N/A'}</td>
@@ -466,7 +461,7 @@ export default function Verifications() {
                             }));
                         }
                     } catch (error) {
-                        alert('Action failed');
+                        showToast('Action failed', 'error');
                     } finally {
                         setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
                     }
@@ -479,6 +474,7 @@ export default function Verifications() {
                 inputValue={blockingReason}
                 onInputChange={setBlockingReason}
             />
+            {ToastComponent}
         </>
     );
 }
