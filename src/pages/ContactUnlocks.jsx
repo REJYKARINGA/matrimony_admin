@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { unlockApi } from '../api/unlockApi';
 import Pagination from '../components/Pagination';
-import { FaUnlock, FaUser, FaArrowRight, FaMoneyBillWave, FaCalendarAlt, FaSearch, FaFilter, FaIdCard } from 'react-icons/fa';
+import { FaUnlock, FaArrowRight, FaMoneyBillWave, FaCalendarAlt, FaSearch, FaFilter, FaIdCard } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 
 export default function ContactUnlocks() {
     const [unlocks, setUnlocks] = useState([]);
@@ -182,9 +183,7 @@ export default function ContactUnlocks() {
                                     >
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary)15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-                                                    <FaUser size={18} />
-                                                </div>
+                                                <UserAvatar user={item.user} size={40} />
                                                 <div>
                                                     <div style={{ fontWeight: 600 }}>{getUserName(item.user)}</div>
                                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.user?.matrimony_id}</div>
