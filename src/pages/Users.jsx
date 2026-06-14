@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaBan, FaUnlock, FaPlus, FaEdit, FaTrash, FaUndo } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -21,6 +22,7 @@ export default function Users() {
     const [genderFilter, setGenderFilter] = useState('all');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+    const { showToast, ToastComponent } = useToast();
 
     // Form Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +88,7 @@ export default function Users() {
             fetchUsers(currentPage); // Refresh current page
         } catch (error) {
             console.error('Action failed:', error);
-            alert('Failed to perform action');
+            showToast('Failed to perform action', 'error');
         } finally {
             setConfirmModal({ isOpen: false, id: null, action: '', message: '' });
             setBlockReason('');
@@ -313,11 +315,9 @@ export default function Users() {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Profile</th>
-                                        <th>Name</th>
+                                        <th>User</th>
                                         <th>Gender</th>
                                         <th>Contact</th>
-                                        <th>Matrimony ID</th>
                                         <th>Reference Code</th>
                                         <th>Role</th>
                                         <th>Email Status</th>
@@ -331,12 +331,7 @@ export default function Users() {
                                     {users.map((user) => (
                                         <tr key={user.id}>
                                             <td>
-                                                <UserAvatar user={user} size={40} />
-                                            </td>
-                                            <td>
-                                                <div style={{ fontWeight: '600' }}>
-                                                    {user.user_profile?.first_name || 'N/A'} {user.user_profile?.last_name || ''}
-                                                </div>
+                                                <UserCell user={user} profile={user?.user_profile} />
                                             </td>
                                             <td>
                                                 <span style={{ textTransform: 'capitalize', fontWeight: '500', color: user.user_profile?.gender === 'male' ? '#60a5fa' : user.user_profile?.gender === 'female' ? '#f472b6' : 'var(--text-secondary)' }}>
@@ -346,11 +341,6 @@ export default function Users() {
                                             <td>
                                                 <div>{user.email}</div>
                                                 <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{user.phone}</div>
-                                            </td>
-                                            <td>
-                                                <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)' }}>
-                                                    {user.matrimony_id}
-                                                </span>
                                             </td>
                                             <td>
                                                 <span className="badge badge-primary">
@@ -456,6 +446,8 @@ export default function Users() {
                     </>
                 )}
             </div>
+
+            {ToastComponent}
 
             {/* Custom Confirm Modal */}
             <ConfirmModal
