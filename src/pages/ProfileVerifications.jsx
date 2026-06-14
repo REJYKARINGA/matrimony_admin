@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { FaUserCheck, FaSearch, FaTimes, FaEdit, FaInfoCircle, FaCheck, FaSave } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -529,6 +530,7 @@ const ProfileVerifications = () => {
                                                     flexShrink: 0
                                                 }}
                                             />
+                                            <UserAvatar user={profile.user} size={44} />
                                             <div>
                                                 <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>
                                                     {profile.first_name || 'Incomplete'} {profile.last_name || 'Profile'}
@@ -608,13 +610,7 @@ const ProfileVerifications = () => {
 
                         <div style={{ padding: '2rem', overflowY: 'auto' }}>
                             <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
-                                <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--primary)', flexShrink: 0 }}>
-                                    <img 
-                                        src={selectedProfile.profile_picture || 'https://via.placeholder.com/100'} 
-                                        alt="Profile" 
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                </div>
+                                <UserAvatar user={selectedProfile.user} size={100} style={{ border: '3px solid var(--primary)' }} />
                                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                     <h2 style={{ margin: '0 0 0.25rem 0' }}>{selectedProfile.first_name} {selectedProfile.last_name}</h2>
                                     <p style={{ margin: 0, color: 'var(--primary)', fontWeight: 'bold' }}>{selectedProfile.user?.matrimony_id}</p>
