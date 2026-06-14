@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auditApi } from '../api/auditApi';
 import Pagination from '../components/Pagination';
-import { FaHistory, FaFingerprint, FaDesktop, FaMapMarkerAlt, FaSearch, FaFilter, FaStream, FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { FaHistory, FaFingerprint, FaDesktop, FaMapMarkerAlt, FaSearch, FaFilter, FaStream, FaCalendarAlt } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 
 export default function AuditLogs() {
     const [activeTab, setActiveTab] = useState('login_history'); // 'login_history' or 'activity_logs'
@@ -231,13 +232,7 @@ export default function AuditLogs() {
                                     >
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                <div style={{ 
-                                                    width: '36px', height: '36px', borderRadius: '50%', 
-                                                    background: 'var(--primary)15', display: 'flex', 
-                                                    alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' 
-                                                }}>
-                                                    <FaUser size={16} />
-                                                </div>
+                                                <UserAvatar user={item.user} size={36} />
                                                 <div>
                                                     <div style={{ fontWeight: 600, color: 'var(--text)' }}>
                                                         {item.user?.user_profile ? 
