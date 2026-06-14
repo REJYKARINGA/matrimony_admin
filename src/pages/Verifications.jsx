@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
@@ -185,11 +186,14 @@ export default function Verifications() {
                                     {verifications.map((v) => (
                                         <tr key={v.id}>
                                             <td>
-                                                <div>
-                                                    <div style={{ fontWeight: '600' }}>
-                                                        {v.user?.user_profile?.first_name} {v.user?.user_profile?.last_name}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <UserAvatar user={v.user} size={36} />
+                                                    <div>
+                                                        <div style={{ fontWeight: '600' }}>
+                                                            {v.user?.user_profile?.first_name} {v.user?.user_profile?.last_name}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{v.user?.email}</div>
                                                     </div>
-                                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{v.user?.email}</div>
                                                 </div>
                                             </td>
                                             <td>{v.id_proof_type}</td>
