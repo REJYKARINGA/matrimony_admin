@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaSpinner, FaCreditCard } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 export default function Payments() {
     const [payments, setPayments] = useState([]);
@@ -10,6 +11,7 @@ export default function Payments() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchPayments(1);
@@ -86,13 +88,7 @@ export default function Payments() {
                                     <tr key={payment.id}>
                                         <td>{new Date(payment.created_at).toLocaleDateString()}</td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={payment.user} size={36} />
-                                                <div>
-                                                    <div style={{ fontWeight: '600' }}>{payment.user?.user_profile?.first_name}</div>
-                                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{payment.user?.email}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={payment.user} profile={payment.user?.user_profile} />
                                         </td>
                                         <td style={{ fontWeight: 'bold' }}>₹{payment.amount}</td>
                                         <td>{payment.subscription_id ? 'Subscription' : 'Wallet / Other'}</td>
@@ -116,6 +112,7 @@ export default function Payments() {
                     />
                 </>
             )}
+            {ToastComponent}
         </div>
     );
 }
