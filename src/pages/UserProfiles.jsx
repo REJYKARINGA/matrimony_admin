@@ -3,9 +3,10 @@ import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
-import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaExclamationTriangle, FaBan, FaUnlock } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaBan, FaUnlock, FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 const SELECT_STYLE = {
     padding: '0.35rem 0.65rem',
@@ -209,13 +210,7 @@ export default function UserProfiles() {
     const [confirm, setConfirm] = useState({ open: false, id: null, action: '', message: '' });
     const [confirmLoading, setConfirmLoading] = useState(false);
 
-    // Toast
-    const [toast, setToast] = useState(null);
-
-    const showToast = (msg, type = 'success') => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 3000);
-    };
+    const { showToast, ToastComponent } = useToast();
 
     const extractArray = (d) => Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
 
@@ -465,6 +460,40 @@ export default function UserProfiles() {
         }
     };
 
+    const handleToggleVerified = async (profile) => {
+        try {
+            await api.put(`/admin/user-profiles/${profile.id}`, {
+                is_identity_verified: !profile.is_identity_verified
+            });
+            setProfiles(prev => prev.map(p =>
+                p.id === profile.id ? { ...p, is_identity_verified: !p.is_identity_verified } : p
+            ));
+            if (selectedProfile?.id === profile.id) {
+                setSelectedProfile(prev => ({ ...prev, is_identity_verified: !prev.is_identity_verified }));
+            }
+            showToast(`ID verification ${!profile.is_identity_verified ? 'enabled' : 'disabled'}`);
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to toggle ID verification', 'error');
+        }
+    };
+
+    const handleToggleProfileActive = async (profile) => {
+        try {
+            await api.put(`/admin/user-profiles/${profile.id}`, {
+                is_profile_active: !profile.is_profile_active
+            });
+            setProfiles(prev => prev.map(p =>
+                p.id === profile.id ? { ...p, is_profile_active: !p.is_profile_active } : p
+            ));
+            if (selectedProfile?.id === profile.id) {
+                setSelectedProfile(prev => ({ ...prev, is_profile_active: !prev.is_profile_active }));
+            }
+            showToast(`Profile ${!profile.is_profile_active ? 'activated' : 'deactivated'}`);
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to toggle profile active status', 'error');
+        }
+    };
+
     const handleToggleBlock = async (profile) => {
         const user = profile.user;
         const isBlocked = user?.status === 'blocked';
@@ -512,16 +541,7 @@ export default function UserProfiles() {
         <div className="card" style={{ position: 'relative' }}>
 
             {/* Toast */}
-            {toast && (
-                <div style={{
-                    position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 100000,
-                    padding: '0.75rem 1.25rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',
-                    background: toast.type === 'error' ? '#EF4444' : '#10B981', color: 'white',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-                }}>
-                    {toast.msg}
-                </div>
-            )}
+            {ToastComponent}
 
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -622,8 +642,7 @@ export default function UserProfiles() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Profile</th>
-                                    <th>Name</th>
+                                    <th>User</th>
                                     <th>Age / Gender</th>
                                     <th>Religion</th>
                                     <th>Location</th>
@@ -642,10 +661,7 @@ export default function UserProfiles() {
                                 ) : profiles.map((profile) => (
                                     <tr key={profile.id}>
                                         <td>
-                                            <UserAvatar user={profile} size={42} />
-                                        </td>
-                                        <td>
-                                            <div style={{ fontWeight: '600' }}>{profile.first_name} {profile.last_name}</div>
+                                            <UserCell user={profile.user} profile={profile} avatarSize={42} />
                                         </td>
                                         <td>
                                             <div style={{ fontWeight: '600' }}>{getAge(profile.date_of_birth)} yrs</div>
@@ -726,6 +742,14 @@ export default function UserProfiles() {
                                                     </>
                                                 ) : (
                                                     <>
+                                                        <button onClick={() => handleToggleVerified(profile)} title={profile.is_identity_verified ? 'Mark Unverified' : 'Mark ID Verified'}
+                                                            style={{ background: profile.is_identity_verified ? '#8B5CF6' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                            {profile.is_identity_verified ? <FaCheckCircle /> : <FaTimesCircle />}
+                                                        </button>
+                                                        <button onClick={() => handleToggleProfileActive(profile)} title={profile.is_profile_active ? 'Deactivate Profile' : 'Activate Profile'}
+                                                            style={{ background: profile.is_profile_active ? '#10B981' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                            {profile.is_profile_active ? <FaEye /> : <FaEyeSlash />}
+                                                        </button>
                                                         <button onClick={() => handleEdit(profile)} title="Edit"
                                                             style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                                                             <FaEdit />
