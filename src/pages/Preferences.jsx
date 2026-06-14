@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 export default function Preferences() {
     const [preferences, setPreferences] = useState([]);
@@ -11,6 +12,7 @@ export default function Preferences() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchPreferences(1);
@@ -161,17 +163,7 @@ export default function Preferences() {
                                     <tr key={preference.id}>
                                         <td>
                                             {preference.user?.user_profile ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <UserAvatar user={preference.user} size={36} />
-                                                    <div>
-                                                        <div style={{ fontWeight: '600' }}>
-                                                            {preference.user.user_profile.first_name} {preference.user.user_profile.last_name}
-                                                        </div>
-                                                        <small style={{ color: 'var(--text-secondary)' }}>
-                                                            {preference.user.matrimony_id}
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                                <UserCell user={preference.user} profile={preference.user.user_profile} />
                                             ) : (
                                                 <span>-</span>
                                             )}
@@ -252,6 +244,7 @@ export default function Preferences() {
                     />
                 </>
             )}
+            {ToastComponent}
         </div>
     );
 }
