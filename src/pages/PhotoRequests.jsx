@@ -3,7 +3,8 @@ import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import TimeFormatCell from '../components/TimeFormatCell';
 import { FaCamera, FaSearch, FaHistory } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 const SELECT_STYLE = {
     padding: '0.4rem 0.75rem',
@@ -24,6 +25,7 @@ export default function PhotoRequests() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchRequests(1);
@@ -133,34 +135,16 @@ export default function PhotoRequests() {
                                 ) : requests.map((request) => (
                                     <tr key={request.id}>
                                          <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={request.requester} size={36} />
-                                                <div>
-                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                        {request.requester?.user_profile?.first_name} {request.requester?.user_profile?.last_name}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                        ID: {request.requester?.matrimony_id || 'N/A'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={request.receiver} size={36} />
-                                                <div>
-                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                        {request.receiver?.user_profile?.first_name} {request.receiver?.user_profile?.last_name}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                        ID: {request.receiver?.matrimony_id || 'N/A'}
-                                                    </div>
-                                                    {request.receiver?.user_profile?.gender === 'female' && (
-                                                        <span style={{ fontSize: '0.7rem', background: 'rgba(244, 114, 182, 0.1)', color: '#f472b6', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>Women Protection Active</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
+                                             <UserCell user={request.requester} profile={request.requester?.user_profile} />
+                                         </td>
+                                         <td>
+                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                 <UserCell user={request.receiver} profile={request.receiver?.user_profile} />
+                                                 {request.receiver?.user_profile?.gender === 'female' && (
+                                                     <span style={{ fontSize: '0.7rem', background: 'rgba(244, 114, 182, 0.1)', color: '#f472b6', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', width: 'fit-content' }}>Women Protection Active</span>
+                                                 )}
+                                             </div>
+                                         </td>
                                         <td>{getStatusBadge(request.status)}</td>
                                         <td>
                                             <TimeFormatCell date={request.created_at} />
@@ -183,6 +167,7 @@ export default function PhotoRequests() {
                     />
                 </>
             )}
+            {ToastComponent}
         </div>
     );
 }
