@@ -3,6 +3,7 @@ import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import TimeFormatCell from '../components/TimeFormatCell';
 import { FaCamera, FaSearch, FaHistory } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 
 const SELECT_STYLE = {
     padding: '0.4rem 0.75rem',
@@ -131,24 +132,34 @@ export default function PhotoRequests() {
                                     </tr>
                                 ) : requests.map((request) => (
                                     <tr key={request.id}>
-                                        <td>
-                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                {request.requester?.user_profile?.first_name} {request.requester?.user_profile?.last_name}
-                                            </div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                ID: {request.requester?.matrimony_id || 'N/A'}
+                                         <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={request.requester} size={36} />
+                                                <div>
+                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                        {request.requester?.user_profile?.first_name} {request.requester?.user_profile?.last_name}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                                        ID: {request.requester?.matrimony_id || 'N/A'}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                                                {request.receiver?.user_profile?.first_name} {request.receiver?.user_profile?.last_name}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={request.receiver} size={36} />
+                                                <div>
+                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                        {request.receiver?.user_profile?.first_name} {request.receiver?.user_profile?.last_name}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                                        ID: {request.receiver?.matrimony_id || 'N/A'}
+                                                    </div>
+                                                    {request.receiver?.user_profile?.gender === 'female' && (
+                                                        <span style={{ fontSize: '0.7rem', background: 'rgba(244, 114, 182, 0.1)', color: '#f472b6', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>Women Protection Active</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                ID: {request.receiver?.matrimony_id || 'N/A'}
-                                            </div>
-                                            {request.receiver?.user_profile?.gender === 'female' && (
-                                                <span style={{ fontSize: '0.7rem', background: 'rgba(244, 114, 182, 0.1)', color: '#f472b6', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>Women Protection Active</span>
-                                            )}
                                         </td>
                                         <td>{getStatusBadge(request.status)}</td>
                                         <td>
