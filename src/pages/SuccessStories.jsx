@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaExternalLinkAlt, FaSpinner, FaHeartBroken } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import { CONFIG } from '../config';
 
 export default function SuccessStories() {
@@ -13,6 +14,7 @@ export default function SuccessStories() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '' });
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchStories(1);
@@ -42,7 +44,7 @@ export default function SuccessStories() {
             await api.post(`/admin/success-stories/${id}/approve`);
             fetchStories(currentPage);
         } catch (error) {
-            alert('Failed to approve');
+            showToast('Failed to approve', 'error');
         }
     };
 
@@ -51,7 +53,7 @@ export default function SuccessStories() {
             await api.post(`/admin/success-stories/${id}/reject`);
             fetchStories(currentPage);
         } catch (error) {
-            alert('Failed to reject');
+            showToast('Failed to reject', 'error');
         }
     };
 
@@ -107,11 +109,9 @@ export default function SuccessStories() {
                                     <tr key={story.id}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={story.user1} size={36} />
-                                                <div style={{ fontWeight: '600' }}>
-                                                    {story.user1?.user_profile?.first_name} & {story.user2?.user_profile?.first_name}
-                                                </div>
-                                                <UserAvatar user={story.user2} size={36} />
+                                                <UserCell user={story.user1} profile={story.user1?.user_profile} />
+                                                <span style={{ color: 'var(--text-secondary)', fontWeight: '600' }}>&</span>
+                                                <UserCell user={story.user2} profile={story.user2?.user_profile} />
                                             </div>
                                         </td>
                                         <td>{new Date(story.wedding_date).toLocaleDateString()}</td>
@@ -175,6 +175,7 @@ export default function SuccessStories() {
                 confirmText={confirmModal.action === 'approve' ? 'Approve' : 'Reject'}
                 confirmButtonClass={confirmModal.action === 'approve' ? 'btn-success' : 'btn-danger'}
             />
+            {ToastComponent}
         </div>
     );
 }
