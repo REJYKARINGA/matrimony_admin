@@ -17,6 +17,8 @@ import {
     FaFlag, FaChartLine, FaArrowTrendUp, FaSpinner, FaClock,
     FaWallet, FaGraduationCap, FaBullseye, FaArrowRotateLeft
 } from 'react-icons/fa6';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import { CONFIG } from '../config';
 
 const API_URL = CONFIG.API_URL;
@@ -172,6 +174,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
     const [hoverFR, setHoverFR] = useState(false);
+    const { showToast, ToastComponent } = useToast();
     const { theme, isMobile } = useOutletContext();
     const navigate = useNavigate();
     const isDark = theme === 'dark';
@@ -897,8 +900,8 @@ export default function Dashboard() {
                                                 cursor: 'pointer'
                                             }}
                                         >
-                                            <p style={{ margin: 0, fontWeight: 700, fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
-                                            <p style={{ margin: '1px 0 0', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{s.matrimony_id}</p>
+                                                                    <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
+                                                                    <UserCell user={s.user} profile={s.user?.user_profile} avatarSize={24} showBadge={false} />
                                         </div>
                                     ))}
                                 </div>
@@ -1015,6 +1018,7 @@ export default function Dashboard() {
                 </motion.div>
 
             </div>
+            {ToastComponent}
         </div>
     );
 }
