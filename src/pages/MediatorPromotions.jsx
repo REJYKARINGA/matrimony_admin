@@ -15,6 +15,7 @@ import {
     FaFilter,
     FaSearch
 } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import api from '../api/axios';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
@@ -500,8 +501,13 @@ export default function MediatorPromotions() {
                                                 style={{ borderBottom: '1px solid var(--border-color)' }}
                                             >
                                                 <td style={{ padding: '1rem' }}>
-                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{promo.user?.name || 'Unknown'}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{promo.user?.email}</div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        <UserAvatar user={promo.user} size={36} />
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{promo.user?.name || 'Unknown'}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{promo.user?.email}</div>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td style={{ padding: '1rem' }}>
                                                     <span style={{
