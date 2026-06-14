@@ -481,3 +481,8 @@ input:focus+.slider {
     transform: translateY(0) scale(1);
   }
 }
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
