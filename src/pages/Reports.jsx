@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
 import { FaCheckCircle, FaTimes, FaShieldAlt, FaBan, FaUnlock } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import Pagination from '../components/Pagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import TimeFormatCell from '../components/TimeFormatCell';
@@ -20,6 +21,8 @@ export default function Reports() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+
+    const { showToast, ToastComponent } = useToast();
 
     // Confirm Modal state
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '', userId: null });
@@ -95,7 +98,7 @@ export default function Reports() {
             setResolvingReport(null);
             fetchReports(currentPage);
         } catch (error) {
-            alert('Failed to resolve');
+            showToast('Failed to resolve', 'error');
         } finally {
             setIsResolving(false);
         }
@@ -105,7 +108,7 @@ export default function Reports() {
 
     const handleToggleBlock = async () => {
         if (!confirmModal.userId) {
-            alert('Cannot perform action: Reported User data is missing or inaccessible.');
+            showToast('Cannot perform action: Reported User data is missing or inaccessible.', 'error');
             setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
             return;
         }
@@ -116,7 +119,7 @@ export default function Reports() {
             fetchReports(currentPage);
         } catch (error) {
             console.error('Action failed:', error);
-            alert('Failed to perform action');
+            showToast('Failed to perform action', 'error');
         } finally {
             setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null });
             setBlockReason('');
@@ -274,22 +277,12 @@ export default function Reports() {
                                 {reports.map((report) => (
                                     <tr key={report.id}>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={report.reporter} size={36} />
-                                                <div>
-                                                    <div>{(report.reporter?.user_profile?.first_name || report.reporter?.userProfile?.first_name) || 'N/A'} {(report.reporter?.user_profile?.last_name || report.reporter?.userProfile?.last_name) || ''}</div>
-                                                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>ID: {report.reporter?.matrimony_id}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={report.reporter} profile={report.reporter?.user_profile || report.reporter?.userProfile} />
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={report.reported} size={36} />
-                                                <div>
-                                                    <div>{(report.reported?.user_profile?.first_name || report.reported?.userProfile?.first_name) || 'N/A'} {(report.reported?.user_profile?.last_name || report.reported?.userProfile?.last_name) || ''}</div>
-                                                    <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px', flexWrap: 'wrap' }}>
-                                                        <span style={{ opacity: 0.6 }}>ID: {report.reported?.matrimony_id}</span>
-                                                        <span className={`badge ${report.reported?.status === 'blocked' ? 'badge-rejected' : 'badge-verified'}`} style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <UserCell user={report.reported} profile={report.reported?.user_profile || report.reported?.userProfile} showBadge={false} />
+                                                <span className={`badge ${report.reported?.status === 'blocked' ? 'badge-rejected' : 'badge-verified'}`} style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
                                                     {report.reported?.status}
                                                 </span>
                                                 {report.reported?.received_user_reports_count > 1 && (
@@ -306,9 +299,7 @@ export default function Reports() {
                                                     </span>
                                                 )}
                                             </div>
-                                        </div>
-                                    </div>
-                                    </td>
+                                        </td>
                                         <td>
                                             <div>{report.reason}</div>
                                             <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
@@ -443,6 +434,7 @@ export default function Reports() {
                 document.body
             )}
 
+            {ToastComponent}
             <ConfirmModal
                 isOpen={confirmModal.isOpen}
                 onClose={() => setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null })}
