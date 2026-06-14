@@ -11,6 +11,7 @@ import {
     FaUser,
     FaReceipt
 } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import api from '../api/axios';
 
 const containerVariants = {
@@ -416,15 +417,20 @@ export default function WalletTransactions() {
                                                 }}
                                             >
                                                 <td style={{ padding: '1rem' }}>
-                                                    <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>
-                                                        {transaction.user?.user_profile?.first_name || 'N/A'} 
-                                                        {transaction.user?.user_profile?.last_name || ''}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                                        {transaction.user?.email || 'N/A'}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                        ID: {transaction.user?.matrimony_id || 'N/A'}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        <UserAvatar user={transaction.user} size={36} />
+                                                        <div>
+                                                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>
+                                                                {transaction.user?.user_profile?.first_name || 'N/A'} 
+                                                                {transaction.user?.user_profile?.last_name || ''}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                                                {transaction.user?.email || 'N/A'}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                                                ID: {transaction.user?.matrimony_id || 'N/A'}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 
