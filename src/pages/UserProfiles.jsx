@@ -4,6 +4,7 @@ import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaExclamationTriangle, FaBan, FaUnlock } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import ConfirmModal from '../components/ConfirmModal';
 
 const SELECT_STYLE = {
@@ -270,7 +271,7 @@ export default function UserProfiles() {
         return age;
     };
 
-    const getAvatarSrc = (gender) => {
+    const getAvatarSrc = (gender) => { // kept for legacy usage in form modal
         const isMale = ['male', 'm', 'groom'].includes(String(gender).toLowerCase());
         const c1 = isMale ? '%2360a5fa' : '%23f472b6';
         const c2 = isMale ? '%232563eb' : '%23db2777';
@@ -639,16 +640,7 @@ export default function UserProfiles() {
                                 ) : profiles.map((profile) => (
                                     <tr key={profile.id}>
                                         <td>
-                                            {profile.profile_picture ? (
-                                                <img className="profile-img-zoom"
-                                                    src={profile.profile_picture.startsWith('http') ? profile.profile_picture : `${import.meta.env.VITE_API_BASE_URL}/storage/${profile.profile_picture}`}
-                                                    alt="Profile"
-                                                    style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
-                                                    onError={(e) => { e.target.onerror = null; e.target.src = getAvatarSrc(profile.gender); }}
-                                                />
-                                            ) : (
-                                                <img src={getAvatarSrc(profile.gender)} alt="Avatar" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
-                                            )}
+                                            <UserAvatar user={profile} size={42} />
                                         </td>
                                         <td>
                                             <div style={{ fontWeight: '600' }}>{profile.first_name} {profile.last_name}</div>
