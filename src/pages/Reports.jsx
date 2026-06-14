@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
 import { FaCheckCircle, FaTimes, FaShieldAlt, FaBan, FaUnlock } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import TimeFormatCell from '../components/TimeFormatCell';
@@ -273,14 +274,22 @@ export default function Reports() {
                                 {reports.map((report) => (
                                     <tr key={report.id}>
                                         <td>
-                                            <div>{(report.reporter?.user_profile?.first_name || report.reporter?.userProfile?.first_name) || 'N/A'} {(report.reporter?.user_profile?.last_name || report.reporter?.userProfile?.last_name) || ''}</div>
-                                            <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>ID: {report.reporter?.matrimony_id}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={report.reporter} size={36} />
+                                                <div>
+                                                    <div>{(report.reporter?.user_profile?.first_name || report.reporter?.userProfile?.first_name) || 'N/A'} {(report.reporter?.user_profile?.last_name || report.reporter?.userProfile?.last_name) || ''}</div>
+                                                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>ID: {report.reporter?.matrimony_id}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <div>{(report.reported?.user_profile?.first_name || report.reported?.userProfile?.first_name) || 'N/A'} {(report.reported?.user_profile?.last_name || report.reported?.userProfile?.last_name) || ''}</div>
-                                            <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px', flexWrap: 'wrap' }}>
-                                                <span style={{ opacity: 0.6 }}>ID: {report.reported?.matrimony_id}</span>
-                                                <span className={`badge ${report.reported?.status === 'blocked' ? 'badge-rejected' : 'badge-verified'}`} style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={report.reported} size={36} />
+                                                <div>
+                                                    <div>{(report.reported?.user_profile?.first_name || report.reported?.userProfile?.first_name) || 'N/A'} {(report.reported?.user_profile?.last_name || report.reported?.userProfile?.last_name) || ''}</div>
+                                                    <div style={{ fontSize: '0.75rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px', flexWrap: 'wrap' }}>
+                                                        <span style={{ opacity: 0.6 }}>ID: {report.reported?.matrimony_id}</span>
+                                                        <span className={`badge ${report.reported?.status === 'blocked' ? 'badge-rejected' : 'badge-verified'}`} style={{ fontSize: '0.65rem', padding: '1px 4px' }}>
                                                     {report.reported?.status}
                                                 </span>
                                                 {report.reported?.received_user_reports_count > 1 && (
@@ -297,7 +306,9 @@ export default function Reports() {
                                                     </span>
                                                 )}
                                             </div>
-                                        </td>
+                                        </div>
+                                    </div>
+                                    </td>
                                         <td>
                                             <div>{report.reason}</div>
                                             <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
