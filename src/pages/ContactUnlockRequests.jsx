@@ -5,33 +5,7 @@ import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { FaArrowRight, FaSearch, FaFilter, FaCalendarAlt, FaCheck, FaTimes, FaHourglassHalf, FaUnlock } from 'react-icons/fa';
 import { LuCheck, LuTriangleAlert } from 'react-icons/lu';
-
-const getAvatarSrc = (gender) => {
-    const isMale = ['male', 'm', 'groom'].includes(String(gender).toLowerCase());
-    const c1 = isMale ? '%2360a5fa' : '%23f472b6';
-    const c2 = isMale ? '%232563eb' : '%23db2777';
-    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${c1}'/%3E%3Cstop offset='100%25' stop-color='${c2}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23bg)'/%3E%3Ccircle cx='50' cy='36' r='18' fill='white'/%3E%3Cpath d='M15,100 Q15,65 50,65 Q85,65 85,100 Z' fill='white'/%3E%3C/svg%3E`;
-};
-
-const UserAvatar = ({ user, style }) => {
-    const picture = user?.user_profile?.profile_picture;
-    const gender = user?.user_profile?.gender;
-    const src = picture
-        ? (picture.startsWith('http') ? picture : `${import.meta.env.VITE_API_BASE_URL}/storage/${picture}`)
-        : getAvatarSrc(gender);
-
-    return (
-        <img
-            src={src}
-            alt=""
-            style={{
-                width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover',
-                background: 'var(--sidebar-bg)', ...style
-            }}
-            onError={(e) => { e.target.onerror = null; e.target.src = getAvatarSrc(gender); }}
-        />
-    );
-};
+import UserAvatar from '../components/UserAvatar';
 
 export default function ContactUnlockRequests() {
     const [requests, setRequests] = useState([]);
