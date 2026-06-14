@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { FaUserCheck, FaSearch, FaTimes, FaEdit, FaInfoCircle, FaCheck, FaSave } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 const SELECT_STYLE = {
     width: '100%',
@@ -45,12 +46,7 @@ const ProfileVerifications = () => {
         confirmText: 'Confirm',
         confirmButtonClass: 'btn-primary'
     });
-    const [toast, setToast] = useState(null);
-
-    const showToast = (msg, type = 'success') => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 3000);
-    };
+    const { showToast, ToastComponent } = useToast();
 
     // Dropdown options
     const [religions, setReligions] = useState([]);
@@ -530,15 +526,7 @@ const ProfileVerifications = () => {
                                                     flexShrink: 0
                                                 }}
                                             />
-                                            <UserAvatar user={profile.user} size={44} />
-                                            <div>
-                                                <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>
-                                                    {profile.first_name || 'Incomplete'} {profile.last_name || 'Profile'}
-                                                </h4>
-                                                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                                    {profile.user?.matrimony_id}
-                                                </p>
-                                            </div>
+                                            <UserCell user={profile.user} profile={profile} avatarSize={44} />
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end' }}>
                                             <div style={{ 
@@ -619,9 +607,8 @@ const ProfileVerifications = () => {
 
                         <div style={{ padding: '2rem', overflowY: 'auto' }}>
                             <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
-                                <UserAvatar user={selectedProfile.user} size={100} style={{ border: '3px solid var(--primary)' }} />
+                                <UserCell user={selectedProfile.user} profile={selectedProfile} avatarSize={100} />
                                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                    <h2 style={{ margin: '0 0 0.25rem 0' }}>{selectedProfile.first_name} {selectedProfile.last_name}</h2>
                                     <p style={{ margin: 0, color: 'var(--primary)', fontWeight: 'bold' }}>{selectedProfile.user?.matrimony_id}</p>
                                     <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{selectedProfile.user?.email}</p>
                                 </div>
@@ -744,22 +731,7 @@ const ProfileVerifications = () => {
             />
 
             {/* Toast */}
-            {toast && (
-                <div style={{
-                    position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 1000000,
-                    padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.9rem',
-                    background: toast.type === 'error' ? '#EF4444' : '#10B981', color: 'white',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    animation: 'modalSlideUp 0.3s ease-out',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />
-                    {toast.msg}
-                </div>
-            )}
+            {ToastComponent}
 
             <style>{`
                 .verification-card:hover {
