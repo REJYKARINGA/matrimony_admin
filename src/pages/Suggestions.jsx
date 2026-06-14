@@ -8,7 +8,8 @@ import {
     LuChevronRight, LuTerminal, LuRocket, LuEye, LuMessageSquare,
     LuGitPullRequest, LuZap, LuImage, LuPaperclip, LuDownload
 } from 'react-icons/lu';
-import UserAvatar from '../components/UserAvatar';
+import UserCell from '../components/UserCell';
+import { useToast } from '../components/Toast';
 
 // ─── Status Config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -105,12 +106,7 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
                         <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <LuMessageSquare size={12} />
                             Submitted by:
-                            <UserAvatar user={suggestion.user} size={20} />
-                            <strong style={{ color: 'var(--text)' }}>
-                                {suggestion.user?.user_profile
-                                    ? `${suggestion.user.user_profile.first_name || ''} ${suggestion.user.user_profile.last_name || ''}`.trim()
-                                    : suggestion.user?.email}
-                            </strong>
+                            <UserCell user={suggestion.user} profile={suggestion.user?.user_profile} avatarSize={20} showBadge={false} />
                         </div>
                     </div>
 
@@ -224,6 +220,7 @@ export default function Suggestions() {
     const [reviewTarget, setReviewTarget] = useState(null);
     const [deleting, setDeleting] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
+    const { showToast, ToastComponent } = useToast();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -250,7 +247,7 @@ export default function Suggestions() {
             await api.delete(`/admin/suggestions/${confirmModal.id}`);
             fetchData();
         } catch {
-            alert('Failed to delete.');
+            showToast('Failed to delete.', 'error');
         } finally {
             setDeleting(null);
             setConfirmModal({ isOpen: false, id: null });
@@ -368,23 +365,11 @@ export default function Suggestions() {
                                     <p style={{ margin: '4px 0 0', fontSize: '0.82rem' }}>Users haven't submitted any suggestions yet, or try adjusting your filters.</p>
                                 </td></tr>
                             ) : suggestions.map((s, i) => {
-                                const profile = s.user?.user_profile;
-                                const name = profile
-                                    ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
-                                    : s.user?.email || '—';
-                                const subInfo = s.user?.matrimony_id || s.user?.email || '';
-
                                 return (
                                     <tr key={s.id}>
                                         <td style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{(page - 1) * 15 + i + 1}</td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <UserAvatar user={s.user} size={28} />
-                                                <div>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text)' }}>{name}</div>
-                                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>{subInfo}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={s.user} profile={s.user?.user_profile} />
                                         </td>
                                         <td style={{ maxWidth: 300 }}>
                                             <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: 3 }}>
@@ -453,6 +438,8 @@ export default function Suggestions() {
                     </div>
                 )}
             </div>
+
+            {ToastComponent}
 
             {reviewTarget && (
                 <ReviewModal
