@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { FaCheck, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaExternalLinkAlt, FaSpinner, FaHeartBroken } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
+import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
 
 export default function SuccessStories() {
@@ -10,6 +11,7 @@ export default function SuccessStories() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '' });
 
     useEffect(() => {
         fetchStories(1);
@@ -35,7 +37,6 @@ export default function SuccessStories() {
     };
 
     const handleApprove = async (id) => {
-        if (!window.confirm('Approve this story?')) return;
         try {
             await api.post(`/admin/success-stories/${id}/approve`);
             fetchStories(currentPage);
@@ -45,7 +46,6 @@ export default function SuccessStories() {
     };
 
     const handleReject = async (id) => {
-        if (!window.confirm('Reject this story?')) return;
         try {
             await api.post(`/admin/success-stories/${id}/reject`);
             fetchStories(currentPage);
@@ -54,13 +54,39 @@ export default function SuccessStories() {
         }
     };
 
+    const loadingStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+        color: 'var(--text-secondary)',
+        gap: '1rem'
+    };
+
+    const emptyStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+        color: 'var(--text-secondary)',
+        gap: '0.75rem'
+    };
+
     return (
         <div className="card">
             <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Success Stories</h2>
             {loading ? (
-                <p>Loading...</p>
+                <div style={loadingStyle}>
+                    <FaSpinner size={32} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Loading stories...</span>
+                </div>
             ) : stories.length === 0 ? (
-                <p style={{ color: 'var(--text-secondary)' }}>No stories submitted.</p>
+                <div style={emptyStyle}>
+                    <FaHeartBroken size={32} />
+                    <span>No stories submitted.</span>
+                </div>
             ) : (
                 <>
                     <div className="table-container">
@@ -104,10 +130,10 @@ export default function SuccessStories() {
                                         <td>
                                             {!story.is_approved && (
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button onClick={() => handleApprove(story.id)} className="btn btn-success" title="Approve">
+                                                    <button onClick={() => setConfirmModal({ isOpen: true, id: story.id, action: 'approve' })} className="btn btn-success" title="Approve">
                                                         <FaCheck />
                                                     </button>
-                                                    <button onClick={() => handleReject(story.id)} className="btn btn-danger" title="Reject">
+                                                    <button onClick={() => setConfirmModal({ isOpen: true, id: story.id, action: 'reject' })} className="btn btn-danger" title="Reject">
                                                         <FaTimes />
                                                     </button>
                                                 </div>
@@ -127,6 +153,23 @@ export default function SuccessStories() {
                     />
                 </>
             )}
+
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: null, action: '' })}
+                onConfirm={async () => {
+                    if (confirmModal.action === 'approve') {
+                        await handleApprove(confirmModal.id);
+                    } else if (confirmModal.action === 'reject') {
+                        await handleReject(confirmModal.id);
+                    }
+                    setConfirmModal({ isOpen: false, id: null, action: '' });
+                }}
+                title={confirmModal.action === 'approve' ? 'Approve Story' : 'Reject Story'}
+                message={confirmModal.action === 'approve' ? 'Approve this success story?' : 'Reject this success story?'}
+                confirmText={confirmModal.action === 'approve' ? 'Approve' : 'Reject'}
+                confirmButtonClass={confirmModal.action === 'approve' ? 'btn-success' : 'btn-danger'}
+            />
         </div>
     );
 }
