@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { unlockApi } from '../api/unlockApi';
 import Pagination from '../components/Pagination';
 import { FaUnlock, FaArrowRight, FaMoneyBillWave, FaCalendarAlt, FaSearch, FaFilter, FaIdCard } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import UserCell from '../components/UserCell';
+import { useToast } from '../components/Toast';
 
 export default function ContactUnlocks() {
     const [unlocks, setUnlocks] = useState([]);
@@ -12,6 +13,7 @@ export default function ContactUnlocks() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const { showToast, ToastComponent } = useToast();
 
     const fetchUnlocks = async (page = 1) => {
         try {
@@ -41,14 +43,6 @@ export default function ContactUnlocks() {
             hour: '2-digit',
             minute: '2-digit'
         });
-    };
-
-    const getUserName = (user) => {
-        if (!user) return 'Unknown User';
-        if (user.user_profile) {
-            return `${user.user_profile.first_name} ${user.user_profile.last_name}`;
-        }
-        return user.name || user.matrimony_id || 'Unknown';
     };
 
     return (
@@ -182,13 +176,7 @@ export default function ContactUnlocks() {
                                         style={{ borderBottom: '1px solid var(--border-color)' }}
                                     >
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <UserAvatar user={item.user} size={40} />
-                                                <div>
-                                                    <div style={{ fontWeight: 600 }}>{getUserName(item.user)}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.user?.matrimony_id}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={item.user} profile={item.user?.user_profile} avatarSize={40} />
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
                                             <div style={{ color: 'var(--primary)', opacity: 0.5 }}>
@@ -196,15 +184,7 @@ export default function ContactUnlocks() {
                                             </div>
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--success)15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)' }}>
-                                                    <FaIdCard size={18} />
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: 600 }}>{getUserName(item.unlocked_user)}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.unlocked_user?.matrimony_id}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={item.unlocked_user} profile={item.unlocked_user?.user_profile} avatarSize={40} />
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
                                             <span style={{ fontWeight: 700, color: 'var(--text)' }}>₹{parseFloat(item.amount_paid).toFixed(2)}</span>
@@ -257,6 +237,7 @@ export default function ContactUnlocks() {
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                 tr:hover { background: var(--sidebar-bg); transition: background 0.2s; }
             `}</style>
+            {ToastComponent}
         </div>
     );
 }
