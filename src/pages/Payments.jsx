@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaSpinner, FaCreditCard } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 
 export default function Payments() {
@@ -85,8 +86,13 @@ export default function Payments() {
                                     <tr key={payment.id}>
                                         <td>{new Date(payment.created_at).toLocaleDateString()}</td>
                                         <td>
-                                            <div style={{ fontWeight: '600' }}>{payment.user?.user_profile?.first_name}</div>
-                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{payment.user?.email}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={payment.user} size={36} />
+                                                <div>
+                                                    <div style={{ fontWeight: '600' }}>{payment.user?.user_profile?.first_name}</div>
+                                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{payment.user?.email}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td style={{ fontWeight: 'bold' }}>₹{payment.amount}</td>
                                         <td>{payment.subscription_id ? 'Subscription' : 'Wallet / Other'}</td>
