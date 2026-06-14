@@ -5,6 +5,8 @@ import { FaPlus, FaExternalLinkAlt, FaSignOutAlt, FaBullhorn, FaMoon, FaSun, FaU
 import logo from '../assets/logo.png';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import './MediatorDashboard.css';
 
 
@@ -32,6 +34,8 @@ export default function MediatorDashboard() {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
+    const { showToast, ToastComponent } = useToast();
+
     const [formData, setFormData] = useState({
         platform: '',
         link: ''
@@ -193,7 +197,7 @@ export default function MediatorDashboard() {
             setFormData({ platform: '', link: '' });
         } catch (error) {
             console.error('Failed to submit promotion:', error);
-            alert('Failed to submit promotion');
+            showToast('Failed to submit promotion', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -205,13 +209,13 @@ export default function MediatorDashboard() {
         const totalPayableCombined = totalPromoPayable + totalRefEarnings;
 
         if (totalPayableCombined <= 0) {
-            alert('No pending payout balance.');
+            showToast('No pending payout balance.', 'error');
             return;
         }
 
         const primaryAcc = bankAccounts.find(a => a.is_primary);
         if (!primaryAcc) {
-            alert('Please add and set a primary bank account first.');
+            showToast('Please add and set a primary bank account first.', 'error');
             setActiveTab('bank-accounts');
             return;
         }
@@ -220,12 +224,12 @@ export default function MediatorDashboard() {
 
         try {
             const response = await api.post('/mediator/request-payout');
-            alert(response.data.message);
+            showToast(response.data.message);
             fetchPromotions();
             fetchBankAccounts();
         } catch (error) {
             console.error('Payout failed:', error);
-            alert(error.response?.data?.error || 'Payout request failed');
+            showToast(error.response?.data?.error || 'Payout request failed', 'error');
         }
     };
 
@@ -237,10 +241,10 @@ export default function MediatorDashboard() {
             setIsBankModalOpen(false);
             setBankDetails({ account_name: '', account_number: '', ifsc_code: '' });
             fetchBankAccounts();
-            alert('Bank account added successfully');
+            showToast('Bank account added successfully');
         } catch (error) {
             console.error('Failed to add bank account:', error);
-            alert(error.response?.data?.error || 'Failed to add bank account');
+            showToast(error.response?.data?.error || 'Failed to add bank account', 'error');
         } finally {
             setBankSubmitting(false);
         }
@@ -253,7 +257,7 @@ export default function MediatorDashboard() {
             fetchUser(); // Update primary account info in user object if needed
         } catch (error) {
             console.error('Failed to set primary account:', error);
-            alert('Failed to set primary account');
+            showToast('Failed to set primary account', 'error');
         }
     };
 
@@ -264,7 +268,7 @@ export default function MediatorDashboard() {
             fetchBankAccounts();
         } catch (error) {
             console.error('Failed to delete account:', error);
-            alert(error.response?.data?.error || 'Failed to delete account');
+            showToast(error.response?.data?.error || 'Failed to delete account', 'error');
         }
     };
 
@@ -769,17 +773,7 @@ export default function MediatorDashboard() {
                                                 <tr key={ref.id}>
                                                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{index + 1}</td>
                                                     <td>
-                                                        <span style={{
-                                                            fontFamily: 'monospace',
-                                                            fontWeight: '600',
-                                                            color: 'var(--primary)',
-                                                            background: 'rgba(var(--primary-rgb),0.08)',
-                                                            padding: '3px 8px',
-                                                            borderRadius: '6px',
-                                                            fontSize: '0.85rem'
-                                                        }}>
-                                                            {ref.referred_user?.matrimony_id || '—'}
-                                                        </span>
+                                                        <UserCell user={ref.referred_user} profile={ref.referred_user?.user_profile} />
                                                     </td>
                                                     <td>
                                                         <span style={{
@@ -1251,6 +1245,7 @@ export default function MediatorDashboard() {
                     </div>
                 )}
             </FormModal>
+            {ToastComponent}
         </div>
     );
 }
