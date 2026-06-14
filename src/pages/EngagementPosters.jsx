@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../api/axios';
-import { FaCheck, FaTimes, FaExternalLinkAlt, FaTrash, FaUser, FaHeart } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaExternalLinkAlt, FaTrash, FaHeart } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import { CONFIG } from '../config';
 
@@ -123,35 +124,7 @@ export default function EngagementPosters() {
                                     <tr key={poster.id}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <div style={{ flexShrink: 0 }}>
-                                                    {poster.user?.user_profile?.profile_picture ? (
-                                                        <img 
-                                                            src={getFullImageUrl(poster.user.user_profile.profile_picture)} 
-                                                            alt="User" 
-                                                            style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color)', padding: '2px' }}
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none';
-                                                                e.target.nextSibling.style.display = 'flex';
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <div style={{ 
-                                                        width: '50px', 
-                                                        height: '50px', 
-                                                        borderRadius: '50%', 
-                                                        background: getAvatarColor(poster.user?.user_profile?.gender), 
-                                                        color: 'white',
-                                                        display: poster.user?.user_profile?.profile_picture ? 'none' : 'flex', 
-                                                        alignItems: 'center', 
-                                                        justifyContent: 'center',
-                                                        fontWeight: 'bold',
-                                                        fontSize: '1.2rem',
-                                                        border: '2px solid white',
-                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                                                    }}>
-                                                        <FaUser size={24} />
-                                                    </div>
-                                                </div>
+                                                <UserAvatar user={poster.user} size={50} />
                                                 <div>
                                                     <div style={{ fontWeight: '600' }}>
                                                         {poster.user?.user_profile?.first_name || poster.user?.email || 'N/A'} 
@@ -164,35 +137,7 @@ export default function EngagementPosters() {
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <div style={{ flexShrink: 0 }}>
-                                                    {poster.partner?.user_profile?.profile_picture ? (
-                                                        <img 
-                                                            src={getFullImageUrl(poster.partner.user_profile.profile_picture)} 
-                                                            alt="Partner" 
-                                                            style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--secondary-color, #ec4899)', padding: '2px' }}
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none';
-                                                                e.target.nextSibling.style.display = 'flex';
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <div style={{ 
-                                                        width: '50px', 
-                                                        height: '50px', 
-                                                        borderRadius: '50%', 
-                                                        background: getAvatarColor(poster.partner?.user_profile?.gender), 
-                                                        color: 'white',
-                                                        display: poster.partner?.user_profile?.profile_picture ? 'none' : 'flex', 
-                                                        alignItems: 'center', 
-                                                        justifyContent: 'center',
-                                                        fontWeight: 'bold',
-                                                        fontSize: '1.2rem',
-                                                        border: '2px solid white',
-                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                                                    }}>
-                                                        <FaUser size={24} />
-                                                    </div>
-                                                </div>
+                                                <UserAvatar user={poster.partner} size={50} />
                                                 <div>
                                                     <div style={{ fontWeight: '500' }}>{poster.partner_matrimony_id}</div>
                                                     <div style={{ fontSize: '0.75rem', color: 'gray' }}>
