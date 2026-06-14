@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import UserAvatar from '../components/UserAvatar';
+import UserCell from '../components/UserCell';
+import { useToast } from '../components/Toast';
 import Pagination from '../components/Pagination';
 
 export default function FamilyDetails() {
@@ -10,6 +11,7 @@ export default function FamilyDetails() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         fetchFamilyDetails(1);
@@ -90,18 +92,8 @@ export default function FamilyDetails() {
                                 {familyDetails.map((detail) => (
                                     <tr key={detail.id}>
                                         <td>
-                                            {detail.user?.user_profile ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <UserAvatar user={detail.user} size={36} />
-                                                    <div>
-                                                        <div style={{ fontWeight: '600' }}>
-                                                            {detail.user.user_profile.first_name} {detail.user.user_profile.last_name}
-                                                        </div>
-                                                        <small style={{ color: 'var(--text-secondary)' }}>
-                                                            {detail.user.matrimony_id}
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                            {detail.user ? (
+                                                <UserCell user={detail.user} profile={detail.user?.user_profile} />
                                             ) : (
                                                 <span>-</span>
                                             )}
@@ -167,6 +159,7 @@ export default function FamilyDetails() {
                     />
                 </>
             )}
+            {ToastComponent}
         </div>
     );
 }
