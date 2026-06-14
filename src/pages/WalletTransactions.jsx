@@ -11,7 +11,8 @@ import {
     FaUser,
     FaReceipt
 } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 import api from '../api/axios';
 
 const containerVariants = {
@@ -65,6 +66,7 @@ export default function WalletTransactions() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [mounted, setMounted] = useState(false);
+    const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
         setMounted(true);
@@ -123,6 +125,7 @@ export default function WalletTransactions() {
 
     return (
         <div style={{ padding: '2rem', position: 'relative' }}>
+            {ToastComponent}
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -417,21 +420,7 @@ export default function WalletTransactions() {
                                                 }}
                                             >
                                                 <td style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <UserAvatar user={transaction.user} size={36} />
-                                                        <div>
-                                                            <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>
-                                                                {transaction.user?.user_profile?.first_name || 'N/A'} 
-                                                                {transaction.user?.user_profile?.last_name || ''}
-                                                            </div>
-                                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                                                {transaction.user?.email || 'N/A'}
-                                                            </div>
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                                ID: {transaction.user?.matrimony_id || 'N/A'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    <UserCell user={transaction.user} profile={transaction.user?.user_profile} />
                                                 </td>
                                                 
                                                 <td style={{ padding: '1rem' }}>
