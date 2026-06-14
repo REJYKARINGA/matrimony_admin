@@ -540,12 +540,21 @@ const ProfileVerifications = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div style={{ 
-                                            ...badgeStyle, 
-                                            backgroundColor: profile.is_active_verified ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                            color: profile.is_active_verified ? '#22c55e' : '#ef4444'
-                                        }}>
-                                            {profile.is_active_verified ? 'Verified' : 'Unverified'}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end' }}>
+                                            <div style={{ 
+                                                ...badgeStyle, 
+                                                backgroundColor: profile.is_identity_verified ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                color: profile.is_identity_verified ? '#22c55e' : '#ef4444'
+                                            }}>
+                                                {profile.is_identity_verified ? 'ID Verified' : 'Unverified'}
+                                            </div>
+                                            <div style={{ 
+                                                ...badgeStyle, 
+                                                backgroundColor: profile.is_profile_active ? 'rgba(56, 189, 248, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                color: profile.is_profile_active ? '#38bdf8' : '#ef4444'
+                                            }}>
+                                                {profile.is_profile_active ? 'Active' : 'Inactive'}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -566,7 +575,7 @@ const ProfileVerifications = () => {
                                                 +{profile.changed_fields.length - 3} more
                                             </span>
                                         )}
-                                        {!profile.changed_fields && !profile.is_active_verified && (
+                                        {!profile.changed_fields && !profile.is_identity_verified && (
                                             <span style={{ fontSize: '0.75rem', color: '#eab308' }}>Initial Registration Pool</span>
                                         )}
                                     </div>

@@ -160,7 +160,8 @@ const EMPTY_FORM = {
     present_city: '', present_country: '', postal_code: '',
     bio: '',
     hide_photos: false,
-    is_active_verified: false,
+    is_identity_verified: false,
+    is_profile_active: false,
     profile_picture: null,
 };
 
@@ -242,7 +243,7 @@ export default function UserProfiles() {
                     ...(religionFilter !== 'all' && { religion_id: religionFilter }),
                     ...(educationFilter !== 'all' && { education_id: educationFilter }),
                     ...(occupationFilter !== 'all' && { occupation_id: occupationFilter }),
-                    ...(statusFilter !== 'all' && { is_active_verified: statusFilter }),
+                    ...(statusFilter !== 'all' && { is_profile_active: statusFilter }),
                     ...(verificationFilter !== 'all' && { verification_status: verificationFilter }),
                     ...(ageMin && { age_min: ageMin }),
                     ...(ageMax && { age_max: ageMax }),
@@ -325,7 +326,8 @@ export default function UserProfiles() {
             postal_code: profile.postal_code || '',
             bio: profile.bio || '',
             hide_photos: !!profile.hide_photos,
-            is_active_verified: !!profile.is_active_verified,
+            is_identity_verified: !!profile.is_identity_verified,
+            is_profile_active: !!profile.is_profile_active,
             profile_picture: null,
         });
         setFormErrors({});
@@ -686,8 +688,8 @@ export default function UserProfiles() {
                                             )}
                                         </td>
                                         <td>
-                                            <span className={`badge ${profile.is_active_verified ? 'badge-verified' : 'badge-rejected'}`}>
-                                                {profile.is_active_verified ? 'Yes' : 'No'}
+                                            <span className={`badge ${profile.is_profile_active ? 'badge-verified' : 'badge-rejected'}`}>
+                                                {profile.is_profile_active ? 'Active' : 'Inactive'}
                                             </span>
                                             <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', gap: '4px' }}>
                                                 <span style={{ opacity: 0.7 }}>Activity:</span>
@@ -989,7 +991,7 @@ export default function UserProfiles() {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: '1.4rem' }}>
-                                <Toggle name="is_active_verified" checked={formData.is_active_verified} onChange={handleFormChange} label="Profile Active" />
+                                <Toggle name="is_profile_active" checked={formData.is_profile_active} onChange={handleFormChange} label="Profile Active" />
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: '1.4rem' }}>
                                 <Toggle name="hide_photos" checked={formData.hide_photos} onChange={handleFormChange} label="Hide Photos" />
