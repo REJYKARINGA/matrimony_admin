@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 
 export default function FamilyDetails() {
@@ -90,13 +91,16 @@ export default function FamilyDetails() {
                                     <tr key={detail.id}>
                                         <td>
                                             {detail.user?.user_profile ? (
-                                                <div>
-                                                    <div style={{ fontWeight: '600' }}>
-                                                        {detail.user.user_profile.first_name} {detail.user.user_profile.last_name}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <UserAvatar user={detail.user} size={36} />
+                                                    <div>
+                                                        <div style={{ fontWeight: '600' }}>
+                                                            {detail.user.user_profile.first_name} {detail.user.user_profile.last_name}
+                                                        </div>
+                                                        <small style={{ color: 'var(--text-secondary)' }}>
+                                                            {detail.user.matrimony_id}
+                                                        </small>
                                                     </div>
-                                                    <small style={{ color: 'var(--text-secondary)' }}>
-                                                        {detail.user.matrimony_id}
-                                                    </small>
                                                 </div>
                                             ) : (
                                                 <span>-</span>
