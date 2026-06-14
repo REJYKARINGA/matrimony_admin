@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { FaSpinner, FaCreditCard } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 
 export default function Payments() {
@@ -32,13 +33,39 @@ export default function Payments() {
         fetchPayments(page);
     };
 
+    const loadingStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+        color: 'var(--text-secondary)',
+        gap: '1rem'
+    };
+
+    const emptyStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+        color: 'var(--text-secondary)',
+        gap: '0.75rem'
+    };
+
     return (
         <div className="card">
             <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Transaction History</h2>
             {loading ? (
-                <p>Loading...</p>
+                <div style={loadingStyle}>
+                    <FaSpinner size={32} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Loading transactions...</span>
+                </div>
             ) : payments.length === 0 ? (
-                <p style={{ color: 'var(--text-secondary)' }}>No transactions found.</p>
+                <div style={emptyStyle}>
+                    <FaCreditCard size={32} />
+                    <span>No transactions found.</span>
+                </div>
             ) : (
                 <>
                     <div className="table-container">
