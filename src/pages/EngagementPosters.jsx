@@ -5,6 +5,8 @@ import { FaCheck, FaTimes, FaExternalLinkAlt, FaTrash, FaHeart } from 'react-ico
 import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import { CONFIG } from '../config';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 export default function EngagementPosters() {
     const [posters, setPosters] = useState([]);
@@ -14,6 +16,7 @@ export default function EngagementPosters() {
     const [totalItems, setTotalItems] = useState(0);
     const [selectedImage, setSelectedImage] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: false });
+    const { showToast, ToastComponent } = useToast();
 
     const getAvatarColor = (gender) => {
         if (gender?.toLowerCase() === 'female') return '#FB419E'; // Soft Pink
@@ -82,7 +85,7 @@ export default function EngagementPosters() {
             await api.post(`/admin/engagement-posters/${id}/verify`);
             fetchPosters(currentPage);
         } catch (error) {
-            alert('Failed to verify');
+            showToast('Failed to verify', 'error');
         }
     };
 
@@ -92,7 +95,7 @@ export default function EngagementPosters() {
             await api.delete(`/admin/engagement-posters/${id}`);
             fetchPosters(currentPage);
         } catch (error) {
-            alert('Failed to delete');
+            showToast('Failed to delete', 'error');
         }
     };
 
@@ -123,17 +126,7 @@ export default function EngagementPosters() {
                                 {posters.map((poster) => (
                                     <tr key={poster.id}>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                <UserAvatar user={poster.user} size={50} />
-                                                <div>
-                                                    <div style={{ fontWeight: '600' }}>
-                                                        {poster.user?.user_profile?.first_name || poster.user?.email || 'N/A'} 
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'gray' }}>
-                                                        {poster.user?.matrimony_id}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={poster.user} profile={poster.user?.user_profile} />
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -199,6 +192,8 @@ export default function EngagementPosters() {
                     />
                 </>
             )}
+
+            {ToastComponent}
 
             {/* Image Modal */}
             {selectedImage && createPortal(
