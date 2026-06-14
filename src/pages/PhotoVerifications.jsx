@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf, FaEye, FaImages } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
@@ -295,11 +296,16 @@ export default function PhotoVerifications() {
                                         ))}
                                     </div>
                                     <div style={userInfoStyle}>
-                                        <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '0.2rem' }}>
-                                            {user.user_profile?.first_name} {user.user_profile?.last_name}
-                                        </div>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                                            {user.matrimony_id}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                            <UserAvatar user={user} size={44} />
+                                            <div>
+                                                <div style={{ fontWeight: '600', fontSize: '1rem' }}>
+                                                    {user.user_profile?.first_name} {user.user_profile?.last_name}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                                    {user.matrimony_id}
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
