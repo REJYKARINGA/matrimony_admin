@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { FaCheck, FaTimes, FaExternalLinkAlt, FaSpinner, FaHeartBroken } from 'react-icons/fa';
+import UserAvatar from '../components/UserAvatar';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
@@ -105,8 +106,12 @@ export default function SuccessStories() {
                                 {stories.map((story) => (
                                     <tr key={story.id}>
                                         <td>
-                                            <div style={{ fontWeight: '600' }}>
-                                                {story.user1?.user_profile?.first_name} & {story.user2?.user_profile?.first_name}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <UserAvatar user={story.user1} size={36} />
+                                                <div style={{ fontWeight: '600' }}>
+                                                    {story.user1?.user_profile?.first_name} & {story.user2?.user_profile?.first_name}
+                                                </div>
+                                                <UserAvatar user={story.user2} size={36} />
                                             </div>
                                         </td>
                                         <td>{new Date(story.wedding_date).toLocaleDateString()}</td>
