@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { auditApi } from '../api/auditApi';
 import Pagination from '../components/Pagination';
 import { FaHistory, FaFingerprint, FaDesktop, FaMapMarkerAlt, FaSearch, FaFilter, FaStream, FaCalendarAlt } from 'react-icons/fa';
-import UserAvatar from '../components/UserAvatar';
+import { useToast } from '../components/Toast';
+import UserCell from '../components/UserCell';
 
 export default function AuditLogs() {
     const [activeTab, setActiveTab] = useState('login_history'); // 'login_history' or 'activity_logs'
@@ -15,6 +16,8 @@ export default function AuditLogs() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+
+    const { showToast, ToastComponent } = useToast();
 
     const fetchData = async (page = 1) => {
         try {
@@ -231,19 +234,7 @@ export default function AuditLogs() {
                                         transition={{ delay: index * 0.03 }}
                                     >
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                <UserAvatar user={item.user} size={36} />
-                                                <div>
-                                                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>
-                                                        {item.user?.user_profile ? 
-                                                            `${item.user.user_profile.first_name} ${item.user.user_profile.last_name}` : 
-                                                            (item.user?.name || 'Unknown User')}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                        {item.user?.matrimony_id || item.user?.email || '-'}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={item.user} profile={item.user?.user_profile} />
                                         </td>
 
                                         {activeTab === 'login_history' ? (
@@ -322,6 +313,7 @@ export default function AuditLogs() {
                 </div>
             </div>
 
+            {ToastComponent}
             <style>{`
                 .loader {
                     border: 3px solid var(--border-color);
