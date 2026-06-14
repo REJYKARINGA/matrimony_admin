@@ -4,8 +4,8 @@ import { contactUnlockRequestApi } from '../api/contactUnlockRequestApi';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { FaArrowRight, FaSearch, FaFilter, FaCalendarAlt, FaCheck, FaTimes, FaHourglassHalf, FaUnlock } from 'react-icons/fa';
-import { LuCheck, LuTriangleAlert } from 'react-icons/lu';
-import UserAvatar from '../components/UserAvatar';
+import UserCell from '../components/UserCell';
+import { useToast } from '../components/Toast';
 
 export default function ContactUnlockRequests() {
     const [requests, setRequests] = useState([]);
@@ -15,13 +15,8 @@ export default function ContactUnlockRequests() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [toast, setToast] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ open: false, id: null, action: '' });
-
-    const showToast = (msg, type = 'success') => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 3000);
-    };
+    const { showToast, ToastComponent } = useToast();
 
     const fetchRequests = async (page = 1) => {
         try {
@@ -61,12 +56,6 @@ export default function ContactUnlockRequests() {
         return new Date(dateString).toLocaleDateString('en-US', {
             day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
         });
-    };
-
-    const getUserName = (user) => {
-        if (!user) return 'Unknown';
-        if (user.user_profile) return `${user.user_profile.first_name} ${user.user_profile.last_name}`;
-        return user.name || user.matrimony_id || 'Unknown';
     };
 
     const statusBadge = (status) => {
@@ -153,25 +142,13 @@ export default function ContactUnlockRequests() {
                                         animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.03 }}
                                         style={{ borderBottom: '1px solid var(--border-color)' }}>
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <UserAvatar user={item.requester} />
-                                                <div>
-                                                    <div style={{ fontWeight: 600 }}>{getUserName(item.requester)}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.requester?.matrimony_id}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={item.requester} profile={item.requester?.user_profile} />
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
                                             <div style={{ color: 'var(--primary)', opacity: 0.5 }}><FaArrowRight /></div>
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <UserAvatar user={item.target_user} />
-                                                <div>
-                                                    <div style={{ fontWeight: 600 }}>{getUserName(item.target_user)}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.target_user?.matrimony_id}</div>
-                                                </div>
-                                            </div>
+                                            <UserCell user={item.target_user} profile={item.target_user?.user_profile} />
                                         </td>
                                         <td style={{ textAlign: 'center' }}>{statusBadge(item.status)}</td>
                                         <td style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
@@ -211,19 +188,7 @@ export default function ContactUnlockRequests() {
                 </div>
             </div>
 
-            {toast && (
-                <div style={{
-                    position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 1000000,
-                    padding: '0.75rem 1.25rem', borderRadius: '12px', fontWeight: '600', fontSize: '0.9rem',
-                    background: toast.type === 'error' ? '#EF4444' : '#10B981', color: 'white',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.4)',
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    animation: 'modalSlideUp 0.3s ease-out', border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                    {toast.type === 'error' ? <LuTriangleAlert size={18} /> : <LuCheck size={18} />}
-                    {toast.msg}
-                </div>
-            )}
+            {ToastComponent}
 
             <ConfirmModal
                 isOpen={confirmModal.open}
