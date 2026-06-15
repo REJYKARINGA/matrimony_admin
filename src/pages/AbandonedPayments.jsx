@@ -10,7 +10,12 @@ import {
     FaReceipt,
     FaExclamationTriangle,
     FaTimesCircle,
-    FaClock
+    FaClock,
+    FaWallet,
+    FaCheckCircle,
+    FaCopy,
+    FaTimes,
+    FaWhatsapp
 } from 'react-icons/fa';
 import UserCell from '../components/UserCell';
 import api from '../api/axios';
@@ -46,6 +51,8 @@ export default function AbandonedPayments() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [mounted, setMounted] = useState(false);
+    const [copiedRow, setCopiedRow] = useState(null);
+    const [expandedUser, setExpandedUser] = useState(null);
 
     useEffect(() => {
         setMounted(true);
@@ -71,6 +78,23 @@ export default function AbandonedPayments() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGroupFollowUp = async (userId, status, response) => {
+        try {
+            const payload = { user_id: userId, follow_up_status: status };
+            if (response !== undefined) payload.follow_up_response = response;
+            await api.put('/admin/wallet/abandoned/follow-up', payload);
+            fetchAbandoned(currentPage);
+        } catch (error) {
+            console.error('Failed to update follow-up', error);
+        }
+    };
+
+    const handleCopy = (rowId, value) => {
+        navigator.clipboard.writeText(value);
+        setCopiedRow(rowId);
+        setTimeout(() => setCopiedRow(null), 1500);
     };
 
     const handlePageChange = (page) => {
@@ -131,8 +155,7 @@ export default function AbandonedPayments() {
                 <div>
                     <h1 style={{
                         margin: 0, fontSize: '2rem', fontWeight: 'bold',
-                        background: 'linear-gradient(135deg, var(--danger), var(--warning))',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
+                        color: 'var(--text-primary)'
                     }}>
                         Abandoned Payments
                     </h1>
@@ -140,51 +163,6 @@ export default function AbandonedPayments() {
                         Follow up with users who initiated but didn&apos;t complete payment
                     </p>
                 </div>
-            </motion.div>
-
-            {/* Stats Summary */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '1.5rem',
-                    marginBottom: '2rem'
-                }}
-            >
-                <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} style={{
-                    background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-                    borderRadius: '16px', padding: '1.5rem',
-                    boxShadow: '0 4px 24px var(--shadow-color)', position: 'relative', overflow: 'hidden'
-                }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '80px', height: '80px',
-                        background: 'radial-gradient(circle, var(--warning)30 0%, transparent 70%)',
-                        filter: 'blur(20px)' }} />
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                        <FaClock size={24} color="var(--warning)" style={{ marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                            Initiated (Pending)
-                        </div>
-                    </div>
-                </motion.div>
-
-                <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} style={{
-                    background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-                    borderRadius: '16px', padding: '1.5rem',
-                    boxShadow: '0 4px 24px var(--shadow-color)', position: 'relative', overflow: 'hidden'
-                }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '80px', height: '80px',
-                        background: 'radial-gradient(circle, var(--danger)30 0%, transparent 70%)',
-                        filter: 'blur(20px)' }} />
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                        <FaTimesCircle size={24} color="var(--danger)" style={{ marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                            Failed Payments
-                        </div>
-                    </div>
-                </motion.div>
             </motion.div>
 
             {/* Controls */}
@@ -258,105 +236,280 @@ export default function AbandonedPayments() {
                             <table>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>
-                                            <FaUser style={{ marginRight: '0.5rem' }} />
-                                            User
-                                        </th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>
-                                            <FaPhone style={{ marginRight: '0.5rem' }} />
-                                            Phone
-                                        </th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>
-                                            <FaReceipt style={{ marginRight: '0.5rem' }} />
-                                            Details
-                                        </th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>
-                                            <FaMoneyBillWave style={{ marginRight: '0.5rem' }} />
-                                            Amount
-                                        </th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>
-                                            <FaCalendarAlt style={{ marginRight: '0.5rem' }} />
-                                            Date
-                                        </th>
-                                        <th style={{ padding: '1rem', textAlign: 'center' }}>Status</th>
-                                        <th style={{ padding: '1rem', textAlign: 'center' }}>Action</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>User</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Phone</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Pending</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Failed</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Balance</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Last Success</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Follow-up</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Response</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <AnimatePresence>
-                                        {transactions.map((transaction, index) => {
-                                            const phone = transaction.user_phone || transaction.user?.phone || '';
+                                        {transactions.map((group, index) => {
+                                            const phone = group.user_phone || group.user?.phone || '';
+                                            const isExpanded = expandedUser === group.user?.id;
                                             return (
                                                 <motion.tr
-                                                    key={transaction.id}
+                                                    key={group.user?.id || index}
                                                     variants={itemVariants}
                                                     initial="hidden"
                                                     animate="visible"
                                                     exit={{ opacity: 0, x: -100 }}
                                                     whileHover="hover"
-                                                    transition={{ delay: index * 0.05 }}
-                                                    style={{ borderBottom: '1px solid var(--border-color)' }}
+                                                    transition={{ delay: index * 0.03 }}
+                                                    style={{
+                                                        borderBottom: '1px solid var(--border-color)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    onClick={() => setExpandedUser(isExpanded ? null : group.user?.id)}
                                                 >
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <UserCell user={transaction.user} profile={transaction.user?.user_profile} />
+                                                    <td style={{ padding: '0.75rem' }}>
+                                                        <UserCell user={group.user} profile={group.user?.user_profile} avatarSize={32} />
                                                     </td>
 
-                                                    <td style={{ padding: '1rem' }}>
+                                                    <td style={{ padding: '0.75rem' }}>
                                                         {phone ? (
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                                <span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{phone}</span>
-                                                            </div>
-                                                        ) : (
-                                                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>—</span>
-                                                        )}
+                                                            <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{phone}</span>
+                                                        ) : <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>—</span>}
                                                     </td>
 
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                                            <span style={{ fontWeight: '600', fontSize: '0.875rem' }}>
-                                                                {transaction.type === 'wallet_recharge' ? 'Wallet Recharge' : 'Contact Unlock'}
-                                                            </span>
+                                                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                                        <div style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--warning)' }}>
+                                                            {group.pending_count}
                                                         </div>
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                            {transaction.description || 'No description'}
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                                            ₹{group.total_pending_amount?.toLocaleString() || '0'}
                                                         </div>
                                                     </td>
 
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-                                                            ₹{transaction.amount?.toLocaleString() || '0'}
+                                                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                                        <div style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--danger)' }}>
+                                                            {group.failed_count}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                                            ₹{group.total_failed_amount?.toLocaleString() || '0'}
                                                         </div>
                                                     </td>
 
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <div style={{ fontSize: '0.875rem' }}>
-                                                            {formatDate(transaction.created_at)}
+                                                    <td style={{ padding: '0.75rem' }}>
+                                                        <div style={{
+                                                            fontWeight: '600', fontSize: '0.9rem',
+                                                            color: (group.wallet_balance || 0) >= (group.total_pending_amount || 0)
+                                                                ? 'var(--success)' : 'var(--danger)'
+                                                        }}>
+                                                            ₹{(group.wallet_balance || 0).toLocaleString()}
                                                         </div>
                                                     </td>
 
-                                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                        <span className={`badge ${getStatusBadge(transaction.status)}`}>
-                                                            {transaction.status}
-                                                        </span>
+                                                    <td style={{ padding: '0.75rem' }}>
+                                                        <div style={{ fontSize: '0.75rem' }}>
+                                                            {group.last_success_payment_at
+                                                                ? formatDate(group.last_success_payment_at)
+                                                                : <span style={{ color: 'var(--text-secondary)' }}>Never</span>}
+                                                        </div>
                                                     </td>
 
-                                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                    <td style={{ padding: '0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                        <select
+                                                            value={group.follow_up_status || 'not_contacted'}
+                                                            onChange={(e) => handleGroupFollowUp(group.user?.id, e.target.value, group.follow_up_response)}
+                                                            style={{
+                                                                fontSize: '0.7rem', padding: '4px 6px', width: '100%', minWidth: '90px',
+                                                                background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+                                                                borderRadius: '6px', color: 'var(--text)', cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            <option value="not_contacted">Not Contacted</option>
+                                                            <option value="reached_out">Reached Out</option>
+                                                            <option value="payment_done">Payment Done</option>
+                                                            <option value="another_payment_done">Another Payment Done</option>
+                                                            <option value="not_interested">Not Interested</option>
+                                                            <option value="follow_up_later">Follow-up Later</option>
+                                                            <option value="wrong_number">Wrong Number</option>
+                                                            <option value="no_response">No Response</option>
+                                                        </select>
+                                                    </td>
+
+                                                    <td style={{ padding: '0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                        <input
+                                                            type="text"
+                                                            defaultValue={group.follow_up_response || ''}
+                                                            onBlur={(e) => handleGroupFollowUp(group.user?.id, group.follow_up_status || 'not_contacted', e.target.value)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') handleGroupFollowUp(group.user?.id, group.follow_up_status || 'not_contacted', e.target.value);
+                                                            }}
+                                                            placeholder="Notes..."
+                                                            style={{
+                                                                fontSize: '0.7rem', padding: '4px 6px', width: '100%', minWidth: '90px',
+                                                                background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+                                                                borderRadius: '6px', color: 'var(--text)'
+                                                            }}
+                                                        />
+                                                    </td>
+
+                                                    <td style={{ padding: '0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                                         {phone && (
-                                                            <motion.a
-                                                                href={`tel:${phone}`}
-                                                                whileHover={{ scale: 1.1 }}
-                                                                whileTap={{ scale: 0.9 }}
-                                                                style={{
-                                                                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                                                                    padding: '0.5rem 1rem', borderRadius: '8px',
-                                                                    background: 'var(--success)', color: 'white',
-                                                                    textDecoration: 'none', fontWeight: '600', fontSize: '0.85rem'
-                                                                }}
-                                                            >
-                                                                <FaPhone size={12} />
-                                                                Call
-                                                            </motion.a>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center' }}>
+                                                                <div style={{ display: 'flex', gap: '3px' }}>
+                                                                    <motion.a href={`tel:${phone}`} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} title="Call"
+                                                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                                                            width: '26px', height: '26px', borderRadius: '6px',
+                                                                            background: 'var(--success)', color: 'white', textDecoration: 'none', fontSize: '11px' }}>
+                                                                        <FaPhone size={9} />
+                                                                    </motion.a>
+                                                                    <motion.a href={`https://wa.me/${phone.replace(/\+/g, '').replace(/\s/g, '')}`}
+                                                                        target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} title="WhatsApp"
+                                                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                                                            width: '26px', height: '26px', borderRadius: '6px',
+                                                                            background: '#25D366', color: 'white', textDecoration: 'none', fontSize: '11px' }}>
+                                                                        <FaWhatsapp size={11} />
+                                                                    </motion.a>
+                                                                </div>
+                                                                <div style={{ display: 'flex', gap: '3px' }}>
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                                                                        onClick={(e) => { e.stopPropagation(); handleCopy(`phone-${group.user?.id}`, phone); }}
+                                                                        title="Copy Phone"
+                                                                        animate={{ background: copiedRow === `phone-${group.user?.id}` ? 'var(--success)' : 'var(--card-bg)',
+                                                                            color: copiedRow === `phone-${group.user?.id}` ? '#fff' : 'var(--text)' }}
+                                                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                                                            width: '26px', height: '26px', borderRadius: '6px',
+                                                                            border: '1px solid var(--border-color)', cursor: 'pointer', fontSize: '9px' }}>
+                                                                        {copiedRow === `phone-${group.user?.id}` ? <FaCheckCircle size={9} /> : <FaCopy size={9} />}
+                                                                    </motion.button>
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                                                                        onClick={(e) => { e.stopPropagation(); handleCopy(`email-${group.user?.id}`, group.user_email || group.user?.email || ''); }}
+                                                                        title="Copy Email"
+                                                                        animate={{ background: copiedRow === `email-${group.user?.id}` ? 'var(--success)' : 'var(--card-bg)',
+                                                                            color: copiedRow === `email-${group.user?.id}` ? '#fff' : 'var(--text)' }}
+                                                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                                                            width: '26px', height: '26px', borderRadius: '6px',
+                                                                            border: '1px solid var(--border-color)', cursor: 'pointer', fontSize: '9px' }}>
+                                                                        {copiedRow === `email-${group.user?.id}` ? <FaCheckCircle size={9} /> : <FaCopy size={9} />}
+                                                                    </motion.button>
+                                                                </div>
+                                                            </div>
                                                         )}
+                                                    </td>
+                                                </motion.tr>
+                                            );
+                                        })}
+
+                                        {/* Expanded rows showing individual transactions */}
+                                        {transactions.map((group, index) => {
+                                            if (expandedUser !== group.user?.id) return null;
+                                            return (
+                                                <motion.tr key={`expand-${group.user?.id}`}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                >
+                                                    <td colSpan={9} style={{ padding: 0, border: 'none' }}>
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                            style={{ overflow: 'hidden' }}
+                                                        >
+                                                            <div style={{
+                                                                margin: '0 0.75rem 0.75rem 0.75rem',
+                                                                background: 'var(--card-bg)',
+                                                                border: '1px solid var(--border-color)',
+                                                                borderRadius: '12px',
+                                                                overflow: 'hidden',
+                                                                boxShadow: '0 2px 12px var(--shadow-color)'
+                                                            }}>
+                                                                {/* Header */}
+                                                                <div style={{
+                                                                    display: 'grid',
+                                                                    gridTemplateColumns: '70px 1fr 100px 90px 100px 120px',
+                                                                    gap: '0.5rem',
+                                                                    alignItems: 'center',
+                                                                    padding: '0.6rem 1rem',
+                                                                    background: 'var(--hover-bg)',
+                                                                    borderBottom: '1px solid var(--border-color)',
+                                                                    fontSize: '0.65rem', fontWeight: '600',
+                                                                    color: 'var(--text-secondary)', textTransform: 'uppercase',
+                                                                    letterSpacing: '0.04em'
+                                                                }}>
+                                                                    <span>Status</span>
+                                                                    <span>Details</span>
+                                                                    <span style={{ textAlign: 'right' }}>Amount</span>
+                                                                    <span>Follow-up</span>
+                                                                    <span>Response</span>
+                                                                    <span style={{ textAlign: 'right' }}>Date</span>
+                                                                </div>
+                                                                {group.transactions?.map((tx, txIndex) => (
+                                                                    <div key={tx.id} style={{
+                                                                        display: 'grid',
+                                                                    gridTemplateColumns: '70px 1fr 100px 90px 100px 120px',
+                                                                        gap: '0.5rem',
+                                                                        alignItems: 'center',
+                                                                        padding: '0.6rem 1rem',
+                                                                        borderBottom: txIndex < group.transactions.length - 1
+                                                                            ? '1px solid var(--border-color)' : 'none',
+                                                                        fontSize: '0.8rem',
+                                                                        transition: 'background 0.15s'
+                                                                    }}
+                                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--hover-bg)'}
+                                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                                    >
+                                                                        {/* Status */}
+                                                                        <span className={`badge ${getStatusBadge(tx.status)}`}
+                                                                            style={{ fontSize: '0.6rem', justifySelf: 'start' }}>
+                                                                            {tx.status}
+                                                                        </span>
+
+                                                                        {/* Type + target */}
+                                                                        <div>
+                                                                            <div style={{ fontWeight: '600', fontSize: '0.8rem' }}>
+                                                                                {tx.type === 'wallet_recharge' ? 'Wallet Recharge' : 'Contact Unlock'}
+                                                                            </div>
+                                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                                                                {tx.type === 'contact_unlock' && tx.target_user
+                                                                                    ? `${tx.target_user.name} (${tx.target_user.matrimony_id})`
+                                                                                    : '—'}
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Amount */}
+                                                                        <div style={{ fontWeight: '700', fontSize: '0.85rem', textAlign: 'right' }}>
+                                                                            ₹{tx.amount?.toLocaleString() || '0'}
+                                                                        </div>
+
+                                                                        {/* Follow-up status */}
+                                                                        <div>
+                                                                            <span style={{
+                                                                                display: 'inline-block', padding: '2px 8px', borderRadius: '10px',
+                                                                                fontSize: '0.6rem', fontWeight: '600',
+                                                                                background: tx.follow_up_status === 'not_contacted' || !tx.follow_up_status
+                                                                                    ? 'rgba(156,163,175,0.15)' : 'rgba(34,197,94,0.15)',
+                                                                                color: tx.follow_up_status === 'not_contacted' || !tx.follow_up_status
+                                                                                    ? 'var(--text-secondary)' : 'var(--success)'
+                                                                            }}>
+                                                                                {tx.follow_up_status ? tx.follow_up_status.replace(/_/g, ' ') : 'Not Contacted'}
+                                                                            </span>
+                                                                        </div>
+
+                                                                        {/* Response */}
+                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                                                            {tx.follow_up_response || '—'}
+                                                                        </div>
+
+                                                                        {/* Date */}
+                                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
+                                                                            {formatDate(tx.created_at)}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
                                                     </td>
                                                 </motion.tr>
                                             );
@@ -432,6 +585,8 @@ export default function AbandonedPayments() {
                     Showing {transactions.length} of {totalItems} records
                 </motion.div>
             )}
+
+
         </div>
     );
 }
