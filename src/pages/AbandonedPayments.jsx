@@ -15,7 +15,8 @@ import {
     FaCheckCircle,
     FaCopy,
     FaTimes,
-    FaWhatsapp
+    FaWhatsapp,
+    FaUpload
 } from 'react-icons/fa';
 import UserCell from '../components/UserCell';
 import api from '../api/axios';
@@ -53,6 +54,11 @@ export default function AbandonedPayments() {
     const [mounted, setMounted] = useState(false);
     const [copiedRow, setCopiedRow] = useState(null);
     const [expandedUser, setExpandedUser] = useState(null);
+    const [proofModal, setProofModal] = useState(null);
+    const [proofFile, setProofFile] = useState(null);
+    const [proofAmount, setProofAmount] = useState('');
+    const [proofNotes, setProofNotes] = useState('');
+    const [proofSubmitting, setProofSubmitting] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -99,6 +105,36 @@ export default function AbandonedPayments() {
 
     const handlePageChange = (page) => {
         fetchAbandoned(page);
+    };
+
+    const handleSubmitProof = async () => {
+        if (!proofModal || !proofAmount) return;
+        const hasExisting = proofModal.payment_verification;
+        if (!proofFile && !hasExisting) return;
+        setProofSubmitting(true);
+        try {
+            const formData = new FormData();
+            formData.append('user_id', proofModal.user.id);
+            formData.append('amount', proofAmount);
+            if (proofFile) {
+                formData.append('proof_image', proofFile);
+            } else if (hasExisting) {
+                formData.append('existing_proof', hasExisting.proof_image);
+            }
+            if (proofNotes) formData.append('notes', proofNotes);
+
+            await api.post('/admin/payment-verifications', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setProofModal(null);
+            setProofFile(null);
+            setProofAmount('');
+            setProofNotes('');
+        } catch (error) {
+            console.error('Failed to submit proof', error);
+        } finally {
+            setProofSubmitting(false);
+        }
     };
 
     const formatDate = (dateString) => {
@@ -244,6 +280,7 @@ export default function AbandonedPayments() {
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>Last Success</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'center' }}>Follow-up</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'center' }}>Response</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Verify Request</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'center' }}>Action</th>
                                     </tr>
                                 </thead>
@@ -352,6 +389,78 @@ export default function AbandonedPayments() {
                                                     </td>
 
                                                     <td style={{ padding: '0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                        {group.payment_verification ? (
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+                                                                <span style={{
+                                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                                    padding: '2px 8px', borderRadius: '10px',
+                                                                    fontSize: '0.65rem', fontWeight: '600',
+                                                                    background: group.payment_verification.status === 'verified'
+                                                                        ? 'rgba(34,197,94,0.15)'
+                                                                        : group.payment_verification.status === 'rejected'
+                                                                        ? 'rgba(239,68,68,0.15)'
+                                                                        : 'rgba(255,183,77,0.15)',
+                                                                    color: group.payment_verification.status === 'verified'
+                                                                        ? 'var(--success)'
+                                                                        : group.payment_verification.status === 'rejected'
+                                                                        ? 'var(--danger)'
+                                                                        : 'var(--warning)'
+                                                                }}>
+                                                                    {group.payment_verification.status}
+                                                                </span>
+                                                                 {group.payment_verification.status !== 'verified' && (
+                                                                     <motion.button
+                                                                         whileHover={{ scale: 1.05 }}
+                                                                         whileTap={{ scale: 0.95 }}
+                                                                          onClick={(e) => {
+                                                                              e.stopPropagation();
+                                                                              setProofModal(group);
+                                                                              const prev = group.payment_verification;
+                                                                              setProofAmount(prev?.amount?.toString() || '');
+                                                                              setProofNotes(prev?.notes || '');
+                                                                              setProofFile(null);
+                                                                          }}
+                                                                         title={group.payment_verification.status === 'rejected' ? 'Re-initiate Payment Proof' : 'Update Payment Proof'}
+                                                                         style={{
+                                                                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
+                                                                             padding: '3px 8px', borderRadius: '6px',
+                                                                             background: group.payment_verification.status === 'rejected' ? 'var(--danger)' : 'var(--hover-bg)',
+                                                                             color: group.payment_verification.status === 'rejected' ? 'white' : 'var(--text)',
+                                                                             border: 'none',
+                                                                             cursor: 'pointer', fontSize: '9px', fontWeight: group.payment_verification.status === 'rejected' ? '600' : '500'
+                                                                         }}
+                                                                     >
+                                                                         <FaUpload size={7} />
+                                                                         {group.payment_verification.status === 'rejected' ? 'Re-initiate' : 'Update'}
+                                                                     </motion.button>
+                                                                 )}
+                                                            </div>
+                                                        ) : (
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.05 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setProofModal(group);
+                                                                    setProofAmount('');
+                                                                    setProofNotes('');
+                                                                    setProofFile(null);
+                                                                }}
+                                                                title="Submit Payment Proof"
+                                                                style={{
+                                                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
+                                                                    padding: '6px 12px', borderRadius: '6px',
+                                                                    background: 'var(--primary)', color: 'white', border: 'none',
+                                                                    cursor: 'pointer', fontSize: '10px', fontWeight: '600'
+                                                                }}
+                                                            >
+                                                                <FaUpload size={9} />
+                                                                Proof
+                                                            </motion.button>
+                                                        )}
+                                                    </td>
+
+                                                    <td style={{ padding: '0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
                                                         {phone && (
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center' }}>
                                                                 <div style={{ display: 'flex', gap: '3px' }}>
@@ -391,9 +500,9 @@ export default function AbandonedPayments() {
                                                                             width: '26px', height: '26px', borderRadius: '6px',
                                                                             border: '1px solid var(--border-color)', cursor: 'pointer', fontSize: '9px' }}>
                                                                         {copiedRow === `email-${group.user?.id}` ? <FaCheckCircle size={9} /> : <FaCopy size={9} />}
-                                                                    </motion.button>
-                                                                </div>
-                                                            </div>
+                                                                     </motion.button>
+                                                                 </div>
+                                                             </div>
                                                         )}
                                                     </td>
                                                 </motion.tr>
@@ -409,7 +518,7 @@ export default function AbandonedPayments() {
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
                                                 >
-                                                    <td colSpan={9} style={{ padding: 0, border: 'none' }}>
+                                                    <td colSpan={10} style={{ padding: 0, border: 'none' }}>
                                                         <motion.div
                                                             initial={{ height: 0, opacity: 0 }}
                                                             animate={{ height: 'auto', opacity: 1 }}
@@ -586,6 +695,162 @@ export default function AbandonedPayments() {
                 </motion.div>
             )}
 
+            {/* Submit Proof Modal */}
+            <AnimatePresence>
+                {proofModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => { if (!proofSubmitting) setProofModal(null); }}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                background: 'var(--card-bg)', borderRadius: '20px',
+                                padding: '2rem', maxWidth: '480px', width: '90%',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                            }}
+                        >
+                            <h3 style={{ margin: '0 0 0.25rem', color: 'var(--text-primary)' }}>
+                                Submit Payment Proof
+                            </h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
+                                {proofModal.user?.name} — ₹{proofModal.total_pending_amount?.toLocaleString() || '0'} pending
+                            </p>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.4rem' }}>
+                                    Amount Paid (₹)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={proofAmount}
+                                    onChange={(e) => setProofAmount(e.target.value)}
+                                    placeholder="Enter amount"
+                                    style={{
+                                        width: '100%', padding: '0.7rem 0.9rem', borderRadius: '10px',
+                                        border: '1px solid var(--border-color)',
+                                        background: 'var(--input-bg)', color: 'var(--text)',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.4rem' }}>
+                                    Payment Screenshot
+                                </label>
+                                <div
+                                    onClick={() => document.getElementById('proof-upload').click()}
+                                    style={{
+                                        border: '2px dashed var(--border-color)', borderRadius: '12px',
+                                        padding: '1.5rem', textAlign: 'center', cursor: 'pointer',
+                                        background: 'var(--hover-bg)', transition: 'border-color 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                                >
+                                    {proofFile ? (
+                                        <div>
+                                            <img
+                                                src={URL.createObjectURL(proofFile)}
+                                                alt="Preview"
+                                                style={{ maxHeight: '120px', borderRadius: '8px', marginBottom: '0.5rem' }}
+                                            />
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                                {proofFile.name}
+                                            </p>
+                                        </div>
+                                    ) : proofModal?.payment_verification?.proof_image ? (
+                                        <div>
+                                            <img
+                                                src={proofModal.payment_verification.proof_image}
+                                                alt="Existing Proof"
+                                                style={{ maxHeight: '120px', borderRadius: '8px', marginBottom: '0.5rem', opacity: 0.7 }}
+                                            />
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                                Existing proof — click to replace
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <FaUpload size={28} color="var(--text-secondary)" style={{ marginBottom: '0.5rem' }} />
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                                Click to upload screenshot (JPEG, PNG)
+                                            </p>
+                                        </div>
+                                    )}
+                                    <input
+                                        id="proof-upload"
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/jpg,image/gif"
+                                        onChange={(e) => setProofFile(e.target.files[0])}
+                                        style={{ display: 'none' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.4rem' }}>
+                                    Notes
+                                </label>
+                                <textarea
+                                    value={proofNotes}
+                                    onChange={(e) => setProofNotes(e.target.value)}
+                                    placeholder="Add notes about this payment..."
+                                    rows={3}
+                                    style={{
+                                        width: '100%', padding: '0.7rem 0.9rem', borderRadius: '10px',
+                                        border: '1px solid var(--border-color)',
+                                        background: 'var(--input-bg)', color: 'var(--text)',
+                                        resize: 'vertical', fontSize: '0.85rem'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => { if (!proofSubmitting) setProofModal(null); }}
+                                    style={{
+                                        padding: '0.6rem 1.5rem', borderRadius: '10px',
+                                        border: '1px solid var(--border-color)',
+                                        background: 'transparent', color: 'var(--text)',
+                                        cursor: 'pointer', fontWeight: '500'
+                                    }}
+                                >
+                                    Cancel
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleSubmitProof}
+                                    disabled={proofSubmitting || !proofAmount || (!proofFile && !proofModal?.payment_verification)}
+                                    style={{
+                                        padding: '0.6rem 1.5rem', borderRadius: '10px',
+                                        border: 'none', background: 'var(--primary)', color: 'white',
+                                        cursor: (proofSubmitting || !proofAmount || (!proofFile && !proofModal?.payment_verification)) ? 'not-allowed' : 'pointer',
+                                        fontWeight: '600',
+                                        opacity: (proofSubmitting || !proofAmount || (!proofFile && !proofModal?.payment_verification)) ? 0.7 : 1
+                                    }}
+                                >
+                                    {proofSubmitting ? 'Submitting...' : proofModal?.payment_verification ? 'Re-initiate Request' : 'Send Verification Request'}
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
         </div>
     );

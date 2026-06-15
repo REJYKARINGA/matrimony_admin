@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle } from 'react-icons/fa';
+import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
@@ -30,6 +30,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 { path: '/payments', label: 'Payments', icon: <FaMoneyBillWave size={20} /> },
                 { path: '/wallet-transactions', label: 'Wallet Transactions', icon: <FaWallet size={20} /> },
                 { path: '/abandoned-payments', label: 'Abandoned Payments', icon: <FaExclamationTriangle size={20} /> },
+                { path: '/payment-verifications', label: 'Payment Verifications', icon: <FaCheckCircle size={20} /> },
             ]
         },
         {
