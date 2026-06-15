@@ -17,6 +17,7 @@ import Preferences from './pages/Preferences';
 import PromotionSettings from './pages/PromotionSettings';
 import MediatorPromotions from './pages/MediatorPromotions';
 import WalletTransactions from './pages/WalletTransactions';
+import AbandonedPayments from './pages/AbandonedPayments';
 import ReligionManagement from './pages/ReligionManagement';
 import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
@@ -68,6 +69,7 @@ function App() {
             <Route path="/promotion-settings" element={<PromotionSettings />} />
             <Route path="/mediator-promotions" element={<MediatorPromotions />} />
             <Route path="/wallet-transactions" element={<WalletTransactions />} />
+            <Route path="/abandoned-payments" element={<AbandonedPayments />} />
             <Route path="/suggestions" element={<Suggestions />} />
             <Route path="/photo-verifications" element={<PhotoVerifications />} />
             <Route path="/profile-verifications" element={<ProfileVerifications />} />
