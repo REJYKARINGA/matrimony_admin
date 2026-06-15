@@ -13,6 +13,7 @@ const quickNavItems = [
     { path: '/reports', label: 'User Reports & Flags', group: 'Safety & Security' },
     { path: '/payments', label: 'Payments', group: 'Financial' },
     { path: '/wallet-transactions', label: 'Wallet Transactions', group: 'Financial' },
+    { path: '/recharge-tiers', label: 'Recharge Tiers', group: 'Financial' },
     { path: '/success-stories', label: 'Success Stories', group: 'App Content' },
     { path: '/engagement-posters', label: 'Engagement Posters', group: 'App Content' },
     { path: '/suggestions', label: 'User Suggestions', group: 'App Content' },
