@@ -1,6 +1,6 @@
-// const BASE_URL = 'https://nikkahmatch.in';
+const BASE_URL = 'https://nikkahmatch.in';
 // const BASE_URL = 'https://wishigrove.com';
-const BASE_URL = 'http://43.205.99.214';
+// const BASE_URL = 'http://43.205.99.214';
 const FALLBACK_URL = 'http://43.205.99.214';
 
 export const CONFIG = {
