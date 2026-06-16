@@ -6,7 +6,7 @@ import {
   LuShield, LuClock, LuCoins, LuGift, LuUsers, LuActivity,
   LuRefreshCw
 } from 'react-icons/lu';
-import { FaApple, FaAndroid } from 'react-icons/fa';
+import { FaApple, FaAndroid, FaStar } from 'react-icons/fa';
 
 function StatusBadge({ active, labelOn = 'Active', labelOff = 'Disabled' }) {
   return (
@@ -129,6 +129,10 @@ export default function AdminSettings() {
     wallet_is_active: true,
     wallet_in_maintenance_ios: false,
     wallet_in_maintenance_android: false,
+    review_enabled: true,
+    review_unlock_threshold: 10,
+    review_min_days_between: 90,
+    review_max_prompts: 3,
   });
 
   const showToast = (msg, type = 'success') => {
@@ -153,6 +157,10 @@ export default function AdminSettings() {
         wallet_is_active: s.wallet_is_active !== undefined ? Boolean(s.wallet_is_active) : true,
         wallet_in_maintenance_ios: Boolean(s.wallet_in_maintenance_ios),
         wallet_in_maintenance_android: Boolean(s.wallet_in_maintenance_android),
+        review_enabled: s.review_enabled !== undefined ? Boolean(s.review_enabled) : true,
+        review_unlock_threshold: s.review_unlock_threshold ?? 10,
+        review_min_days_between: s.review_min_days_between ?? 90,
+        review_max_prompts: s.review_max_prompts ?? 3,
       });
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -508,6 +516,100 @@ export default function AdminSettings() {
                 </div>
               ))}
             </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          icon={FaStar}
+          title="App Rating Configuration"
+          desc="Control in-app review prompts for users"
+          accent="#F59E0B"
+        >
+          <ToggleRow
+            accent="#F59E0B"
+            label="Enable App Rating Prompts"
+            desc="When enabled, users may see a native rating dialog after unlocking contacts"
+            checked={formData.review_enabled}
+            onChange={e => setFormData({ ...formData, review_enabled: e.target.checked })}
+          />
+          {formData.review_enabled && (
+            <div style={{
+              marginTop: 12,
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12,
+            }}>
+              <div style={{
+                background: 'var(--bg)', borderRadius: 12,
+                padding: '14px', border: '1px solid var(--border-color)',
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 8 }}>
+                  <LuActivity size={14} style={{ marginRight: 6, verticalAlign: -2, color: '#F59E0B' }} />
+                  Unlock Threshold
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  className="form-control"
+                  value={formData.review_unlock_threshold}
+                  onChange={e => setFormData({ ...formData, review_unlock_threshold: parseInt(e.target.value) || 1 })}
+                  style={{ fontWeight: 600 }}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  Contact unlocks before prompting
+                </p>
+              </div>
+              <div style={{
+                background: 'var(--bg)', borderRadius: 12,
+                padding: '14px', border: '1px solid var(--border-color)',
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 8 }}>
+                  <LuClock size={14} style={{ marginRight: 6, verticalAlign: -2, color: '#F59E0B' }} />
+                  Min Days Between
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  value={formData.review_min_days_between}
+                  onChange={e => setFormData({ ...formData, review_min_days_between: parseInt(e.target.value) || 0 })}
+                  style={{ fontWeight: 600 }}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  Cooldown gap between prompts
+                </p>
+              </div>
+              <div style={{
+                background: 'var(--bg)', borderRadius: 12,
+                padding: '14px', border: '1px solid var(--border-color)',
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 8 }}>
+                  <LuLock size={14} style={{ marginRight: 6, verticalAlign: -2, color: '#F59E0B' }} />
+                  Max Prompts
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  className="form-control"
+                  value={formData.review_max_prompts}
+                  onChange={e => setFormData({ ...formData, review_max_prompts: parseInt(e.target.value) || 1 })}
+                  style={{ fontWeight: 600 }}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  Never prompt again after this many shows
+                </p>
+              </div>
+            </div>
+          )}
+          <div style={{
+            marginTop: 12, display: 'flex', alignItems: 'center', gap: 8,
+            padding: '8px 12px', borderRadius: 8,
+            background: formData.review_enabled ? 'rgba(245, 158, 11, 0.06)' : 'transparent',
+            border: formData.review_enabled ? '1px solid rgba(245, 158, 11, 0.12)' : '1px solid transparent',
+            fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.4,
+          }}>
+            <LuInfo size={14} style={{ flexShrink: 0, color: '#F59E0B' }} />
+            {formData.review_enabled
+              ? 'App will show native rating dialog after threshold unlocks, respecting cooldown & max prompts. Users can also opt out in their Account Settings.'
+              : 'Rating prompts are disabled globally. Users will not be asked to rate the app.'}
           </div>
         </SectionCard>
       </div>
