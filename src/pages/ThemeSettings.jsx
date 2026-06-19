@@ -6,7 +6,7 @@ import {
 import {
   LuPalette, LuSave, LuCheck, LuTriangleAlert,
   LuSun, LuMoon, LuRefreshCw, LuEye, LuRotateCcw, LuUndo2, LuStar,
-  LuFolder, LuTrash2, LuDownload, LuPlus
+  LuFolder, LuTrash2, LuDownload, LuPlus, LuPencil
 } from 'react-icons/lu';
 
 function SectionCard({ icon: Icon, title, desc, children, accent }) {
@@ -397,6 +397,38 @@ export default function ThemeSettings() {
     setFormData({ ...DEFAULTS });
     showToast('Colors reset to defaults — click Save to apply');
   };
+
+  const handleLoadPreset = (p) => {
+    setFormData({
+      primary_color: p.primary_color,
+      secondary_color: p.secondary_color,
+      background_color: p.background_color,
+      surface_color: p.surface_color,
+      text_color: p.text_color,
+      gradient_start: p.gradient_start,
+      gradient_end: p.gradient_end,
+      dark_primary: p.dark_primary,
+      dark_secondary: p.dark_secondary,
+    });
+    showToast(`Preset "${p.name}" loaded — click Save to persist`);
+  };
+
+  const thStyle = {
+    padding: '8px 6px', textAlign: 'center', fontWeight: 600, fontSize: 10,
+    textTransform: 'uppercase', letterSpacing: '0.3px',
+    color: 'var(--text-secondary)',
+    borderBottom: '2px solid var(--border-color)',
+    whiteSpace: 'nowrap',
+  };
+  const tdStyle = {
+    padding: '8px 6px', textAlign: 'center', borderBottom: '1px solid var(--border-color)',
+    verticalAlign: 'middle',
+  };
+  const colorDot = (c) => ({
+    width: 18, height: 18, borderRadius: 4,
+    background: c, border: '1px solid rgba(0,0,0,0.12)',
+    display: 'inline-block', verticalAlign: 'middle',
+  });
 
   if (loading) {
     return (
@@ -904,58 +936,98 @@ export default function ThemeSettings() {
               No presets saved yet. Configure your colors and save them as a preset.
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: 10 }}>
-              {presets.map(p => (
-                <div key={p.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-                  padding: '12px 14px', borderRadius: 10,
-                  background: 'var(--bg)', border: '1px solid var(--border-color)',
-                }}>
-                  <div style={{
-                    display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0,
-                  }}>
-                    {[p.primary_color, p.secondary_color, p.gradient_start, p.gradient_end].map((c, i) => (
-                      <div key={i} style={{
-                        width: 18, height: 18, borderRadius: 4,
-                        background: c, border: '1px solid rgba(0,0,0,0.1)',
-                      }} />
-                    ))}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0, fontWeight: 600, fontSize: 13.5 }}>{p.name}</div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPreset(p.id, p.name)}
-                      disabled={applyingPreset === p.id}
-                      title="Apply this preset to the live theme"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        background: applyingPreset === p.id
-                          ? 'var(--border-color)'
-                          : `linear-gradient(135deg, ${livePreview.primary}, ${livePreview.gradientEnd})`,
-                        color: '#fff', fontWeight: 600, fontSize: 12,
-                        opacity: applyingPreset === p.id ? 0.6 : 1,
-                      }}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%', borderCollapse: 'collapse',
+                fontSize: 12, minWidth: 1000,
+              }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>#</th>
+                    <th style={{...thStyle, textAlign: 'left', minWidth: 120}}>Name</th>
+                    <th style={thStyle} title="Primary">Pri.</th>
+                    <th style={thStyle} title="Secondary">Sec.</th>
+                    <th style={thStyle} title="Background">Bg.</th>
+                    <th style={thStyle} title="Surface">Surf.</th>
+                    <th style={thStyle} title="Text">Text</th>
+                    <th style={thStyle} title="Gradient Start">Grd.S</th>
+                    <th style={thStyle} title="Gradient End">Grd.E</th>
+                    <th style={thStyle} title="Dark Primary">D.Pri</th>
+                    <th style={thStyle} title="Dark Secondary">D.Sec</th>
+                    <th style={{...thStyle, minWidth: 150}}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {presets.map((p, idx) => (
+                    <tr key={p.id} style={{
+                      borderBottom: '1px solid var(--border-color)',
+                      transition: 'background 0.15s',
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
-                      {applyingPreset === p.id ? <LuRefreshCw size={12} className="spinner" /> : <LuDownload size={12} />}
-                      {applyingPreset === p.id ? 'Applying...' : 'Apply'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePreset(p.id, p.name)}
-                      title="Delete this preset"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '6px 12px', borderRadius: 8,
-                        border: '1px solid var(--border-color)',
-                        background: 'transparent', cursor: 'pointer',
-                        fontSize: 12, color: '#EF4444', fontWeight: 500,
-                      }}
-                    ><LuTrash2 size={12} /> Delete</button>
-                  </div>
-                </div>
-              ))}
+                      <td style={tdStyle}>{idx + 1}</td>
+                      <td style={{...tdStyle, textAlign: 'left', fontWeight: 600}}>{p.name}</td>
+                      <td style={tdStyle}><div style={colorDot(p.primary_color)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.secondary_color)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.background_color)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.surface_color)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.text_color)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.gradient_start)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.gradient_end)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.dark_primary)} /></td>
+                      <td style={tdStyle}><div style={colorDot(p.dark_secondary)} /></td>
+                      <td style={{...tdStyle, display: 'flex', gap: 6, justifyContent: 'center', border: 'none', padding: '6px 8px'}}>
+                        <button
+                          type="button"
+                          onClick={() => handleLoadPreset(p)}
+                          title="Load into editor"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '5px 10px', borderRadius: 6,
+                            border: '1px solid var(--border-color)',
+                            background: 'transparent', cursor: 'pointer',
+                            fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                          }}
+                        ><LuPencil size={10} /> Edit</button>
+                        <button
+                          type="button"
+                          onClick={() => handleApplyPreset(p.id, p.name)}
+                          disabled={applyingPreset === p.id}
+                          title="Apply this preset to the live theme"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                            padding: '5px 12px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                            background: applyingPreset === p.id
+                              ? 'var(--border-color)'
+                              : `linear-gradient(135deg, ${livePreview.primary}, ${livePreview.gradientEnd})`,
+                            color: '#fff', fontWeight: 600, fontSize: 11,
+                            opacity: applyingPreset === p.id ? 0.6 : 1,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {applyingPreset === p.id ? <LuRefreshCw size={10} className="spinner" /> : <LuDownload size={10} />}
+                          {applyingPreset === p.id ? 'Applying...' : 'Apply'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePreset(p.id, p.name)}
+                          title="Delete this preset"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                            padding: '5px 10px', borderRadius: 6,
+                            border: '1px solid var(--border-color)',
+                            background: 'transparent', cursor: 'pointer',
+                            fontSize: 11, color: '#EF4444', fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                          }}
+                        ><LuTrash2 size={10} /> Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
