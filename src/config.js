@@ -7,6 +7,8 @@ export const CONFIG = {
     BASE_URL: BASE_URL,
     API_URL: `${BASE_URL}/api`,
     FALLBACK_URL: FALLBACK_URL,
+    APP_NAME: 'Nikkah Match',
+    SUPPORT_EMAIL: 'support@nerittmatch.com',
 };
 
 export default CONFIG;

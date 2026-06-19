@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaPalette, FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins } from 'react-icons/fa';
-import logo from '../assets/logo.png';
+import logo from '../assets/icon_logo.png';
+import { CONFIG } from '../config';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
@@ -153,7 +154,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                         letterSpacing: '-0.02em',
                         whiteSpace: 'nowrap'
                     }}>
-                        Matrimony
+                        Nikkah Match
                     </h2>
                 </div>
             </div>
@@ -265,7 +266,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                            MATRIMONY ADMIN
+                            {CONFIG.APP_NAME.toUpperCase()} ADMIN
                         </div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                             v1.0.4 • End of List
