@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins } from 'react-icons/fa';
+import { FaPalette, FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
@@ -56,6 +56,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
         {
             title: 'Settings & Logs',
             items: [
+                { path: '/theme-settings', label: 'Theme Settings', icon: <FaPalette size={20} /> },
                 { path: '/promotion-settings', label: 'Promotion Settings', icon: <FaBullhorn size={20} /> },
                 { path: '/mediator-promotions', label: 'Mediator Promotions', icon: <FaBullseye size={20} /> },
                 { path: '/admin-settings', label: 'Admin Settings', icon: <FaCog size={20} /> },

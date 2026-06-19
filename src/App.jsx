@@ -23,6 +23,7 @@ import ReligionManagement from './pages/ReligionManagement';
 import Interests from './pages/Interests';
 import Personalities from './pages/Personalities';
 import AdminSettings from './pages/AdminSettings';
+import ThemeSettings from './pages/ThemeSettings';
 import AuditLogs from './pages/AuditLogs';
 import ContactUnlockRequests from './pages/ContactUnlockRequests';
 import ContactUnlocks from './pages/ContactUnlocks';
@@ -62,6 +63,7 @@ function App() {
             <Route path="/interests" element={<Interests />} />
             <Route path="/personalities" element={<Personalities />} />
             <Route path="/admin-settings" element={<AdminSettings />} />
+            <Route path="/theme-settings" element={<ThemeSettings />} />
             <Route path="/audit-logs" element={<AuditLogs />} />
             <Route path="/contact-unlock-requests" element={<ContactUnlockRequests />} />
             <Route path="/contact-unlocks" element={<ContactUnlocks />} />
