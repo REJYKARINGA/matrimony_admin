@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getThemeSettings, updateThemeSettings } from '../api/themeSettingsApi';
 import {
   getThemePresets, saveThemePreset, deleteThemePreset, applyThemePreset
@@ -53,6 +53,14 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState(null);
+  const [previewColor, setPreviewColor] = useState(null);
+  const [previewPos, setPreviewPos] = useState(null);
+  const [previewMagnified, setPreviewMagnified] = useState(null);
+  const spectrumCanvasRef = useRef(null);
+  const imageCanvasRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => { setCustomHex(value); }, [value]);
 
@@ -66,6 +74,145 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
 
   const isValidHex = (h) => /^#[0-9A-Fa-f]{6}$/.test(h);
 
+  const parseHex = (h) => {
+    if (!isValidHex(h)) return { r: 0, g: 0, b: 0 };
+    const big = parseInt(h.slice(1), 16);
+    return { r: (big >> 16) & 255, g: (big >> 8) & 255, b: big & 255 };
+  };
+  const toHex = (r, g, b) => `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+
+  const { r, g, b } = parseHex(value);
+
+  const drawSpectrum = useCallback(() => {
+    const canvas = spectrumCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const { r, g, b } = parseHex(value);
+    for (let x = 0; x < w; x++) {
+      const hue = (x / w) * 360;
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, `hsl(${hue}, 100%, 100%)`);
+      gradient.addColorStop(0.5, `hsl(${hue}, 100%, 50%)`);
+      gradient.addColorStop(1, `hsl(${hue}, 100%, 0%)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, 0, 1, h);
+    }
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    const hue = ((r * 0.3 + g * 0.59 + b * 0.11) / 255) * w;
+    ctx.beginPath();
+    ctx.arc(hue, h / 2, 5, 0, Math.PI * 2);
+    ctx.stroke();
+  }, [value]);
+
+  useEffect(() => { if (showCustom) drawSpectrum(); }, [showCustom, drawSpectrum]);
+
+  useEffect(() => {
+    if (!showImagePicker || !imageDataUrl || !imageCanvasRef.current) return;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = imageCanvasRef.current;
+      if (!canvas) return;
+      const maxW = 400, maxH = 160;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      if (h > maxH) { w = w * maxH / h; h = maxH; }
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    };
+    img.src = imageDataUrl;
+  }, [showImagePicker, imageDataUrl]);
+
+  const getSpectrumColor = (e) => {
+    const canvas = spectrumCanvasRef.current;
+    if (!canvas) return null;
+    const x = e.nativeEvent.offsetX;
+    const scale = canvas.width / canvas.offsetWidth;
+    const pixel = canvas.getContext('2d').getImageData(Math.round(x * scale), Math.round(canvas.height / 2), 1, 1).data;
+    if (pixel[3] === 0) return null;
+    return toHex(pixel[0], pixel[1], pixel[2]);
+  };
+
+  const getImageColor = (e) => {
+    const canvas = imageCanvasRef.current;
+    if (!canvas) return null;
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
+    const cx = Math.round(x * scaleX);
+    const cy = Math.round(y * scaleY);
+    if (cx < 0 || cy < 0 || cx >= canvas.width || cy >= canvas.height) return null;
+    const pixel = canvas.getContext('2d').getImageData(cx, cy, 1, 1).data;
+    if (pixel[3] === 0) return null;
+    return toHex(pixel[0], pixel[1], pixel[2]);
+  };
+
+  const handleSpectrumMove = (e) => {
+    const color = getSpectrumColor(e);
+    if (color) { setPreviewColor(color); setPreviewPos({ x: e.clientX, y: e.clientY }); }
+  };
+
+  const handleSpectrumLeave = () => { setPreviewColor(null); setPreviewPos(null); };
+
+  const handleSpectrumClick = (e) => {
+    const color = getSpectrumColor(e);
+    if (color) applyColor(color);
+  };
+
+  const handleImageMove = (e) => {
+    const color = getImageColor(e);
+    if (!color) return;
+    setPreviewColor(color);
+    setPreviewPos({ x: e.clientX, y: e.clientY });
+    const canvas = imageCanvasRef.current;
+    if (!canvas) return;
+    const ox = e.nativeEvent.offsetX;
+    const oy = e.nativeEvent.offsetY;
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
+    const cx = Math.round(ox * scaleX);
+    const cy = Math.round(oy * scaleY);
+    const sx = Math.max(0, Math.min(canvas.width - 20, cx - 10));
+    const sy = Math.max(0, Math.min(canvas.height - 20, cy - 10));
+    const magCanvas = document.createElement('canvas');
+    magCanvas.width = 80; magCanvas.height = 80;
+    const magCtx = magCanvas.getContext('2d');
+    const scale = 80 / 20;
+    magCtx.imageSmoothingEnabled = false;
+    magCtx.drawImage(canvas, sx, sy, 20, 20, 0, 0, 80, 80);
+    magCtx.strokeStyle = '#fff';
+    magCtx.lineWidth = 1.5;
+    magCtx.strokeRect(10 * scale - 1, 10 * scale - 1, 2, 2);
+    setPreviewMagnified(magCanvas.toDataURL());
+  };
+
+  const handleImageLeave = () => { setPreviewColor(null); setPreviewPos(null); setPreviewMagnified(null); };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setImageDataUrl(ev.target.result);
+      setShowImagePicker(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageClick = (e) => {
+    const color = getImageColor(e);
+    if (!color) return;
+    applyColor(color);
+    setShowImagePicker(false);
+    setImageDataUrl(null);
+    setPreviewColor(null);
+    setPreviewPos(null);
+    setPreviewMagnified(null);
+  };
+
   const applyColor = (color) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(color);
@@ -73,7 +220,6 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
     setHistoryIndex(newHistory.length - 1);
     onChange(color);
     setCustomHex(color);
-    setShowCustom(false);
   };
 
   const undo = () => {
@@ -155,36 +301,189 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         {showCustom ? (
-          <>
-            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-secondary)' }}>#</span>
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="FF8800"
-              value={customHex?.replace('#', '') || ''}
-              onChange={e => {
-                const raw = e.target.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
-                const val = `#${raw}`;
-                setCustomHex(val);
-                if (raw.length === 6) applyColor(val);
-              }}
-              style={{
-                flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-color)',
-                background: 'var(--bg)', color: 'var(--text)', fontSize: 13, fontWeight: 600,
-                fontFamily: 'monospace', textTransform: 'uppercase',
-                outline: 'none',
-              }}
-              onBlur={() => { if (isValidHex(customHex)) applyColor(customHex); }}
-            />
-            <button
-              type="button"
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {/* Backdrop */}
+            <div
               onClick={() => setShowCustom(false)}
               style={{
-                padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-color)',
-                background: 'var(--bg)', cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)',
+                position: 'absolute', inset: 0,
+                background: 'rgba(0,0,0,0.45)',
+                backdropFilter: 'blur(4px)',
               }}
-            >Done</button>
-          </>
+            />
+            {/* Modal */}
+            <div style={{
+              position: 'relative', width: 360, maxWidth: '94vw',
+              background: 'var(--card-bg)',
+              borderRadius: 16, boxShadow: '0 32px 80px rgba(0,0,0,0.35)',
+              padding: 24, animation: 'fadeInUp 0.2s ease-out',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: value, border: '2px solid var(--border-color)' }} />
+                <div style={{ fontWeight: 700, fontSize: 15 }}>Pick a color</div>
+                <div style={{ flex: 1 }} />
+                <button type="button" onClick={() => setShowCustom(false)} style={{
+                  width: 28, height: 28, borderRadius: '50%', border: 'none',
+                  background: 'var(--hover-bg)', cursor: 'pointer', fontSize: 16, lineHeight: '28px',
+                  color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>×</button>
+              </div>
+
+              {/* Spectrum Canvas */}
+              <div style={{ marginBottom: 14 }}>
+                <canvas
+                  ref={spectrumCanvasRef}
+                  width={360}
+                  height={24}
+                  onClick={handleSpectrumClick}
+                  onMouseMove={handleSpectrumMove}
+                  onMouseLeave={handleSpectrumLeave}
+                  style={{ width: '100%', height: 24, borderRadius: 8, cursor: 'crosshair', display: 'block' }}
+                />
+                <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 3 }}>
+                  Move cursor over the bar to preview, click to pick
+                </div>
+              </div>
+
+              {/* RGB Sliders */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+                {['R', 'G', 'B'].map((ch, i) => {
+                  const val = [r, g, b][i];
+                  const chVal = [r, g, b];
+                  return (
+                    <label key={ch} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                      <span style={{ fontWeight: 700, color: ['#EF4444', '#22C55E', '#3B82F6'][i], minWidth: 14 }}>{ch}</span>
+                      <input
+                        type="range" min={0} max={255}
+                        value={val}
+                        onChange={e => {
+                          const nv = parseInt(e.target.value);
+                          chVal[i] = nv;
+                          applyColor(toHex(chVal[0], chVal[1], chVal[2]));
+                        }}
+                        style={{ flex: 1, height: 4, accentColor: value, cursor: 'pointer' }}
+                      />
+                      <span style={{ fontFamily: 'monospace', fontSize: 11, minWidth: 26, textAlign: 'right', color: 'var(--text-secondary)' }}>{val}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* Hex + Image Upload */}
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 14 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-secondary)' }}>#</span>
+                <input
+                  type="text" maxLength={6}
+                  placeholder="FF8800"
+                  value={customHex?.replace('#', '') || ''}
+                  onChange={e => {
+                    const raw = e.target.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+                    const val = `#${raw}`;
+                    setCustomHex(val);
+                    if (raw.length === 6) applyColor(val);
+                  }}
+                  style={{
+                    flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-color)',
+                    background: 'var(--bg)', color: 'var(--text)', fontSize: 13, fontWeight: 600,
+                    fontFamily: 'monospace', textTransform: 'uppercase', outline: 'none',
+                  }}
+                  onBlur={() => { if (isValidHex(customHex)) applyColor(customHex); }}
+                />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload image and pick a color from it"
+                  style={{
+                    padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-color)',
+                    background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >📷</button>
+              </div>
+
+              {/* Image picker inside modal */}
+              {showImagePicker && imageDataUrl && (
+                <div style={{
+                  padding: 10, borderRadius: 10, marginBottom: 14,
+                  border: '1px solid var(--border-color)', background: 'var(--bg)',
+                  position: 'relative',
+                }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                    Move cursor to preview, click to pick a color
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <canvas
+                      ref={imageCanvasRef}
+                      style={{ maxWidth: '100%', maxHeight: 150, borderRadius: 6, cursor: 'crosshair', display: 'block' }}
+                      onClick={handleImageClick}
+                      onMouseMove={handleImageMove}
+                      onMouseLeave={handleImageLeave}
+                    />
+                    {/* Magnified loupe */}
+                    {previewMagnified && previewPos && (
+                      <div style={{
+                        position: 'absolute',
+                        left: Math.min(previewPos.x - 40, 260),
+                        top: -88,
+                        width: 80, height: 80,
+                        borderRadius: 8, overflow: 'hidden',
+                        border: '2px solid #fff',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                        pointerEvents: 'none',
+                      }}>
+                        <img src={previewMagnified} alt="magnified" style={{ width: '100%', height: '100%', display: 'block' }} />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setShowImagePicker(false); setImageDataUrl(null); setPreviewColor(null); setPreviewPos(null); setPreviewMagnified(null); }}
+                    style={{
+                      position: 'absolute', top: 4, right: 4,
+                      padding: '2px 8px', borderRadius: 4, border: 'none',
+                      background: 'rgba(0,0,0,0.5)', color: '#fff', cursor: 'pointer', fontSize: 10,
+                    }}
+                  >×</button>
+                </div>
+              )}
+
+              {/* Floating color preview tooltip */}
+              {previewColor && previewPos && (
+                <div style={{
+                  position: 'fixed',
+                  left: previewPos.x + 16,
+                  top: previewPos.y - 30,
+                  zIndex: 10001,
+                  padding: '6px 10px', borderRadius: 8,
+                  background: '#1a1a1a', color: '#fff',
+                  fontSize: 11, fontWeight: 600, fontFamily: 'monospace',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                  pointerEvents: 'none',
+                }}>
+                  <div style={{ width: 14, height: 14, borderRadius: 3, background: previewColor, border: '1px solid rgba(255,255,255,0.2)', flexShrink: 0 }} />
+                  {previewColor}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setShowCustom(false)} style={{
+                  padding: '8px 18px', borderRadius: 10, border: '1px solid var(--border-color)',
+                  background: 'transparent', cursor: 'pointer', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500,
+                }}>Cancel</button>
+                <button type="button" onClick={() => setShowCustom(false)} style={{
+                  padding: '8px 22px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  background: `linear-gradient(135deg, ${value}, ${value}dd)`,
+                  color: '#fff', fontWeight: 600, fontSize: 13,
+                }}>Apply</button>
+              </div>
+            </div>
+          </div>
         ) : (
           <div style={{ display: 'flex', gap: 6 }}>
             <button
