@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getThemeSettings, updateThemeSettings } from '../api/themeSettingsApi';
 import {
+  getThemePresets, saveThemePreset, deleteThemePreset, applyThemePreset
+} from '../api/themePresetsApi';
+import {
   LuPalette, LuSave, LuCheck, LuTriangleAlert,
-  LuSun, LuMoon, LuRefreshCw, LuEye, LuRotateCcw, LuUndo2
+  LuSun, LuMoon, LuRefreshCw, LuEye, LuRotateCcw, LuUndo2, LuStar,
+  LuFolder, LuTrash2, LuDownload, LuPlus
 } from 'react-icons/lu';
 
 function SectionCard({ icon: Icon, title, desc, children, accent }) {
@@ -43,10 +47,22 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
   const [showCustom, setShowCustom] = useState(false);
   const [history, setHistory] = useState([value]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [savedColors, setSavedColors] = useState(() => {
+    try {
+      const stored = localStorage.getItem(`cf_saved_${label}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
 
   useEffect(() => { setCustomHex(value); }, [value]);
 
+  useEffect(() => {
+    try { localStorage.setItem(`cf_saved_${label}`, JSON.stringify(savedColors)); }
+    catch {}
+  }, [savedColors, label]);
+
   const presets = ['#00C897', '#00A87D', '#00875F', '#0EA5E9', '#6366F1', '#8B5CF6', '#F59E0B', '#EF4444', '#22C55E', '#3B82F6', '#EC4899', '#F97316'];
+  const allSwatches = [...new Set([...presets, ...savedColors])];
 
   const isValidHex = (h) => /^#[0-9A-Fa-f]{6}$/.test(h);
 
@@ -102,21 +118,39 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-        {presets.map(p => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => { applyColor(p); }}
-            style={{
-              width: 28, height: 28, borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: p,
-              boxShadow: value === p ? '0 0 0 2px var(--primary), 0 0 0 4px rgba(0,200,151,0.2)' : '0 1px 3px rgba(0,0,0,0.15)',
-              transition: 'all 0.15s',
-              outline: 'none',
-            }}
-            title={p}
-          />
-        ))}
+        {allSwatches.map((p, i) => {
+          const isSaved = savedColors.includes(p) && !presets.includes(p);
+          return (
+            <div key={p + i} style={{ position: 'relative', display: 'inline-flex' }}>
+              <button
+                type="button"
+                onClick={() => { applyColor(p); }}
+                style={{
+                  width: 28, height: 28, borderRadius: 6, border: 'none', cursor: 'pointer',
+                  background: p,
+                  boxShadow: value === p ? '0 0 0 2px var(--primary), 0 0 0 4px rgba(0,200,151,0.2)' : '0 1px 3px rgba(0,0,0,0.15)',
+                  transition: 'all 0.15s',
+                  outline: 'none',
+                }}
+                title={p}
+              />
+              {isSaved && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setSavedColors(savedColors.filter(c => c !== p)); }}
+                  title="Remove saved color"
+                  style={{
+                    position: 'absolute', top: -5, right: -5,
+                    width: 14, height: 14, borderRadius: '50%', border: 'none',
+                    background: '#EF4444', color: '#fff', cursor: 'pointer',
+                    fontSize: 9, lineHeight: '14px', textAlign: 'center',
+                    padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >×</button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -162,6 +196,18 @@ function ColorField({ label, desc, value, onChange, defaultValue }) {
                 fontWeight: 500,
               }}
             >+ Custom</button>
+            {!savedColors.includes(value) && (
+              <button
+                type="button"
+                onClick={() => setSavedColors([...savedColors, value])}
+                title="Save this color"
+                style={{
+                  padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border-color)',
+                  background: 'transparent', cursor: 'pointer', fontSize: 12,
+                  color: '#F59E0B', display: 'flex', alignItems: 'center',
+                }}
+              ><LuStar size={13} /></button>
+            )}
             <div style={{ flex: 1 }} />
             <button
               type="button"
@@ -236,12 +282,80 @@ export default function ThemeSettings() {
     dark_secondary: '#64B5F6',
   };
 
+  const [presets, setPresets] = useState([]);
+  const [presetsLoading, setPresetsLoading] = useState(false);
+  const [showSavePreset, setShowSavePreset] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [applyingPreset, setApplyingPreset] = useState(null);
+
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type, id: Date.now() });
     setTimeout(() => setToast(null), 3500);
   };
 
-  useEffect(() => { fetchSettings(); }, []);
+  useEffect(() => { fetchSettings(); fetchPresets(); }, []);
+
+  const fetchPresets = async () => {
+    setPresetsLoading(true);
+    try {
+      const res = await getThemePresets();
+      setPresets(res.data.presets || []);
+    } catch (e) {
+      console.error('Failed to fetch theme presets:', e);
+    } finally {
+      setPresetsLoading(false);
+    }
+  };
+
+  const handleSavePreset = async () => {
+    if (!presetName.trim()) return;
+    try {
+      const res = await saveThemePreset({ name: presetName.trim(), ...formData });
+      setPresets(prev => [...prev, res.data.preset]);
+      setShowSavePreset(false);
+      setPresetName('');
+      showToast(`Preset "${res.data.preset.name}" saved`);
+    } catch (e) {
+      console.error('Failed to save preset:', e);
+      showToast('Failed to save preset', 'error');
+    }
+  };
+
+  const handleApplyPreset = async (id, name) => {
+    setApplyingPreset(id);
+    try {
+      const res = await applyThemePreset(id);
+      const t = res.data.theme;
+      setFormData({
+        primary_color: t.primary_color,
+        secondary_color: t.secondary_color,
+        background_color: t.background_color,
+        surface_color: t.surface_color,
+        text_color: t.text_color,
+        gradient_start: t.gradient_start,
+        gradient_end: t.gradient_end,
+        dark_primary: t.dark_primary,
+        dark_secondary: t.dark_secondary,
+      });
+      showToast(`Preset "${name}" applied to live theme`);
+    } catch (e) {
+      console.error('Failed to apply preset:', e);
+      showToast('Failed to apply preset', 'error');
+    } finally {
+      setApplyingPreset(null);
+    }
+  };
+
+  const handleDeletePreset = async (id, name) => {
+    try {
+      await deleteThemePreset(id);
+      setPresets(prev => prev.filter(p => p.id !== id));
+      showToast(`Preset "${name}" deleted`);
+    } catch (e) {
+      console.error('Failed to delete preset:', e);
+      showToast('Failed to delete preset', 'error');
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -723,6 +837,129 @@ export default function ThemeSettings() {
           </div>
         </SectionCard>
         </div>
+      </div>
+
+      {/* Theme Presets */}
+      <div style={{ marginTop: 24 }}>
+      <SectionCard
+        icon={LuFolder}
+        title="Theme Presets"
+        desc="Save entire color schemes and apply them later with one click"
+        accent="#6366F1"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Save Current Preset */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+            padding: 12, borderRadius: 10,
+            background: 'var(--bg)', border: '1px solid var(--border-color)',
+          }}>
+            <LuPlus size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+            {showSavePreset ? (
+              <>
+                <input
+                  type="text"
+                  value={presetName}
+                  onChange={e => setPresetName(e.target.value)}
+                  placeholder="Preset name..."
+                  maxLength={50}
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter') handleSavePreset(); if (e.key === 'Escape') setShowSavePreset(false); }}
+                  style={{
+                    flex: 1, minWidth: 160, padding: '7px 10px', borderRadius: 8,
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--card-bg)', color: 'var(--text)', fontSize: 13,
+                    outline: 'none',
+                  }}
+                />
+                <button type="button" onClick={handleSavePreset} style={{
+                  padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: `linear-gradient(135deg, ${livePreview.primary}, ${livePreview.gradientEnd})`,
+                  color: '#fff', fontWeight: 600, fontSize: 12,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  <LuSave size={13} /> Save
+                </button>
+                <button type="button" onClick={() => { setShowSavePreset(false); setPresetName(''); }} style={{
+                  padding: '7px 12px', borderRadius: 8, border: '1px solid var(--border-color)',
+                  background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)',
+                }}>Cancel</button>
+              </>
+            ) : (
+              <button type="button" onClick={() => setShowSavePreset(true)} style={{
+                padding: '7px 16px', borderRadius: 8, border: '1px solid var(--border-color)',
+                background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'var(--text-secondary)',
+                fontWeight: 500,
+              }}>Save Current as Preset</button>
+            )}
+          </div>
+
+          {/* Presets List */}
+          {presetsLoading ? (
+            <div style={{ textAlign: 'center', padding: 20, fontSize: 13, color: 'var(--text-secondary)' }}>
+              Loading presets...
+            </div>
+          ) : presets.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 20, fontSize: 13, color: 'var(--text-secondary)' }}>
+              No presets saved yet. Configure your colors and save them as a preset.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {presets.map(p => (
+                <div key={p.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+                  padding: '12px 14px', borderRadius: 10,
+                  background: 'var(--bg)', border: '1px solid var(--border-color)',
+                }}>
+                  <div style={{
+                    display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0,
+                  }}>
+                    {[p.primary_color, p.secondary_color, p.gradient_start, p.gradient_end].map((c, i) => (
+                      <div key={i} style={{
+                        width: 18, height: 18, borderRadius: 4,
+                        background: c, border: '1px solid rgba(0,0,0,0.1)',
+                      }} />
+                    ))}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, fontWeight: 600, fontSize: 13.5 }}>{p.name}</div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPreset(p.id, p.name)}
+                      disabled={applyingPreset === p.id}
+                      title="Apply this preset to the live theme"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                        background: applyingPreset === p.id
+                          ? 'var(--border-color)'
+                          : `linear-gradient(135deg, ${livePreview.primary}, ${livePreview.gradientEnd})`,
+                        color: '#fff', fontWeight: 600, fontSize: 12,
+                        opacity: applyingPreset === p.id ? 0.6 : 1,
+                      }}
+                    >
+                      {applyingPreset === p.id ? <LuRefreshCw size={12} className="spinner" /> : <LuDownload size={12} />}
+                      {applyingPreset === p.id ? 'Applying...' : 'Apply'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePreset(p.id, p.name)}
+                      title="Delete this preset"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '6px 12px', borderRadius: 8,
+                        border: '1px solid var(--border-color)',
+                        background: 'transparent', cursor: 'pointer',
+                        fontSize: 12, color: '#EF4444', fontWeight: 500,
+                      }}
+                    ><LuTrash2 size={12} /> Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </SectionCard>
       </div>
 
       <div style={{ height: 60 }} />
