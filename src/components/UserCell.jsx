@@ -14,7 +14,7 @@ export default function UserCell({ user, profile, showBadge = true, avatarSize =
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <UserAvatar user={user || profile} size={avatarSize} />
+            <UserAvatar user={user || profile} profile={profile} size={avatarSize} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                 <div style={{ fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {name}

@@ -7,6 +7,7 @@ import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaBan, FaUnlock, FaCheckCircle
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
 import UserCell from '../components/UserCell';
+import { CONFIG } from '../config';
 
 const SELECT_STYLE = {
     padding: '0.35rem 0.65rem',
@@ -989,14 +990,14 @@ export default function UserProfiles() {
                                     <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--hover-bg)', overflow: 'hidden', border: '1px solid var(--border-color)', flexShrink: 0 }}>
                                         {formData.profile_picture ? (
                                             <img
-                                                src={formData.profile_picture instanceof File ? URL.createObjectURL(formData.profile_picture) : (formData.profile_picture.startsWith('http') ? formData.profile_picture : `${import.meta.env.VITE_API_BASE_URL}/storage/${formData.profile_picture}`)}
+                                                src={formData.profile_picture instanceof File ? URL.createObjectURL(formData.profile_picture) : (formData.profile_picture.startsWith('http') ? formData.profile_picture : `${CONFIG.BASE_URL}/storage/${formData.profile_picture}`)}
                                                 alt="Preview"
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                 onError={(e) => { e.target.onerror = null; e.target.src = getAvatarSrc(formData.gender); }}
                                             />
                                         ) : selectedProfile?.profile_picture ? (
                                             <img
-                                                src={selectedProfile.profile_picture.startsWith('http') ? selectedProfile.profile_picture : `${import.meta.env.VITE_API_BASE_URL}/storage/${selectedProfile.profile_picture}`}
+                                                src={selectedProfile.profile_picture.startsWith('http') ? selectedProfile.profile_picture : `${CONFIG.BASE_URL}/storage/${selectedProfile.profile_picture}`}
                                                 alt="Preview"
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                 onError={(e) => { e.target.onerror = null; e.target.src = getAvatarSrc(formData.gender); }}

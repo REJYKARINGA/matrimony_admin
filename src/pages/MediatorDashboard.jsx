@@ -7,6 +7,7 @@ import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 import { useToast } from '../components/Toast';
 import UserCell from '../components/UserCell';
+import { CONFIG } from '../config';
 import './MediatorDashboard.css';
 
 
@@ -1179,7 +1180,7 @@ export default function MediatorDashboard() {
                         <div style={{ marginBottom: '1.5rem' }}>
                             {selectedReferral.referred_user?.user_profile?.profile_picture ? (
                                 <img
-                                    src={`${import.meta.env.VITE_API_BASE_URL}/storage/${selectedReferral.referred_user.user_profile.profile_picture}`}
+                                    src={`${CONFIG.BASE_URL}/storage/${selectedReferral.referred_user.user_profile.profile_picture}`}
                                     alt="Profile"
                                     style={{
                                         width: '100px',
