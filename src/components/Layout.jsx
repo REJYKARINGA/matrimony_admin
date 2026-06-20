@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import AccessGuard from './AccessGuard';
 export default function Layout() {
     const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -90,7 +91,9 @@ export default function Layout() {
                     flex: 1, 
                     overflowX: 'hidden' 
                 }}>
-                    <Outlet context={{ theme, isMobile }} />
+                    <AccessGuard>
+                        <Outlet context={{ theme, isMobile }} />
+                    </AccessGuard>
                 </main>
             </div>
         </div>
