@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LuMenu, LuLogOut, LuUser, LuMoon, LuSun, LuSearch, LuArrowRight, LuCommand } from 'react-icons/lu';
+import { CONFIG } from '../config';
+import api from '../api/axios';
 
 const quickNavItems = [
     { path: '/dashboard', label: 'Dashboard', group: 'Management' },
@@ -39,6 +41,10 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const profileRef = useRef(null);
+    const photoInputRef = useRef(null);
     const [focused, setFocused] = useState(false);
     const [highlightedIdx, setHighlightedIdx] = useState(-1);
     const searchRef = useRef(null);
@@ -77,6 +83,9 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
         const handleClickOutside = (e) => {
             if (searchRef.current && !searchRef.current.contains(e.target)) {
                 closeDropdown();
+            }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setShowProfileMenu(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -363,23 +372,92 @@ export default function Header({ toggleSidebar, collapsed, theme, toggleTheme, i
                     {theme === 'dark' ? <LuSun /> : <LuMoon />}
                 </button>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '10px',
-                        background: 'var(--primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                    }}>
-                        <LuUser size={16} color="#fff" />
+                <div ref={profileRef} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <div onClick={() => setShowProfileMenu(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.3rem 0.5rem', borderRadius: '10px', transition: 'background 0.2s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{
+                            width: '32px', height: '32px', borderRadius: '10px',
+                            background: user.user_profile?.profile_picture ? 'transparent' : 'var(--primary)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
+                        }}>
+                            {user.user_profile?.profile_picture ? (
+                                <img src={`${CONFIG.BASE_URL}/storage/${user.user_profile.profile_picture}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <LuUser size={16} color="#fff" />
+                            )}
+                        </div>
+                        {!isMobile && (
+                            <span style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text)' }}>
+                                {user.user_profile?.first_name || 'Admin'}
+                            </span>
+                        )}
                     </div>
-                    {!isMobile && (
-                        <span style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text)' }}>
-                            {user.user_profile?.first_name || 'Admin'}
-                        </span>
+
+                    {showProfileMenu && (
+                        <div style={{
+                            position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 1000,
+                            background: 'var(--card-bg)', borderRadius: '14px', border: '1px solid var(--border-color)',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.15)', minWidth: '260px', overflow: 'hidden',
+                        }}>
+                            <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{
+                                    width: '42px', height: '42px', borderRadius: '12px', flexShrink: 0, overflow: 'hidden',
+                                    background: user.user_profile?.profile_picture ? 'transparent' : 'var(--primary)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    {user.user_profile?.profile_picture ? (
+                                        <img src={`${CONFIG.BASE_URL}/storage/${user.user_profile.profile_picture}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <LuUser size={20} color="#fff" />
+                                    )}
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>
+                                        {user.user_profile?.first_name} {user.user_profile?.last_name || ''}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                                        {user.role}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style={{ padding: '10px 18px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ fontWeight: 500, minWidth: 36 }}>Email</span>
+                                    <span style={{ color: 'var(--text)', wordBreak: 'break-all' }}>{user.email}</span>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ fontWeight: 500, minWidth: 36 }}>Phone</span>
+                                    <span style={{ color: 'var(--text)' }}>{user.phone || '-'}</span>
+                                </div>
+                                <button onClick={() => photoInputRef.current?.click()} disabled={uploadingPhoto} style={{
+                                    marginTop: 6, padding: '7px 14px', borderRadius: 10, border: '1px solid var(--border-color)',
+                                    background: 'transparent', cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+                                    color: 'var(--primary)', fontWeight: 600, fontSize: '0.8rem', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', gap: 6, opacity: uploadingPhoto ? 0.6 : 1,
+                                }}>
+                                    <LuUser size={14} />
+                                    {uploadingPhoto ? 'Uploading...' : 'Update Photo'}
+                                </button>
+                            </div>
+                            <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setUploadingPhoto(true);
+                                try {
+                                    const fd = new FormData();
+                                    fd.append('profile_picture', file);
+                                    const res = await api.post('/auth/update-profile-picture', fd, {
+                                        headers: { 'Content-Type': 'multipart/form-data' },
+                                    });
+                                    const newUser = res.data.user;
+                                    localStorage.setItem('admin_user', JSON.stringify(newUser));
+                                    window.location.reload();
+                                } catch {
+                                    setUploadingPhoto(false);
+                                }
+                            }} />
+                        </div>
                     )}
                 </div>
                 <button

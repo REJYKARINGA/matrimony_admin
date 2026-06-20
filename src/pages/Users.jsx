@@ -7,6 +7,7 @@ import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import ConfirmModal from '../components/ConfirmModal';
 import TimeFormatCell from '../components/TimeFormatCell';
+import { getRoles } from '../api/rolePermissionsApi';
 
 export default function Users() {
     const [users, setUsers] = useState([]);
@@ -28,6 +29,16 @@ export default function Users() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+
+    // Roles for dynamic dropdown and tabs
+    const [roleOptions, setRoleOptions] = useState([]);
+
+    useEffect(() => {
+        getRoles().then(res => {
+            const roles = res.data.roles || [];
+            setRoleOptions(roles);
+        }).catch(() => {});
+    }, []);
 
     // Confirm Modal state
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '' });
@@ -142,8 +153,7 @@ export default function Users() {
             required: true,
             options: [
                 { value: 'user', label: 'User' },
-                { value: 'mediator', label: 'Mediator' },
-                { value: 'admin', label: 'Admin' }
+                ...roleOptions.map(r => ({ value: r.name, label: r.label }))
             ],
             defaultValue: selectedUser?.role || 'user'
         }
@@ -168,143 +178,61 @@ export default function Users() {
                     </div>
                 </div>
 
-                {/* Tab Navigation */}
-                <div className="tab-nav" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
-                    <button
-                        onClick={() => setActiveTab('all')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.75rem 0',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            borderBottom: activeTab === 'all' ? '3px solid var(--primary)' : '3px solid transparent',
-                            color: activeTab === 'all' ? 'var(--primary)' : 'var(--text-secondary)',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        All
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('user')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.75rem 0',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            borderBottom: activeTab === 'user' ? '3px solid var(--primary)' : '3px solid transparent',
-                            color: activeTab === 'user' ? 'var(--primary)' : 'var(--text-secondary)',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        Users
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('mediator')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.75rem 0',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            borderBottom: activeTab === 'mediator' ? '3px solid var(--primary)' : '3px solid transparent',
-                            color: activeTab === 'mediator' ? 'var(--primary)' : 'var(--text-secondary)',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        Mediators
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('admin')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.75rem 0',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            borderBottom: activeTab === 'admin' ? '3px solid var(--primary)' : '3px solid transparent',
-                            color: activeTab === 'admin' ? 'var(--primary)' : 'var(--text-secondary)',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        Admins
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto', paddingBottom: '2px' }}>
-                        <select
-                            value={emailFilter}
-                            onChange={(e) => setEmailFilter(e.target.value)}
-                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                            <option value="all">Email: All</option>
-                            <option value="1">Email: Verified</option>
-                            <option value="0">Email: Unverified</option>
-                        </select>
-                        <select
-                            value={phoneFilter}
-                            onChange={(e) => setPhoneFilter(e.target.value)}
-                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                            <option value="all">Phone: All</option>
-                            <option value="1">Phone: Verified</option>
-                            <option value="0">Phone: Unverified</option>
-                        </select>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                            <option value="all">Status: All</option>
-                            <option value="active">Status: Active</option>
-                            <option value="blocked">Status: Blocked</option>
-                        </select>
-                        <select
-                            value={genderFilter}
-                            onChange={(e) => setGenderFilter(e.target.value)}
-                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                            <option value="all">Gender: All</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                        <select
-                            value={`${sortBy}-${sortDir}`}
-                            onChange={(e) => {
-                                const [by, dir] = e.target.value.split('-');
-                                setSortBy(by);
-                                setSortDir(dir);
-                            }}
-                            style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}
-                        >
-                            <option value="created_at-desc">Sort: Newest</option>
-                            <option value="created_at-asc">Sort: Oldest</option>
-                            <option value="last_active_at-desc">Sort: Last Active</option>
-                            <option value="last_active_at-asc">Sort: Oldest Active</option>
-                            <option value="updated_at-desc">Sort: Last Updated</option>
-                            <option value="name-asc">Sort: Name (A-Z)</option>
-                            <option value="name-desc">Sort: Name (Z-A)</option>
-                        </select>
-                    </div>
-                    <button
-                        onClick={() => setActiveTab('trashed')}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '0.75rem 0',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            borderBottom: activeTab === 'trashed' ? '3px solid #EF4444' : '3px solid transparent',
-                            color: activeTab === 'trashed' ? '#EF4444' : 'var(--text-secondary)',
-                            transition: 'all 0.2s ease',
-                        }}
-                    >
-                        Deleted Users
-                    </button>
+                {/* Tabs */}
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+                    {[{ name: 'all', label: 'All' }, ...roleOptions, { name: 'trashed', label: 'Deleted Users' }].map(role => (
+                        <button key={role.name} onClick={() => setActiveTab(role.name)} style={{
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            padding: '0.6rem 1rem', fontWeight: '600', fontSize: '0.95rem',
+                            borderBottom: activeTab === role.name
+                                ? `3px solid ${role.name === 'trashed' ? '#EF4444' : 'var(--primary)'}`
+                                : '3px solid transparent',
+                            color: activeTab === role.name
+                                ? (role.name === 'trashed' ? '#EF4444' : 'var(--primary)')
+                                : 'var(--text-secondary)',
+                            transition: 'all 0.2s'
+                        }}>{role.label}</button>
+                    ))}
+                </div>
+
+                {/* Filter row */}
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                    <select value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)}
+                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <option value="all">Email: All</option>
+                        <option value="1">Email: Verified</option>
+                        <option value="0">Email: Unverified</option>
+                    </select>
+                    <select value={phoneFilter} onChange={(e) => setPhoneFilter(e.target.value)}
+                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <option value="all">Phone: All</option>
+                        <option value="1">Phone: Verified</option>
+                        <option value="0">Phone: Unverified</option>
+                    </select>
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <option value="all">Status: All</option>
+                        <option value="active">Status: Active</option>
+                        <option value="blocked">Status: Blocked</option>
+                    </select>
+                    <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
+                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <option value="all">Gender: All</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                    <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
+                        const [by, dir] = e.target.value.split('-');
+                        setSortBy(by); setSortDir(dir);
+                    }} style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}>
+                        <option value="created_at-desc">Sort: Newest</option>
+                        <option value="created_at-asc">Sort: Oldest</option>
+                        <option value="last_active_at-desc">Sort: Last Active</option>
+                        <option value="last_active_at-asc">Sort: Oldest Active</option>
+                        <option value="updated_at-desc">Sort: Last Updated</option>
+                        <option value="name-asc">Sort: Name (A-Z)</option>
+                        <option value="name-desc">Sort: Name (Z-A)</option>
+                    </select>
                 </div>
 
                 {loading ? (

@@ -1,11 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaPalette, FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins } from 'react-icons/fa';
 import logo from '../assets/icon_logo.png';
 import { CONFIG } from '../config';
+import { getRolePermissionsByRoleName } from '../api/rolePermissionsApi';
 
 export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
     const [isHovered, setIsHovered] = useState(false);
+    const [allowedPaths, setAllowedPaths] = useState(null);
+    const fetchedRole = useRef(null);
+
+    const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+    const role = user.role || '';
+
+    useEffect(() => {
+        if (!role) return;
+        if (fetchedRole.current === role) return;
+        fetchedRole.current = role;
+        getRolePermissionsByRoleName(role)
+            .then(res => setAllowedPaths(res.data.paths ? new Set(res.data.paths) : null))
+            .catch(() => setAllowedPaths(null));
+    }, [role]);
+
+    const isItemVisible = (path) => {
+        if (allowedPaths === null) return true;
+        return allowedPaths.has(path);
+    };
+
     const menuGroups = [
         {
             title: 'Management',
@@ -66,6 +87,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 { path: '/contact-unlocks', label: 'Contact Unlocks', icon: <FaUnlock size={20} /> },
                 { path: '/preferences', label: 'Preferences', icon: <FaSlidersH size={20} /> },
                 { path: '/audit-logs', label: 'Login & Activity Logs', icon: <FaHistory size={20} /> },
+                { path: '/permissions', label: 'Permissions', icon: <FaUserShield size={20} /> },
             ]
         }
     ];
@@ -161,7 +183,10 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
 
             <nav className="hide-scrollbar" style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {menuGroups.map((group, groupIndex) => (
+                    {menuGroups.map((group, groupIndex) => {
+                        const visibleItems = group.items.filter((item) => isItemVisible(item.path));
+                        if (visibleItems.length === 0) return null;
+                        return (
                         <div key={group.title} style={{ marginBottom: '1.5rem' }}>
                             <div style={{ 
                                 paddingLeft: (!isExpanded && !isMobile) ? '0' : '1.5rem', 
@@ -180,7 +205,7 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                             }}>
                                 {group.title}
                             </div>
-                            {group.items.map((item) => (
+                            {visibleItems.map((item) => (
                                 <li key={item.path} style={{ marginBottom: '0.25rem' }}>
                                     <NavLink
                                         to={item.path}
@@ -248,32 +273,34 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                                 </li>
                             ))}
                         </div>
-                    ))}
+                    );
+                    })}
                 </ul>
 
-                {/* BOTTOM INDICATOR - SHOW END OF LIST */}
-                <div style={{ 
-                    padding: '2rem 0',
-                    textAlign: 'center',
-                    opacity: 0.4
+            </nav>
+            {/* Bottom branding - always pinned to bottom */}
+            <div style={{
+                padding: '1.25rem 0',
+                textAlign: 'center', opacity: 0.4,
+                borderTop: '1px solid var(--border-color)',
+                marginTop: 'auto',
+            }}>
+                <div style={{
+                    overflow: 'hidden',
+                    maxWidth: (!isExpanded && !isMobile) ? 0 : '150px',
+                    opacity: (!isExpanded && !isMobile) ? 0 : 1,
+                    whiteSpace: 'nowrap',
+                    margin: '0 auto',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
-                    <div style={{
-                        overflow: 'hidden',
-                        maxWidth: (!isExpanded && !isMobile) ? 0 : '150px',
-                        opacity: (!isExpanded && !isMobile) ? 0 : 1,
-                        whiteSpace: 'nowrap',
-                        margin: '0 auto',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                            {CONFIG.APP_NAME.toUpperCase()} ADMIN
-                        </div>
-                        <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                            v1.0.4 • End of List
-                        </div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        {CONFIG.APP_NAME.toUpperCase()} ADMIN
+                    </div>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                        v1.0.4 • End of List
                     </div>
                 </div>
-            </nav>
+            </div>
         </div>
     );
 }

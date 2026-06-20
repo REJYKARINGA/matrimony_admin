@@ -33,6 +33,7 @@ import ProfileVerifications from './pages/ProfileVerifications';
 import PhotoRequests from './pages/PhotoRequests';
 import Festivals from './pages/Festivals';
 import RechargeTiers from './pages/RechargeTiers';
+import Permissions from './pages/Permissions';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -81,6 +82,7 @@ function App() {
             <Route path="/photo-requests" element={<PhotoRequests />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/recharge-tiers" element={<RechargeTiers />} />
+            <Route path="/permissions" element={<Permissions />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

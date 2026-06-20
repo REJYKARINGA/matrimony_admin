@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
 import UserCell from '../components/UserCell';
 import { CONFIG } from '../config';
+import { getRoles } from '../api/rolePermissionsApi';
 
 const SELECT_STYLE = {
     padding: '0.35rem 0.65rem',
@@ -174,7 +175,8 @@ export default function UserProfiles() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [activeTab, setActiveTab] = useState('active'); // 'active' | 'trashed'
+    const [activeTab, setActiveTab] = useState('all');
+    const [roleOptions, setRoleOptions] = useState([]);
 
     // Filters
     const [genderFilter, setGenderFilter] = useState('all');
@@ -221,6 +223,7 @@ export default function UserProfiles() {
         api.get('/admin/sub-castes').then(r => setSubCastes(extractArray(r.data))).catch(() => {});
         api.get('/admin/education').then(r => setEducations(extractArray(r.data))).catch(() => {});
         api.get('/admin/occupations').then(r => setOccupations(extractArray(r.data))).catch(() => {});
+        getRoles().then(r => setRoleOptions(r.data.roles || [])).catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -235,6 +238,7 @@ export default function UserProfiles() {
                     search: search || undefined,
                     page,
                     trashed: activeTab === 'trashed' ? 1 : 0,
+                    role: (activeTab !== 'trashed' && activeTab !== 'all') ? activeTab : undefined,
                     ...(genderFilter !== 'all' && { gender: genderFilter }),
                     ...(religionFilter !== 'all' && { religion_id: religionFilter }),
                     ...(educationFilter !== 'all' && { education_id: educationFilter }),
@@ -649,6 +653,7 @@ export default function UserProfiles() {
                                     <th>Location</th>
                                     <th>Education</th>
                                     <th>Occupation</th>
+                                    <th>Role</th>
                                     <th>Created By</th>
                                     <th>Status / Activity</th>
                                     <th>Verification</th>
@@ -658,7 +663,7 @@ export default function UserProfiles() {
                             </thead>
                             <tbody>
                                 {profiles.length === 0 ? (
-                                    <tr><td colSpan="10" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No profiles found</td></tr>
+                                    <tr><td colSpan="12" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No profiles found</td></tr>
                                 ) : profiles.map((profile) => (
                                     <tr key={profile.id}>
                                         <td>
@@ -684,6 +689,11 @@ export default function UserProfiles() {
                                         <td>{[profile.city, profile.state].filter(Boolean).join(', ') || '-'}</td>
                                         <td>{profile.education_model?.name || '-'}</td>
                                         <td>{profile.occupation_model?.name || '-'}</td>
+                                        <td>
+                                            <span style={{ textTransform: 'capitalize', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text)' }}>
+                                                {profile.user?.role || '-'}
+                                            </span>
+                                        </td>
                                         <td>
                                             {profile.created_by ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
