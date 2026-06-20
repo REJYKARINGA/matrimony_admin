@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LuTriangleAlert } from 'react-icons/lu';
 import { onPermissionDenied } from '../api/permissionGuard';
 
 export default function AccessGuard({ error: propError, children }) {
   const [globalError, setGlobalError] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    setGlobalError(null);
+  }, [location]);
 
   useEffect(() => {
     const unsub = onPermissionDenied(data => setGlobalError(data));
