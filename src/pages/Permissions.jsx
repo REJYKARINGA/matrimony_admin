@@ -4,6 +4,7 @@ import {
   getMenus, createMenu, updateMenu, deleteMenu, reorderMenus,
   getRolePermissions, updateRolePermissions,
 } from '../api/rolePermissionsApi';
+import ConfirmModal from '../components/ConfirmModal';
 import {
   LuShield, LuSave, LuCheck, LuTriangleAlert, LuRefreshCw,
   LuUsers, LuShieldAlert, LuWallet, LuHeart,
@@ -145,6 +146,7 @@ export default function Permissions() {
     setDragTab(null);
   };
 
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null, data: null });
   const [dragItemId, setDragItemId] = useState(null);
   const [dragGroup, setDragGroup] = useState(null);
 
@@ -287,9 +289,7 @@ export default function Permissions() {
   };
 
   const handleDeleteRole = async (role) => {
-    if (!window.confirm(`Delete role "${role.label}"?`)) return;
-    try { await deleteRole(role.id); showToast('Role deleted'); fetchRoles(); }
-    catch (err) { showToast(err.response?.data?.error || 'Failed to delete role', 'error'); }
+    setConfirmModal({ isOpen: true, type: 'role', data: role });
   };
 
   // ── Menus ──
@@ -324,9 +324,7 @@ export default function Permissions() {
   };
 
   const handleDeleteMenu = async (menu) => {
-    if (!window.confirm(`Delete menu "${menu.label}"?`)) return;
-    try { await deleteMenu(menu.id); showToast('Menu deleted'); fetchMenus(); }
-    catch { showToast('Failed to delete menu', 'error'); }
+    setConfirmModal({ isOpen: true, type: 'menu', data: menu });
   };
 
   const groupedMenus = menus.reduce((acc, m) => {
@@ -603,6 +601,27 @@ export default function Permissions() {
           </>
         )
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, type: null, data: null })}
+        onConfirm={async () => {
+          const { type, data } = confirmModal;
+          try {
+            if (type === 'role') { await deleteRole(data.id); showToast('Role deleted'); fetchRoles(); }
+            if (type === 'menu') { await deleteMenu(data.id); showToast('Menu deleted'); fetchMenus(); }
+          } catch (err) {
+            showToast(err.response?.data?.error || 'Failed to delete', 'error');
+          } finally {
+            setConfirmModal({ isOpen: false, type: null, data: null });
+          }
+        }}
+        title={`Delete ${confirmModal.type === 'role' ? 'Role' : 'Menu'}`}
+        message={`Are you sure you want to delete "${confirmModal.data?.label}"? This action cannot be undone.`}
+        confirmText="Delete"
+        confirmButtonClass="btn-danger"
+      />
 
       {/* Toast */}
       {toast && (
