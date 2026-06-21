@@ -24,6 +24,8 @@ export default function Login() {
     const redirectBasedOnRole = (role) => {
         if (role === 'mediator') {
             navigate('/mediator/dashboard');
+        } else if (role === 'partner_office') {
+            navigate('/partner/dashboard');
         } else {
             navigate('/dashboard');
         }
@@ -57,7 +59,7 @@ export default function Login() {
         try {
             const response = await api.post('/auth/login', { email, password });
             const { user, token } = response.data;
-            if (!['admin', 'mediator', 'customer_care', 'verification', 'accountant'].includes(user.role)) {
+            if (!['admin', 'mediator', 'partner_office', 'customer_care', 'verification', 'accountant'].includes(user.role)) {
                 setError('Unauthorized: You do not have access to this panel.');
                 setIsLoading(false);
                 return;

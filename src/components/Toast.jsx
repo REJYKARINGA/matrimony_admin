@@ -9,7 +9,7 @@ export function useToast() {
         setTimeout(() => setToast(null), 3000);
     }, []);
 
-    const ToastComponent = toast ? createPortal(
+    const ToastComponent = () => toast ? createPortal(
         <div key={toast.key} style={{
             position: 'fixed', top: '5rem', right: '1.5rem', zIndex: 100000,
             padding: '0.75rem 1.25rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem',

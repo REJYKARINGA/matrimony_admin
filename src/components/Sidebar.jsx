@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaPalette, FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins } from 'react-icons/fa';
+import { FaPalette, FaUsers, FaUserShield, FaFlag, FaHeart, FaMoneyBillWave, FaIdCard, FaChartLine, FaGraduationCap, FaBriefcase, FaHome, FaSlidersH, FaWallet, FaBullhorn, FaBullseye, FaMosque, FaUserTag, FaHistory, FaUnlock, FaLock, FaLightbulb, FaImage, FaUserCheck, FaCamera, FaCircle, FaCog, FaGift, FaExclamationTriangle, FaCheckCircle, FaCoins, FaBuilding, FaUserTie, FaHandshake, FaMoneyCheck } from 'react-icons/fa';
 import logo from '../assets/icon_logo.png';
 import { CONFIG } from '../config';
 import { getRolePermissionsByRoleName } from '../api/rolePermissionsApi';
@@ -73,6 +73,15 @@ export default function Sidebar({ collapsed, isMobile, theme, onHoverChange }) {
                 { path: '/personalities', label: 'Personality Traits', icon: <FaUserTag size={20} /> },
                 { path: '/religion-management', label: 'Religion & Community', icon: <FaMosque size={20} /> },
                 { path: '/family-details', label: 'Family Details', icon: <FaHome size={20} /> },
+            ]
+        },
+        {
+            title: 'Partner Offices',
+            items: [
+                { path: '/partner-offices', label: 'Partner Offices', icon: <FaBuilding size={20} /> },
+                { path: '/partner-agents', label: 'Partner Agents', icon: <FaUserTie size={20} /> },
+                { path: '/partner-registrations', label: 'Partner Registrations', icon: <FaHandshake size={20} /> },
+                { path: '/partner-payouts', label: 'Partner Payouts', icon: <FaMoneyCheck size={20} /> },
             ]
         },
         {

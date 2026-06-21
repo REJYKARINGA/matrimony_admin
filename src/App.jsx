@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import MediatorDashboard from './pages/MediatorDashboard';
+import PartnerDashboard from './pages/PartnerDashboard';
+import PartnerOffices from './pages/PartnerOffices';
+import PartnerAgents from './pages/PartnerAgents';
+import PartnerRegistrations from './pages/PartnerRegistrations';
+import PartnerPayouts from './pages/PartnerPayouts';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Verifications from './pages/Verifications';
@@ -48,6 +53,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/mediator/dashboard" element={<MediatorDashboard />} />
+          <Route path="/partner/dashboard" element={<PartnerDashboard />} />
 
           {/* Protected Admin Routes */}
           <Route element={<Layout />}>
@@ -83,6 +89,10 @@ function App() {
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/recharge-tiers" element={<RechargeTiers />} />
             <Route path="/permissions" element={<Permissions />} />
+            <Route path="/partner-offices" element={<PartnerOffices />} />
+            <Route path="/partner-agents" element={<PartnerAgents />} />
+            <Route path="/partner-registrations" element={<PartnerRegistrations />} />
+            <Route path="/partner-payouts" element={<PartnerPayouts />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
