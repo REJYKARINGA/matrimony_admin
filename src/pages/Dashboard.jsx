@@ -184,6 +184,35 @@ export default function Dashboard() {
         fetchDashboardStats();
     }, []);
 
+    const handleDownloadSql = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/admin/dashboard/export-database`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to download database');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_${new Date().toISOString().slice(0,10)}.sql`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showToast('Database exported successfully', 'success');
+        } catch (error) {
+            showToast('Failed to export database', 'error');
+        }
+    };
+
     const fetchDashboardStats = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -374,28 +403,53 @@ export default function Dashboard() {
                     </h1>
                 </div>
 
-                <motion.div
-                    animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    style={{
-                        padding: '0.6rem 1.2rem',
-                        background: 'var(--card-bg)',
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleDownloadSql}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            background: 'var(--card-bg)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '24px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
                             backdropFilter: 'blur(12px)',
                             WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '24px',
-                        fontSize: '0.875rem',
-                        color: COLORS.primary,
-                        fontWeight: '700',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.6rem',
-                        border: '1px solid var(--border-color)'
-                    }}
-                >
-                    <div style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%' }} />
-                    Live System Feed
-                </motion.div>
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                        }}
+                    >
+                        <FaArrowRotateLeft size={14} /> Export SQL
+                    </motion.button>
+
+                    <motion.div
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            background: 'var(--card-bg)',
+                                backdropFilter: 'blur(12px)',
+                                WebkitBackdropFilter: 'blur(12px)',
+                            borderRadius: '24px',
+                            fontSize: '0.875rem',
+                            color: COLORS.primary,
+                            fontWeight: '700',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            border: '1px solid var(--border-color)'
+                        }}
+                    >
+                        <div style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%' }} />
+                        Live System Feed
+                    </motion.div>
+                </div>
             </motion.div>
 
             {/* 12-Column Premium Grid */}
