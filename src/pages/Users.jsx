@@ -170,7 +170,7 @@ export default function Users() {
                             placeholder="Search by name, email, phone, matrimony ID, reference code..."
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); }}
-                            style={{ width: '260px', marginBottom: 0 }}
+                            style={{ width: '260px', maxWidth: '100%', marginBottom: 0 }}
                         />
                         <button onClick={handleAddUser} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <FaPlus /> Add User
@@ -179,52 +179,45 @@ export default function Users() {
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+                <div className="tabs-container">
                     {[{ name: 'all', label: 'All' }, ...roleOptions, { name: 'trashed', label: 'Deleted Users' }].map(role => (
                         <button key={role.name} onClick={() => setActiveTab(role.name)} style={{
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                            padding: '0.6rem 1rem', fontWeight: '600', fontSize: '0.95rem',
                             borderBottom: activeTab === role.name
                                 ? `3px solid ${role.name === 'trashed' ? '#EF4444' : 'var(--primary)'}`
                                 : '3px solid transparent',
                             color: activeTab === role.name
                                 ? (role.name === 'trashed' ? '#EF4444' : 'var(--primary)')
                                 : 'var(--text-secondary)',
-                            transition: 'all 0.2s'
                         }}>{role.label}</button>
                     ))}
                 </div>
 
                 {/* Filter row */}
-                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
-                    <select value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)}
-                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                <div className="filter-container">
+                    <select value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)}>
                         <option value="all">Email: All</option>
                         <option value="1">Email: Verified</option>
                         <option value="0">Email: Unverified</option>
                     </select>
-                    <select value={phoneFilter} onChange={(e) => setPhoneFilter(e.target.value)}
-                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <select value={phoneFilter} onChange={(e) => setPhoneFilter(e.target.value)}>
                         <option value="all">Phone: All</option>
                         <option value="1">Phone: Verified</option>
                         <option value="0">Phone: Unverified</option>
                     </select>
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                         <option value="all">Status: All</option>
                         <option value="active">Status: Active</option>
                         <option value="blocked">Status: Blocked</option>
                     </select>
-                    <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
-                        style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
                         <option value="all">Gender: All</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                     </select>
-                    <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
+                    <select className="sort-select" value={`${sortBy}-${sortDir}`} onChange={(e) => {
                         const [by, dir] = e.target.value.split('-');
                         setSortBy(by); setSortDir(dir);
-                    }} style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}>
+                    }} style={{ fontWeight: '500' }}>
                         <option value="created_at-desc">Sort: Newest</option>
                         <option value="created_at-asc">Sort: Oldest</option>
                         <option value="last_active_at-desc">Sort: Last Active</option>
