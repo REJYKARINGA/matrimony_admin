@@ -11,7 +11,7 @@ import {
     LuTriangleAlert, LuTrendingUp, LuLoader, LuClock,
     LuWallet, LuGraduationCap, LuTarget, LuShieldCheck, LuMessageSquare,
     LuLightbulb, LuTerminal, LuZap, LuCircleX, LuExternalLink, LuEye,
-    LuGift
+    LuGift, LuSparkles, LuArrowUpRight
 } from 'react-icons/lu';
 import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
@@ -41,29 +41,52 @@ const COLORS = {
     male: '#00C897'
 };
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2
-        }
-    }
-};
+/* ---------- Shared premium surface helpers ---------- */
 
-const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            type: 'spring',
-            stiffness: 100,
-            damping: 12
-        }
-    }
-};
+const glass = (isDark) => ({
+    background: 'var(--card-bg)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid var(--border-color)',
+});
+
+const cardShadow = (accent, isDark) => isDark
+    ? `0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 45px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02) inset`
+    : `0 1px 0 0 rgba(255,255,255,0.6) inset, 0 20px 45px -22px rgba(15,23,42,0.10), 0 0 0 1px rgba(15,23,42,0.015) inset`;
+
+const hoverShadow = (accent) => `0 30px 60px -25px ${accent}33, 0 1px 0 0 rgba(255,255,255,0.5) inset`;
+
+/** Thin gradient "data thread" — the signature accent line every panel carries */
+function AccentThread({ color, secondary }) {
+    return (
+        <div style={{
+            position: 'absolute',
+            top: 0, left: '8%', right: '8%',
+            height: '3px',
+            borderRadius: '0 0 8px 8px',
+            background: `linear-gradient(90deg, transparent, ${color}, ${secondary || color}, transparent)`,
+            opacity: 0.85,
+        }} />
+    );
+}
+
+/** Eyebrow label used to tag each panel with its data domain */
+function PanelEyebrow({ label, color }) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+            <span style={{
+                width: 6, height: 6, borderRadius: '50%',
+                background: color, boxShadow: `0 0 0 4px ${color}1f`
+            }} />
+            <span style={{
+                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.12em',
+                textTransform: 'uppercase', color: color
+            }}>
+                {label}
+            </span>
+        </div>
+    );
+}
 
 const numberVariants = {
     hidden: { scale: 0.5, opacity: 0 },
@@ -87,14 +110,24 @@ function SkeletonCard() {
             className="skeleton-card"
             style={{
                 background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
                 border: '1px solid var(--border-color)',
-                borderRadius: '16px',
+                borderRadius: '24px',
                 padding: '1.5rem',
-                height: '140px'
+                height: '140px',
+                position: 'relative',
+                overflow: 'hidden'
             }}
         >
+            <motion.div
+                animate={{ x: ['-100%', '180%'] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                    position: 'absolute', top: 0, left: 0, height: '100%', width: '40%',
+                    background: 'linear-gradient(90deg, transparent, rgba(0,200,151,0.08), transparent)'
+                }}
+            />
             <motion.div
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
@@ -102,7 +135,7 @@ function SkeletonCard() {
                     height: '20px',
                     width: '60%',
                     background: 'var(--border-color)',
-                    borderRadius: '4px',
+                    borderRadius: '6px',
                     marginBottom: '1rem'
                 }}
             />
@@ -113,7 +146,7 @@ function SkeletonCard() {
                     height: '32px',
                     width: '40%',
                     background: 'var(--border-color)',
-                    borderRadius: '4px',
+                    borderRadius: '6px',
                     marginBottom: '0.5rem'
                 }}
             />
@@ -124,7 +157,7 @@ function SkeletonCard() {
                     height: '16px',
                     width: '80%',
                     background: 'var(--border-color)',
-                    borderRadius: '4px'
+                    borderRadius: '6px'
                 }}
             />
         </motion.div>
@@ -132,22 +165,22 @@ function SkeletonCard() {
 }
 
 const FR_STATUS = {
-    pending:     { label: 'Under Review',   color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  icon: LuEye       },
-    in_progress: { label: 'In Development', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)',  icon: LuTerminal  },
-    completed:   { label: 'Shipped ✓',      color: '#10B981', bg: 'rgba(16,185,129,0.12)',  icon: LuZap       },
-    rejected:    { label: 'Declined',       color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   icon: LuCircleX   },
+    pending: { label: 'Under Review', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', icon: LuEye },
+    in_progress: { label: 'In Development', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)', icon: LuTerminal },
+    completed: { label: 'Shipped ✓', color: '#10B981', bg: 'rgba(16,185,129,0.12)', icon: LuZap },
+    rejected: { label: 'Declined', color: '#EF4444', bg: 'rgba(239,68,68,0.12)', icon: LuCircleX },
 };
 
 const CustomTooltip = ({ active, payload, label, isDark }) => {
     if (active && payload && payload.length) {
         return (
             <div style={{
-                background: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                background: isDark ? 'rgba(10, 14, 22, 0.92)' : 'rgba(255, 255, 255, 0.98)',
                 padding: '12px 16px',
-                border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                border: `1px solid ${isDark ? 'rgba(0,200,151,0.25)' : '#e2e8f0'}`,
                 borderRadius: '16px',
-                boxShadow: '0 20px 40px -4px rgba(0,0,0,0.2)',
-                backdropFilter: 'blur(10px)',
+                boxShadow: '0 24px 48px -8px rgba(0,0,0,0.25)',
+                backdropFilter: 'blur(14px)',
                 zIndex: 1000
             }}>
                 <p style={{ margin: 0, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', fontSize: '0.9rem', fontFamily: 'Inter, sans-serif' }}>
@@ -155,11 +188,11 @@ const CustomTooltip = ({ active, payload, label, isDark }) => {
                 </p>
                 {payload.map((item, index) => (
                     <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color || item.fill }} />
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color || item.fill, boxShadow: `0 0 0 3px ${(item.color || item.fill)}22` }} />
                         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isDark ? '#94a3b8' : '#475569' }}>
-                            {item.name} : 
+                            {item.name} :
                         </span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isDark ? '#fff' : '#0f172a' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isDark ? '#fff' : '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
                             {item.value?.toLocaleString()}
                         </span>
                     </div>
@@ -193,21 +226,21 @@ export default function Dashboard() {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to download database');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `backup_${new Date().toISOString().slice(0,10)}.sql`;
+            a.download = `backup_${new Date().toISOString().slice(0, 10)}.sql`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            
+
             showToast('Database exported successfully', 'success');
         } catch (error) {
             showToast('Failed to export database', 'error');
@@ -261,9 +294,6 @@ export default function Dashboard() {
                 </motion.div>
 
                 <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -308,48 +338,54 @@ export default function Dashboard() {
             value: stats?.users?.total ?? 0,
             icon: LuUsers,
             color: COLORS.primary,
+            secondary: '#00f0b0',
             subtitle: `${stats?.users?.active ?? 0} active members`,
-            delay: 0
+            eyebrow: 'Community'
         },
         {
             title: 'Verifications',
             value: stats?.verifications?.pending ?? 0,
             icon: LuShieldCheck,
             color: COLORS.warning,
+            secondary: '#fbbf24',
             subtitle: `${stats?.verifications?.approved ?? 0} verified`,
-            delay: 0.1
+            eyebrow: 'Trust & safety'
         },
         {
             title: 'Connections',
             value: stats?.interests?.total ?? 0,
             icon: LuHeart,
             color: '#6366f1',
+            secondary: '#818cf8',
             subtitle: `${stats?.interests?.accepted ?? 0} accepted`,
-            delay: 0.2
+            eyebrow: 'Matchmaking'
         },
         {
             title: 'Revenue Flow',
             value: `₹${(stats?.payments?.totalRevenue ?? 0).toLocaleString()}`,
             icon: LuCreditCard,
             color: COLORS.success,
+            secondary: '#00f0b0',
             subtitle: `₹${(stats?.payments?.revenueThisMonth ?? 0).toLocaleString()} current`,
-            delay: 0.3
+            eyebrow: 'Finance'
         },
         {
             title: 'Security Alert',
             value: stats?.reports?.pending ?? 0,
             icon: LuTriangleAlert,
             color: COLORS.danger,
+            secondary: '#f87171',
             subtitle: `${stats?.reports?.total ?? 0} total cases`,
-            delay: 0.4
+            eyebrow: 'Trust & safety'
         },
         {
             title: 'Customer Stories',
             value: stats?.successStories?.approved ?? 0,
             icon: LuMessageSquare,
             color: '#8b5cf6',
+            secondary: '#a78bfa',
             subtitle: `${stats?.successStories?.total ?? 0} stories shared`,
-            delay: 0.5
+            eyebrow: 'Community'
         }
     ];
 
@@ -357,6 +393,7 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: isMobile ? '1rem 0' : '0 0 2rem 0', position: 'relative' }}>
+
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -30 }}
@@ -367,148 +404,185 @@ export default function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: '1rem',
-                    marginBottom: '2.5rem'
+                    marginBottom: '2.5rem',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap',
+                    position: 'relative'
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                {/* ambient glow behind header */}
+                <div aria-hidden style={{
+                    position: 'absolute', top: '-60px', left: '-40px',
+                    width: '320px', height: '220px',
+                    background: `radial-gradient(circle, ${COLORS.primary}26, transparent 70%)`,
+                    filter: 'blur(10px)', pointerEvents: 'none', zIndex: 0
+                }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', position: 'relative', zIndex: 1 }}>
                     <motion.div
                         animate={{
-                            rotate: [0, 10, -10, 0],
-                            scale: [1, 1.1, 1]
+                            rotate: [0, 8, -8, 0],
                         }}
-                        transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+                        transition={{ duration: 5, repeat: Infinity, repeatDelay: 2.5 }}
                         style={{
-                            width: '48px',
-                            height: '48px',
-                            background: 'white',
-                            borderRadius: '16px',
+                            width: '52px',
+                            height: '52px',
+                            background: `linear-gradient(145deg, ${COLORS.primary}, ${COLORS.secondary})`,
+                            borderRadius: '18px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 8px 20px rgba(0,0,0,0.05)'
+                            boxShadow: `0 14px 28px -8px ${COLORS.primary}66, 0 0 0 1px rgba(255,255,255,0.15) inset`
                         }}
                     >
-                        <FaChartLine size={24} color={COLORS.primary} />
+                        <FaChartLine size={22} color="#fff" />
                     </motion.div>
-                    <h1 style={{
-                        margin: 0,
-                        fontSize: isMobile ? '1.5rem' : '2.2rem',
-                        fontWeight: '900',
-                        letterSpacing: '-1px',
-                        background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text'
-                    }}>
-                        Premium Analytics
-                    </h1>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h1 style={{
+                                margin: 0,
+                                fontSize: isMobile ? '1.5rem' : '2.3rem',
+                                fontWeight: '900',
+                                letterSpacing: '-0.03em',
+                                background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary} 60%, ${isDark ? '#e2fff4' : '#0f172a'})`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text'
+                            }}>
+                                Premium Analytics
+                            </h1>
+                            <LuSparkles size={18} color={COLORS.primary} style={{ opacity: 0.7 }} />
+                        </div>
+                        <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>
+                            Command center for growth, trust & revenue
+                        </p>
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', position: 'relative', zIndex: 1 }}>
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.04, y: -1 }}
+                        whileTap={{ scale: 0.96 }}
                         onClick={handleDownloadSql}
                         style={{
-                            padding: '0.6rem 1.2rem',
+                            padding: '0.65rem 1.3rem',
                             background: 'var(--card-bg)',
                             color: 'var(--text-primary)',
                             border: '1px solid var(--border-color)',
                             borderRadius: '24px',
                             fontWeight: '700',
+                            fontSize: '0.85rem',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
+                            boxShadow: cardShadow(COLORS.primary, isDark),
                         }}
                     >
-                        <FaArrowRotateLeft size={14} /> Export SQL
+                        <FaArrowRotateLeft size={13} /> Export SQL
                     </motion.button>
 
                     <motion.div
-                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        animate={{
+                            boxShadow: [
+                                `0 0 0 0 ${COLORS.success}55`,
+                                `0 0 0 6px ${COLORS.success}00`,
+                            ]
+                        }}
                         transition={{ duration: 2, repeat: Infinity }}
                         style={{
-                            padding: '0.6rem 1.2rem',
+                            padding: '0.65rem 1.3rem',
                             background: 'var(--card-bg)',
-                                backdropFilter: 'blur(12px)',
-                                WebkitBackdropFilter: 'blur(12px)',
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
                             borderRadius: '24px',
-                            fontSize: '0.875rem',
+                            fontSize: '0.85rem',
                             color: COLORS.primary,
                             fontWeight: '700',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                            boxShadow: cardShadow(COLORS.primary, isDark),
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.6rem',
                             border: '1px solid var(--border-color)'
                         }}
                     >
-                        <div style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%' }} />
+                        <motion.div
+                            animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                            transition={{ duration: 1.6, repeat: Infinity }}
+                            style={{ width: '8px', height: '8px', background: COLORS.success, borderRadius: '50%', boxShadow: `0 0 8px ${COLORS.success}` }}
+                        />
                         Live System Feed
                     </motion.div>
                 </div>
             </motion.div>
 
             {/* 12-Column Premium Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
-                gap: '1.5rem',
-                position: 'relative',
-                paddingBottom: '4rem'
-            }}>
+            <motion.div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
+                    gap: '1.5rem',
+                    position: 'relative',
+                    paddingBottom: '4rem'
+                }}
+            >
 
                 {/* Wallet Balance — total cash balance across all users */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    whileHover={{ y: -6, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)' }}
+                    whileHover={{ y: -6, boxShadow: hoverShadow('#10b981') }}
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 12',
-                        background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03))',
-                        backdropFilter: 'blur(12px)',
-                        WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '32px',
+                        background: isDark
+                            ? 'linear-gradient(120deg, rgba(16,185,129,0.14), rgba(16,185,129,0.03) 60%, var(--card-bg))'
+                            : 'linear-gradient(120deg, rgba(16,185,129,0.10), rgba(16,185,129,0.02) 60%, var(--card-bg))',
+                        backdropFilter: 'blur(16px)',
+                        WebkitBackdropFilter: 'blur(16px)',
+                        borderRadius: '28px',
                         padding: '1.8rem 2.5rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         gap: '1.5rem',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-                        border: '1px solid rgba(16,185,129,0.2)',
+                        flexWrap: isMobile ? 'wrap' : 'nowrap',
+                        boxShadow: cardShadow('#10b981', isDark),
+                        border: '1px solid rgba(16,185,129,0.22)',
+                        position: 'relative',
+                        overflow: 'hidden',
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                    <AccentThread color="#10b981" secondary="#059669" />
+                    <div aria-hidden style={{
+                        position: 'absolute', right: '-60px', top: '-60px', width: '220px', height: '220px',
+                        background: 'radial-gradient(circle, rgba(16,185,129,0.18), transparent 70%)', pointerEvents: 'none'
+                    }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', position: 'relative', zIndex: 1 }}>
                         <div style={{
-                            width: 56, height: 56, borderRadius: 18,
+                            width: 58, height: 58, borderRadius: 18,
                             background: 'linear-gradient(135deg, #10b981, #059669)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 8px 20px rgba(16,185,129,0.3)',
+                            boxShadow: '0 14px 28px -6px rgba(16,185,129,0.45), 0 0 0 1px rgba(255,255,255,0.15) inset',
                         }}>
                             <LuWallet size={26} color="#fff" />
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Wallet Balance (All Users)</div>
-                            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#10b981', lineHeight: 1.1, marginTop: '0.2rem' }}>
+                            <PanelEyebrow label="Treasury" color="#10b981" />
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '-0.3rem' }}>Total Wallet Balance (All Users)</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#10b981', lineHeight: 1.1, marginTop: '0.25rem', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
                                 ₹{(stats?.payments?.walletBalance ?? 0).toLocaleString()}
                             </div>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', position: 'relative', zIndex: 1 }}>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#6366f1' }}>{stats?.payments?.walletTransactions ?? 0}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Transactions</div>
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#6366f1', fontVariantNumeric: 'tabular-nums' }}>{stats?.payments?.walletTransactions ?? 0}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Transactions</div>
                         </div>
                         <div style={{ width: 1, height: 40, background: 'var(--border-color)' }} />
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0ea5e9' }}>{stats?.partnerOffices?.pendingPayouts ? `₹${(stats.partnerOffices.pendingPayouts).toLocaleString()}` : '₹0'}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Pending Payouts</div>
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0ea5e9', fontVariantNumeric: 'tabular-nums' }}>{stats?.partnerOffices?.pendingPayouts ? `₹${(stats.partnerOffices.pendingPayouts).toLocaleString()}` : '₹0'}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pending Payouts</div>
                         </div>
                     </div>
                 </motion.div>
@@ -517,54 +591,55 @@ export default function Dashboard() {
                 {statCards.slice(0, 4).map((card, index) => (
                     <motion.div
                         key={index}
-                        variants={itemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)' }}
+                        whileHover={{ y: -8, boxShadow: hoverShadow(card.color) }}
                         style={{
                             gridColumn: isMobile ? 'span 1' : 'span 3',
-                            background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                            borderRadius: '32px',
+                            ...glass(isDark),
+                            borderRadius: '26px',
                             padding: '1.8rem',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
                             gap: '1.2rem',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-                            border: '1px solid var(--border-color)',
+                            boxShadow: cardShadow(card.color, isDark),
+                            position: 'relative',
+                            overflow: 'hidden',
                             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                            minHeight: '160px'
+                            minHeight: '170px'
                         }}
                     >
+                        <AccentThread color={card.color} secondary={card.secondary} />
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div style={{
-                                width: '56px',
-                                height: '56px',
-                                borderRadius: '20px',
-                                background: `${card.color}15`,
+                                width: '54px',
+                                height: '54px',
+                                borderRadius: '18px',
+                                background: `linear-gradient(150deg, ${card.color}22, ${card.color}0a)`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: card.color
+                                color: card.color,
+                                border: `1px solid ${card.color}2a`,
+                                boxShadow: `0 8px 18px -8px ${card.color}55`
                             }}>
-                                <card.icon size={26} />
+                                <card.icon size={24} />
                             </div>
                             <div style={{
-                                fontSize: '0.75rem',
+                                display: 'flex', alignItems: 'center', gap: '2px',
+                                fontSize: '0.72rem',
                                 color: COLORS.success,
                                 fontWeight: 'bold',
-                                padding: '0.4rem 0.8rem',
+                                padding: '0.35rem 0.7rem',
                                 background: `${COLORS.success}15`,
                                 borderRadius: '12px'
                             }}>
-                                +12%
+                                <LuArrowUpRight size={12} /> 12%
                             </div>
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '600' }}>{card.title}</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text)', marginTop: '0.2rem' }}>
+                            <PanelEyebrow label={card.eyebrow} color={card.color} />
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600', marginTop: '-0.25rem' }}>{card.title}</div>
+                            <div style={{ fontSize: '1.9rem', fontWeight: '900', color: 'var(--text)', marginTop: '0.2rem', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
                                 {card.value}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>{card.subtitle}</div>
@@ -575,8 +650,8 @@ export default function Dashboard() {
                 {/* System Alerts & Active Offers */}
                 <div style={{ gridColumn: isMobile ? 'span 1' : 'span 12', margin: '0.5rem 0 0' }}>
                     {stats?.alerts?.freeUnlock?.enabled && !stats.alerts.freeUnlock.is_expired && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(249,115,22,0.1), rgba(234,88,12,0.05))', border: '1px solid rgba(249,115,22,0.25)', marginBottom: '1rem' }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#fff', flexShrink: 0 }}><LuGift size={20} /></div>
+                        <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(249,115,22,0.12), rgba(234,88,12,0.04))', border: '1px solid rgba(249,115,22,0.28)', marginBottom: '1rem', boxShadow: '0 12px 30px -16px rgba(249,115,22,0.35)' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#fff', flexShrink: 0, boxShadow: '0 8px 16px -4px rgba(249,115,22,0.5)' }}><LuGift size={20} /></div>
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ea580c' }}>Free Unlock Offer Active</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
@@ -584,16 +659,16 @@ export default function Dashboard() {
                                     {stats.alerts.freeUnlock.expires_at ? ` — expires ${new Date(stats.alerts.freeUnlock.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
                                 </div>
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: '#f97316', fontWeight: 600, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(249,115,22,0.15)', whiteSpace: 'nowrap' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#f97316', fontWeight: 700, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(249,115,22,0.15)', whiteSpace: 'nowrap' }}>
                                 {stats.alerts.freeUnlock.expires_at
                                     ? `${Math.max(0, Math.ceil((new Date(stats.alerts.freeUnlock.expires_at) - new Date()) / (1000 * 60 * 60 * 24)))}d left`
                                     : 'No expiry'}
                             </div>
-                        </div>
+                        </motion.div>
                     )}
                     {stats?.alerts?.walletStatus && (!stats.alerts.walletStatus.is_active || stats.alerts.walletStatus.ios_maintenance || stats.alerts.walletStatus.android_maintenance) && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03))', border: '1px solid rgba(239,68,68,0.2)', marginBottom: '1rem' }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', flexShrink: 0 }}><LuWallet size={20} /></div>
+                        <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.03))', border: '1px solid rgba(239,68,68,0.22)', marginBottom: '1rem', boxShadow: '0 12px 30px -16px rgba(239,68,68,0.3)' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', flexShrink: 0, boxShadow: '0 8px 16px -4px rgba(239,68,68,0.5)' }}><LuWallet size={20} /></div>
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ef4444' }}>Wallet Maintenance</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
@@ -602,19 +677,19 @@ export default function Dashboard() {
                                     {stats.alerts.walletStatus.android_maintenance ? ' Android maintenance' : ''}
                                 </div>
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(239,68,68,0.15)', whiteSpace: 'nowrap' }}>⚠ Affecting users</div>
-                        </div>
+                            <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 700, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(239,68,68,0.15)', whiteSpace: 'nowrap' }}>⚠ Affecting users</div>
+                        </motion.div>
                     )}
                     {stats?.alerts?.activeFestivalOffers?.length > 0 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0 0.25rem' }}>🎉 Active Festival Discounts</div>
+                            <PanelEyebrow label="Active festival discounts" color="#10b981" />
                             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
                                 {stats.alerts.activeFestivalOffers.map((offer, idx) => (
-                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.85rem 1.25rem', borderRadius: 16, border: '1px solid var(--border-color)', background: 'var(--card-bg)', position: 'relative', overflow: 'hidden' }}
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.85rem 1.25rem', borderRadius: 16, border: '1px solid var(--border-color)', background: 'var(--card-bg)', position: 'relative', overflow: 'hidden', boxShadow: cardShadow('#10b981', isDark) }}
                                         onMouseEnter={e => { const c = e.currentTarget.querySelector('.hover-dot'); if (c) c.style.opacity = '1'; }}
                                         onMouseLeave={e => { const c = e.currentTarget.querySelector('.hover-dot'); if (c) c.style.opacity = '0'; }}
                                     >
-                                        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', flexShrink: 0, fontSize: 16 }}>%</div>
+                                        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', flexShrink: 0, fontSize: 16, fontWeight: 800 }}>%</div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text)' }}>{offer.celebration_name}</div>
                                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 1 }}>
@@ -632,21 +707,19 @@ export default function Dashboard() {
 
                 {/* Operations Overview */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 12',
-                        background: 'var(--card-bg)',
-                        backdropFilter: 'blur(12px)',
-                        WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2rem 2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
+                        boxShadow: cardShadow(COLORS.primary, isDark),
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Operations Overview</h2>
+                    <AccentThread color="#0ea5e9" secondary="#a855f7" />
+                    <PanelEyebrow label="Live workload" color="#0ea5e9" />
+                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.01em' }}>Operations Overview</h2>
                     <p style={{ margin: '0.3rem 0 1.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '500' }}>Real-time operational metrics across all modules</p>
                     {(() => {
                         const chartData = ([
@@ -662,14 +735,22 @@ export default function Dashboard() {
                         ]).sort((a, b) => b.value - a.value);
                         return (
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart layout="vertical" data={chartData} margin={{ left: 10, right: 30, top: 5, bottom: 5 }}>
+                                <BarChart layout="vertical" data={chartData} margin={{ left: 10, right: 30, top: 5, bottom: 5 }} barCategoryGap="28%">
+                                    <defs>
+                                        {chartData.map((d, i) => (
+                                            <linearGradient key={`opsGrad-${i}`} id={`opsGrad-${i}`} x1="0" y1="0" x2="1" y2="0">
+                                                <stop offset="0%" stopColor={d.fill} stopOpacity={1} />
+                                                <stop offset="100%" stopColor={d.fill} stopOpacity={0.55} />
+                                            </linearGradient>
+                                        ))}
+                                    </defs>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                                     <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 12, fontWeight: 600 }} width={150} />
-                                    <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
-                                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={22} animationDuration={2500}>
+                                    <Tooltip cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.02)' }} content={<CustomTooltip isDark={isDark} />} />
+                                    <Bar dataKey="value" radius={[0, 12, 12, 0]} barSize={20} animationDuration={1100} animationEasing="ease-out">
                                         {chartData.map((entry, idx) => (
-                                            <Cell key={idx} fill={entry.fill} />
+                                            <Cell key={idx} fill={`url(#opsGrad-${idx})`} stroke={entry.fill} strokeOpacity={0.25} />
                                         ))}
                                     </Bar>
                                 </BarChart>
@@ -688,38 +769,36 @@ export default function Dashboard() {
                             { label: 'Festival Offers', color: '#f97316', link: '/festivals' },
                             { label: 'Mediator Promotions', color: '#a855f7', link: '/mediator-promotions' },
                         ].map(item => (
-                            <div key={item.label} onClick={() => navigate(item.link)}
+                            <motion.div whileHover={{ scale: 1.05, y: -1 }} key={item.label} onClick={() => navigate(item.link)}
                                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 8, cursor: 'pointer', background: `${item.color}10`, border: `1px solid ${item.color}25`, transition: 'all 0.15s' }}
                                 onMouseEnter={e => { e.currentTarget.style.background = `${item.color}20`; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = `${item.color}10`; }}
                             >
                                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
                                 <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{item.label}</span>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </motion.div>
 
                 {/* Row 2: Engagement Matrix */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 8',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '480px'
+                        boxShadow: cardShadow(COLORS.primary, isDark),
+                        minHeight: '480px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
+                    <AccentThread color={COLORS.primary} secondary={COLORS.secondary} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: 'var(--text)' }}>Engagement Matrix</h2>
+                            <PanelEyebrow label="Growth" color={COLORS.primary} />
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.01em' }}>Engagement Matrix</h2>
                             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>User registrations growth (Last 12 Months)</p>
                         </div>
                     </div>
@@ -727,7 +806,8 @@ export default function Dashboard() {
                         <AreaChart data={stats?.users?.growth || []}>
                             <defs>
                                 <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.25} />
+                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.35} />
+                                    <stop offset="55%" stopColor={COLORS.primary} stopOpacity={0.08} />
                                     <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.01} />
                                 </linearGradient>
                             </defs>
@@ -735,33 +815,31 @@ export default function Dashboard() {
                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dy={15} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} dx={-15} />
                             <Tooltip content={<CustomTooltip isDark={isDark} />} />
-                            <Area type="monotone" dataKey="count" stroke={COLORS.primary} strokeWidth={5} fill="url(#colorEngagement)" dot={{ fill: '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 7 }} activeDot={{ r: 9, strokeWidth: 0, fill: COLORS.secondary }} animationDuration={2500} />
+                            <Area type="monotone" dataKey="count" stroke={COLORS.primary} strokeWidth={3.5} fill="url(#colorEngagement)" dot={{ fill: isDark ? '#0b1220' : '#fff', stroke: COLORS.primary, strokeWidth: 3, r: 5 }} activeDot={{ r: 8, strokeWidth: 0, fill: COLORS.secondary }} animationDuration={1200} animationEasing="ease-out" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </motion.div>
 
                 {/* Network Health */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 4',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
+                        boxShadow: cardShadow('#a855f7', isDark),
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        gap: '2.5rem',
-                        minHeight: '480px'
+                        gap: '2rem',
+                        minHeight: '480px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Network Health</h2>
+                    <AccentThread color="#a855f7" secondary={COLORS.secondary} />
+                    <PanelEyebrow label="System integrity" color="#a855f7" />
+                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.01em' }}>Network Health</h2>
                     <ResponsiveContainer width="100%" height={320}>
                         <RadarChart cx="50%" cy="55%" outerRadius="80%" data={[
                             { subject: 'Users', A: stats?.users?.active || 0, fullMark: stats?.users?.total || 100 },
@@ -770,41 +848,45 @@ export default function Dashboard() {
                             { subject: 'Interests', A: stats?.interests?.accepted || 0, fullMark: stats?.interests?.total || 100 },
                             { subject: 'Stories', A: stats?.successStories?.approved || 0, fullMark: stats?.successStories?.total || 100 },
                         ]}>
+                            <defs>
+                                <radialGradient id="radarGrad" cx="50%" cy="50%" r="80%">
+                                    <stop offset="0%" stopColor="#a855f7" stopOpacity={0.55} />
+                                    <stop offset="100%" stopColor={COLORS.secondary} stopOpacity={0.12} />
+                                </radialGradient>
+                            </defs>
                             <PolarGrid stroke={isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"} />
                             <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 12, fontWeight: '600' }} />
-                            <Radar name="System" dataKey="A" stroke={COLORS.secondary} fill={COLORS.secondary} fillOpacity={0.4} animationDuration={3000} />
+                            <Radar name="System" dataKey="A" stroke="#a855f7" strokeWidth={2.5} fill="url(#radarGrad)" dot={{ r: 4, fill: '#a855f7', strokeWidth: 0 }} animationDuration={1200} animationEasing="ease-out" />
                         </RadarChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign: 'center' }}>
-                        <div style={{ color: COLORS.success, fontWeight: '900', fontSize: '2.5rem' }}>A+</div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '600' }}>Overall Reliability Score</div>
+                        <div style={{ color: COLORS.success, fontWeight: '900', fontSize: '2.5rem', letterSpacing: '-0.02em' }}>A+</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600' }}>Overall Reliability Score</div>
                     </div>
                 </motion.div>
 
                 {/* Row 3: Revenue Momentum */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '400px'
+                        boxShadow: cardShadow(COLORS.success, isDark),
+                        minHeight: '400px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
+                    <AccentThread color={COLORS.success} secondary="#10b981" />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Revenue Momentum</h2>
+                            <PanelEyebrow label="Finance" color={COLORS.success} />
+                            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.01em' }}>Revenue Momentum</h2>
                             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Financial performance indicators</p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: '900', color: COLORS.success }}>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '900', color: COLORS.success, fontVariantNumeric: 'tabular-nums' }}>
                                 ₹{stats?.payments?.totalRevenue?.toLocaleString() ?? 0}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700' }}>LIFETIME PROFIT</div>
@@ -812,41 +894,55 @@ export default function Dashboard() {
                     </div>
                     <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={stats?.payments?.revenueGrowth || []}>
+                            <defs>
+                                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor={COLORS.success} stopOpacity={1} />
+                                    <stop offset="100%" stopColor={COLORS.success} stopOpacity={0.45} />
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
-                            <Bar dataKey="amount" fill={COLORS.success} radius={[6, 6, 0, 0]} animationDuration={3000} />
+                            <Tooltip cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.02)' }} content={<CustomTooltip isDark={isDark} />} />
+                            <Bar dataKey="amount" fill="url(#revenueGrad)" radius={[10, 10, 0, 0]} maxBarSize={48} animationDuration={1100} animationEasing="ease-out" />
                         </BarChart>
                     </ResponsiveContainer>
                 </motion.div>
 
                 {/* Match Outcomes & Demographics */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '400px'
+                        boxShadow: cardShadow(COLORS.success, isDark),
+                        minHeight: '400px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center' }}>Match Success</h2>
+                    <AccentThread color={COLORS.success} secondary={COLORS.warning} />
+                    <PanelEyebrow label="Matchmaking" color={COLORS.success} />
+                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center', letterSpacing: '-0.01em' }}>Match Success</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
-                            <Pie data={stats?.matches?.distribution || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="count" nameKey="status">
+                            <defs>
+                                <radialGradient id="matchGradSuccess" cx="35%" cy="35%" r="65%">
+                                    <stop offset="0%" stopColor="#34f0bd" />
+                                    <stop offset="100%" stopColor={COLORS.success} />
+                                </radialGradient>
+                                <radialGradient id="matchGradWarning" cx="35%" cy="35%" r="65%">
+                                    <stop offset="0%" stopColor="#fcd34d" />
+                                    <stop offset="100%" stopColor={COLORS.warning} />
+                                </radialGradient>
+                            </defs>
+                            <Pie data={stats?.matches?.distribution || []} cx="50%" cy="50%" innerRadius={68} outerRadius={92} paddingAngle={6} dataKey="count" nameKey="status" cornerRadius={10} stroke="var(--card-bg)" strokeWidth={3} animationDuration={1100} animationEasing="ease-out">
                                 {(stats?.matches?.distribution || []).map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index === 0 ? COLORS.success : COLORS.warning} />
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? 'url(#matchGradSuccess)' : 'url(#matchGradWarning)'} />
                                 ))}
                             </Pie>
-                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                         </PieChart>
                     </ResponsiveContainer>
                     <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
@@ -860,30 +956,38 @@ export default function Dashboard() {
                 </motion.div>
 
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '400px'
+                        boxShadow: cardShadow(COLORS.female, isDark),
+                        minHeight: '400px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center' }}>User Demographics</h2>
+                    <AccentThread color={COLORS.male} secondary={COLORS.female} />
+                    <PanelEyebrow label="Demographics" color={COLORS.female} />
+                    <h2 style={{ margin: '0 0 1.5rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text)', textAlign: 'center', letterSpacing: '-0.01em' }}>User Demographics</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
-                            <Pie data={stats?.profiles?.genderDistribution || []} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="count" nameKey="gender">
+                            <defs>
+                                <radialGradient id="genderGradMale" cx="35%" cy="35%" r="65%">
+                                    <stop offset="0%" stopColor="#34f0bd" />
+                                    <stop offset="100%" stopColor={COLORS.male} />
+                                </radialGradient>
+                                <radialGradient id="genderGradFemale" cx="35%" cy="35%" r="65%">
+                                    <stop offset="0%" stopColor="#f9a8d4" />
+                                    <stop offset="100%" stopColor={COLORS.female} />
+                                </radialGradient>
+                            </defs>
+                            <Pie data={stats?.profiles?.genderDistribution || []} cx="50%" cy="50%" innerRadius={68} outerRadius={92} paddingAngle={6} dataKey="count" nameKey="gender" cornerRadius={10} stroke="var(--card-bg)" strokeWidth={3} animationDuration={1100} animationEasing="ease-out">
                                 {(stats?.profiles?.genderDistribution || []).map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index === 0 ? COLORS.male : COLORS.female} />
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? 'url(#genderGradMale)' : 'url(#genderGradFemale)'} />
                                 ))}
                             </Pie>
-                            <Tooltip contentStyle={{ borderRadius: '15px', border: 'none' }} />
+                            <Tooltip content={<CustomTooltip isDark={isDark} />} />
                         </PieChart>
                     </ResponsiveContainer>
                     <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
@@ -898,22 +1002,20 @@ export default function Dashboard() {
 
                 {/* Row 4: Operational Pulse */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '420px'
+                        boxShadow: cardShadow(COLORS.warning, isDark),
+                        minHeight: '420px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: '0 0 2rem', fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Operational Pipeline</h2>
+                    <AccentThread color={COLORS.warning} secondary={COLORS.danger} />
+                    <PanelEyebrow label="Pipeline" color={COLORS.warning} />
+                    <h2 style={{ margin: '0 0 2rem', fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.01em' }}>Operational Pipeline</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         {[
                             { label: 'Pending Verifications', count: stats?.verifications?.pending ?? 0, color: COLORS.warning, total: (stats?.verifications?.approved + stats?.verifications?.pending + stats?.verifications?.rejected) || 1 },
@@ -924,10 +1026,10 @@ export default function Dashboard() {
                             <div key={index}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.7rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text)' }}>
                                     <span>{item.label}</span>
-                                    <span>{item.count}</span>
+                                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.count}</span>
                                 </div>
-                                <div style={{ height: '14px', background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', borderRadius: '7px', overflow: 'hidden', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9'}` }}>
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${(item.count / item.total) * 100}%` }} transition={{ duration: 1.5, delay: 0.5 }} style={{ height: '100%', background: item.color, borderRadius: '7px' }} />
+                                <div style={{ height: '12px', background: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', borderRadius: '7px', overflow: 'hidden', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9'}` }}>
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${(item.count / item.total) * 100}%` }} transition={{ duration: 1.2, delay: 0.3 }} style={{ height: '100%', background: `linear-gradient(90deg, ${item.color}cc, ${item.color})`, borderRadius: '7px', boxShadow: `0 0 10px ${item.color}55` }} />
                                 </div>
                             </div>
                         ))}
@@ -936,44 +1038,53 @@ export default function Dashboard() {
 
                 {/* Global Integrity Breakdown */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
+                        boxShadow: cardShadow(COLORS.success, isDark),
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        gap: '2.5rem',
-                        minHeight: '420px'
+                        gap: '2rem',
+                        minHeight: '420px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Global Integrity</h2>
+                    <AccentThread color={COLORS.warning} secondary={COLORS.success} />
+                    <PanelEyebrow label="Trust score" color={COLORS.success} />
+                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)', letterSpacing: '-0.01em' }}>Global Integrity</h2>
                     <div style={{ position: 'relative', width: '220px', height: '220px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={stats?.verifications?.distribution || []} cx="50%" cy="50%" innerRadius={75} outerRadius={105} paddingAngle={5} dataKey="count">
+                                <defs>
+                                    <radialGradient id="integrityGradWarn" cx="35%" cy="35%" r="65%">
+                                        <stop offset="0%" stopColor="#fcd34d" /><stop offset="100%" stopColor={COLORS.warning} />
+                                    </radialGradient>
+                                    <radialGradient id="integrityGradSuccess" cx="35%" cy="35%" r="65%">
+                                        <stop offset="0%" stopColor="#34f0bd" /><stop offset="100%" stopColor={COLORS.success} />
+                                    </radialGradient>
+                                    <radialGradient id="integrityGradDanger" cx="35%" cy="35%" r="65%">
+                                        <stop offset="0%" stopColor="#fca5a5" /><stop offset="100%" stopColor={COLORS.danger} />
+                                    </radialGradient>
+                                </defs>
+                                <Pie data={stats?.verifications?.distribution || []} cx="50%" cy="50%" innerRadius={72} outerRadius={108} paddingAngle={4} dataKey="count" cornerRadius={10} stroke="var(--card-bg)" strokeWidth={3} animationDuration={1100} animationEasing="ease-out">
                                     {(stats?.verifications?.distribution || []).map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={[COLORS.warning, COLORS.success, COLORS.danger][index % 3]} />
+                                        <Cell key={`cell-${index}`} fill={['url(#integrityGradWarn)', 'url(#integrityGradSuccess)', 'url(#integrityGradDanger)'][index % 3]} />
                                     ))}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip isDark={isDark} />} />
                             </PieChart>
                         </ResponsiveContainer>
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                            <div style={{ fontSize: '3.2rem', fontWeight: '900', color: 'var(--text)' }}>
+                            <div style={{ fontSize: '3.2rem', fontWeight: '900', color: 'var(--text)', letterSpacing: '-0.02em' }}>
                                 {Math.round((stats?.verifications?.approved / ((stats?.verifications?.approved + stats?.verifications?.pending + stats?.verifications?.rejected) || 1)) * 100)}%
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Verified</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Verified</div>
                         </div>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', width: '100%' }}>
@@ -983,7 +1094,7 @@ export default function Dashboard() {
                             { label: 'Rejected', color: COLORS.danger, count: stats?.verifications?.rejected },
                         ].map((item, i) => (
                             <div key={i}>
-                                <div style={{ fontSize: '1.25rem', fontWeight: '900', color: item.color }}>{item.count}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '900', color: item.color, fontVariantNumeric: 'tabular-nums' }}>{item.count}</div>
                                 <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-secondary)' }}>{item.label}</div>
                             </div>
                         ))}
@@ -992,20 +1103,14 @@ export default function Dashboard() {
 
                 {/* Feature Requests Single Card Widget */}
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     onMouseEnter={() => setHoverFR(true)}
                     onMouseLeave={() => setHoverFR(false)}
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 3',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
-                        border: '1px solid var(--border-color)',
+                        boxShadow: cardShadow('#6366f1', isDark),
                         display: 'flex', flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -1014,7 +1119,9 @@ export default function Dashboard() {
                         position: 'relative', overflow: 'hidden'
                     }}
                 >
+                    <AccentThread color="#6366f1" secondary="#3B82F6" />
                     <div style={{ textAlign: 'center' }}>
+                        <PanelEyebrow label="Product feedback" color="#6366f1" />
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
                             <div style={{
                                 width: 38, height: 38, borderRadius: 12,
@@ -1024,7 +1131,7 @@ export default function Dashboard() {
                             }}>
                                 <LuLightbulb size={20} />
                             </div>
-                            <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--text)' }}>FR Pipeline</h2>
+                            <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--text)', letterSpacing: '-0.01em' }}>FR Pipeline</h2>
                         </div>
                     </div>
 
@@ -1036,7 +1143,7 @@ export default function Dashboard() {
                             const pendingFR = stats?.featureRequests?.pending || 0;
                             const rejectedFR = stats?.featureRequests?.rejected || 0;
                             const totalFR = stats?.featureRequests?.total || 0;
-                            
+
                             const activeData = totalFR > 0 ? [
                                 { name: 'Shipped', value: completedFR, fill: '#10B981' },
                                 { name: 'In Developer', value: inProgressFR, fill: '#3B82F6' },
@@ -1051,6 +1158,20 @@ export default function Dashboard() {
                                     <div style={{ position: 'relative', height: 160, display: 'flex', justifyContent: 'center' }}>
                                         <ResponsiveContainer width="100%" height={160}>
                                             <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                                                <defs>
+                                                    <linearGradient id="frGradShip" x1="0" y1="0" x2="1" y2="1">
+                                                        <stop offset="0%" stopColor="#34f0bd" /><stop offset="100%" stopColor="#10B981" />
+                                                    </linearGradient>
+                                                    <linearGradient id="frGradDev" x1="0" y1="0" x2="1" y2="1">
+                                                        <stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#3B82F6" />
+                                                    </linearGradient>
+                                                    <linearGradient id="frGradReview" x1="0" y1="0" x2="1" y2="1">
+                                                        <stop offset="0%" stopColor="#fcd34d" /><stop offset="100%" stopColor="#F59E0B" />
+                                                    </linearGradient>
+                                                    <linearGradient id="frGradDrop" x1="0" y1="0" x2="1" y2="1">
+                                                        <stop offset="0%" stopColor="#fca5a5" /><stop offset="100%" stopColor="#EF4444" />
+                                                    </linearGradient>
+                                                </defs>
                                                 <Pie
                                                     data={activeData}
                                                     cx="50%"
@@ -1059,23 +1180,27 @@ export default function Dashboard() {
                                                     endAngle={0}
                                                     innerRadius={70}
                                                     outerRadius={110}
-                                                    paddingAngle={2}
-                                                    stroke="none"
+                                                    paddingAngle={3}
+                                                    stroke="var(--card-bg)"
+                                                    strokeWidth={2}
                                                     dataKey="value"
                                                     isAnimationActive={true}
-                                                    cornerRadius={6}
+                                                    animationDuration={1100}
+                                                    animationEasing="ease-out"
+                                                    cornerRadius={8}
                                                 >
-                                                    {activeData.map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                                                    ))}
+                                                    {activeData.map((entry, index) => {
+                                                        const gradMap = { 'Shipped': 'url(#frGradShip)', 'In Developer': 'url(#frGradDev)', 'Under Review': 'url(#frGradReview)', 'Declined': 'url(#frGradDrop)', 'No Data': entry.fill };
+                                                        return <Cell key={`cell-${index}`} fill={gradMap[entry.name] || entry.fill} />;
+                                                    })}
                                                 </Pie>
                                                 <Tooltip content={<CustomTooltip isDark={isDark} />} />
                                             </PieChart>
                                         </ResponsiveContainer>
                                         {/* Center Number */}
                                         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' }}>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{totalFR}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px', textTransform: 'uppercase' }}>Total</div>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1, letterSpacing: '-0.02em' }}>{totalFR}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</div>
                                         </div>
                                     </div>
 
@@ -1103,7 +1228,7 @@ export default function Dashboard() {
                         })()}
                     </div>
 
-                    {/* Expandable Hover List - Absolute positioning to overlay potentially */}
+                    {/* Expandable Hover List */}
                     <AnimatePresence>
                         {hoverFR && (
                             <motion.div
@@ -1113,8 +1238,8 @@ export default function Dashboard() {
                                 style={{
                                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                                     background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)', zIndex: 10, padding: '1.5rem',
+                                    backdropFilter: 'blur(16px)',
+                                    WebkitBackdropFilter: 'blur(16px)', zIndex: 10, padding: '1.5rem',
                                     display: 'flex', flexDirection: 'column'
                                 }}
                             >
@@ -1134,18 +1259,18 @@ export default function Dashboard() {
                                                 cursor: 'pointer'
                                             }}
                                         >
-                                                                    <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
-                                                                    <UserCell user={s.user} profile={s.user?.user_profile} avatarSize={24} showBadge={false} />
+                                            <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</p>
+                                            <UserCell user={s.user} profile={s.user?.user_profile} avatarSize={24} showBadge={false} />
                                         </div>
                                     ))}
                                 </div>
                                 <button
                                     onClick={() => navigate('/suggestions')}
                                     style={{
-                                        width: '100%', marginTop: '0.5rem', padding: '0.4rem',
+                                        width: '100%', marginTop: '0.5rem', padding: '0.5rem',
                                         borderRadius: 8, background: 'rgba(99,102,241,0.1)',
                                         border: '1px solid rgba(99,102,241,0.2)', color: '#6366f1',
-                                        fontSize: '0.7rem', fontWeight: 700
+                                        fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer'
                                     }}
                                 >
                                     Manage All Requests
@@ -1156,37 +1281,46 @@ export default function Dashboard() {
                 </motion.div>
 
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '400px'
+                        boxShadow: cardShadow(COLORS.primary, isDark),
+                        minHeight: '400px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
+                    <AccentThread color={COLORS.primary} secondary="#ec4899" />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Community Diversity</h2>
+                            <PanelEyebrow label="Community" color={COLORS.primary} />
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)', letterSpacing: '-0.01em' }}>Community Diversity</h2>
                             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>Active member distribution</p>
                         </div>
                     </div>
 
                     <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={stats?.profiles?.religionDistribution || []} layout="vertical" margin={{ left: 40, right: 40 }}>
+                        <BarChart data={stats?.profiles?.religionDistribution || []} layout="vertical" margin={{ left: 40, right: 40 }} barCategoryGap="30%">
+                            <defs>
+                                {(stats?.profiles?.religionDistribution || []).map((_, index) => {
+                                    const c = [COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][index % 7];
+                                    return (
+                                        <linearGradient key={`religionGrad-${index}`} id={`religionGrad-${index}`} x1="0" y1="0" x2="1" y2="0">
+                                            <stop offset="0%" stopColor={c} stopOpacity={1} />
+                                            <stop offset="100%" stopColor={c} stopOpacity={0.55} />
+                                        </linearGradient>
+                                    );
+                                })}
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} hide />
                             <YAxis dataKey="religion" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 14, fontWeight: '700' }} width={120} />
-                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
-                            <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40} animationDuration={3000}>
+                            <Tooltip cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.02)' }} content={<CustomTooltip isDark={isDark} />} />
+                            <Bar dataKey="count" radius={[0, 16, 16, 0]} barSize={32} animationDuration={1100} animationEasing="ease-out">
                                 {(stats?.profiles?.religionDistribution || []).map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][index % 7]} />
+                                    <Cell key={`cell-${index}`} fill={`url(#religionGrad-${index})`} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -1194,34 +1328,32 @@ export default function Dashboard() {
                 </motion.div>
 
                 <motion.div
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
                     style={{
                         gridColumn: isMobile ? 'span 1' : 'span 6',
-                        background: 'var(--card-bg)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                        borderRadius: '40px',
+                        ...glass(isDark),
+                        borderRadius: '32px',
                         padding: '2.5rem',
-                        boxShadow: '0 15px 45px rgba(0,0,0,0.04)',
-                        border: '1px solid var(--border-color)',
-                        minHeight: '400px'
+                        boxShadow: cardShadow('#0ea5e9', isDark),
+                        minHeight: '400px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}
                 >
+                    <AccentThread color="#0ea5e9" secondary={COLORS.secondary} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)' }}>Repository Hub</h2>
+                            <PanelEyebrow label="System data" color="#0ea5e9" />
+                            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text)', letterSpacing: '-0.01em' }}>Repository Hub</h2>
                             <p style={{ margin: '0.3rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>System data distribution</p>
                         </div>
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.primary }}>{stats?.audit?.activityLogs?.toLocaleString() ?? 0}</div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Logs</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.primary, fontVariantNumeric: 'tabular-nums' }}>{stats?.audit?.activityLogs?.toLocaleString() ?? 0}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logs</div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.secondary }}>{stats?.audit?.logsToday ?? 0}</div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase' }}>Today</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: COLORS.secondary, fontVariantNumeric: 'tabular-nums' }}>{stats?.audit?.logsToday ?? 0}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Today</div>
                             </div>
                         </div>
                     </div>
@@ -1237,21 +1369,33 @@ export default function Dashboard() {
                                 { name: 'Posters', count: stats?.content?.posters || 0 },
                                 { name: 'Unlocks', count: stats?.unlocks?.total || 0 },
                             ]}
+                            barCategoryGap="22%"
                         >
+                            <defs>
+                                {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                                    const c = [COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][i % 7];
+                                    return (
+                                        <linearGradient key={`repoGrad-${i}`} id={`repoGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor={c} stopOpacity={1} />
+                                            <stop offset="100%" stopColor={c} stopOpacity={0.55} />
+                                        </linearGradient>
+                                    );
+                                })}
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 13, fontWeight: '700' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 13 }} />
-                            <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
-                            <Bar dataKey="count" radius={[12, 12, 0, 0]} barSize={60} animationDuration={3000}>
+                            <Tooltip cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.02)' }} content={<CustomTooltip isDark={isDark} />} />
+                            <Bar dataKey="count" radius={[16, 16, 0, 0]} maxBarSize={52} animationDuration={1100} animationEasing="ease-out">
                                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                                    <Cell key={i} fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.warning, COLORS.danger, '#6366f1', '#ec4899'][i % 7]} />
+                                    <Cell key={i} fill={`url(#repoGrad-${i})`} />
                                 ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </motion.div>
 
-            </div>
+            </motion.div>
             {ToastComponent}
         </div>
     );
