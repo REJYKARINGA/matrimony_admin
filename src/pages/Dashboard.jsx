@@ -10,7 +10,8 @@ import {
     LuUsers, LuUserCheck, LuUserPlus, LuHeart, LuCreditCard,
     LuTriangleAlert, LuTrendingUp, LuLoader, LuClock,
     LuWallet, LuGraduationCap, LuTarget, LuShieldCheck, LuMessageSquare,
-    LuLightbulb, LuTerminal, LuZap, LuCircleX, LuExternalLink, LuEye
+    LuLightbulb, LuTerminal, LuZap, LuCircleX, LuExternalLink, LuEye,
+    LuGift
 } from 'react-icons/lu';
 import {
     FaUsers, FaUserCheck, FaUserShield, FaHeart, FaMoneyBillWave,
@@ -461,6 +462,57 @@ export default function Dashboard() {
                 paddingBottom: '4rem'
             }}>
 
+                {/* Wallet Balance — total cash balance across all users */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={{ y: -6, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)' }}
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 12',
+                        background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03))',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                        borderRadius: '32px',
+                        padding: '1.8rem 2.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '1.5rem',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                        border: '1px solid rgba(16,185,129,0.2)',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                        <div style={{
+                            width: 56, height: 56, borderRadius: 18,
+                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 8px 20px rgba(16,185,129,0.3)',
+                        }}>
+                            <LuWallet size={26} color="#fff" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Wallet Balance (All Users)</div>
+                            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#10b981', lineHeight: 1.1, marginTop: '0.2rem' }}>
+                                ₹{(stats?.payments?.walletBalance ?? 0).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#6366f1' }}>{stats?.payments?.walletTransactions ?? 0}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Transactions</div>
+                        </div>
+                        <div style={{ width: 1, height: 40, background: 'var(--border-color)' }} />
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0ea5e9' }}>{stats?.partnerOffices?.pendingPayouts ? `₹${(stats.partnerOffices.pendingPayouts).toLocaleString()}` : '₹0'}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Pending Payouts</div>
+                        </div>
+                    </div>
+                </motion.div>
+
                 {/* Hero Stats (Top 4) */}
                 {statCards.slice(0, 4).map((card, index) => (
                     <motion.div
@@ -519,6 +571,134 @@ export default function Dashboard() {
                         </div>
                     </motion.div>
                 ))}
+
+                {/* System Alerts & Active Offers */}
+                <div style={{ gridColumn: isMobile ? 'span 1' : 'span 12', margin: '0.5rem 0 0' }}>
+                    {stats?.alerts?.freeUnlock?.enabled && !stats.alerts.freeUnlock.is_expired && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(249,115,22,0.1), rgba(234,88,12,0.05))', border: '1px solid rgba(249,115,22,0.25)', marginBottom: '1rem' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#fff', flexShrink: 0 }}><LuGift size={20} /></div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ea580c' }}>Free Unlock Offer Active</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                                    Users can unlock contacts for ₹0
+                                    {stats.alerts.freeUnlock.expires_at ? ` — expires ${new Date(stats.alerts.freeUnlock.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#f97316', fontWeight: 600, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(249,115,22,0.15)', whiteSpace: 'nowrap' }}>
+                                {stats.alerts.freeUnlock.expires_at
+                                    ? `${Math.max(0, Math.ceil((new Date(stats.alerts.freeUnlock.expires_at) - new Date()) / (1000 * 60 * 60 * 24)))}d left`
+                                    : 'No expiry'}
+                            </div>
+                        </div>
+                    )}
+                    {stats?.alerts?.walletStatus && (!stats.alerts.walletStatus.is_active || stats.alerts.walletStatus.ios_maintenance || stats.alerts.walletStatus.android_maintenance) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: 20, background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03))', border: '1px solid rgba(239,68,68,0.2)', marginBottom: '1rem' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', flexShrink: 0 }}><LuWallet size={20} /></div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ef4444' }}>Wallet Maintenance</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                                    {!stats.alerts.walletStatus.is_active ? 'Wallet is disabled globally. All users see maintenance.' : ''}
+                                    {stats.alerts.walletStatus.ios_maintenance ? ' iOS maintenance •' : ''}
+                                    {stats.alerts.walletStatus.android_maintenance ? ' Android maintenance' : ''}
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, padding: '0.3rem 0.8rem', borderRadius: 8, background: 'rgba(239,68,68,0.15)', whiteSpace: 'nowrap' }}>⚠ Affecting users</div>
+                        </div>
+                    )}
+                    {stats?.alerts?.activeFestivalOffers?.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0 0.25rem' }}>🎉 Active Festival Discounts</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                                {stats.alerts.activeFestivalOffers.map((offer, idx) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', padding: '0.85rem 1.25rem', borderRadius: 16, border: '1px solid var(--border-color)', background: 'var(--card-bg)', position: 'relative', overflow: 'hidden' }}
+                                        onMouseEnter={e => { const c = e.currentTarget.querySelector('.hover-dot'); if (c) c.style.opacity = '1'; }}
+                                        onMouseLeave={e => { const c = e.currentTarget.querySelector('.hover-dot'); if (c) c.style.opacity = '0'; }}
+                                    >
+                                        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', flexShrink: 0, fontSize: 16 }}>%</div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text)' }}>{offer.celebration_name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 1 }}>
+                                                {offer.offer_discount_type === 'percentage' ? `${offer.offer_discount}% OFF` : `₹${offer.offer_discount} OFF`}
+                                                {' · '}ends {new Date(offer.end_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                            </div>
+                                        </div>
+                                        <div className="hover-dot" style={{ position: 'absolute', bottom: 8, right: 8, width: 10, height: 10, borderRadius: '50%', background: '#10b981', opacity: 0, transition: 'opacity 0.2s', boxShadow: '0 0 6px rgba(16,185,129,0.5)' }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Operations Overview */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                        gridColumn: isMobile ? 'span 1' : 'span 12',
+                        background: 'var(--card-bg)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                        borderRadius: '40px',
+                        padding: '2rem 2.5rem',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border-color)',
+                    }}
+                >
+                    <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--text)' }}>Operations Overview</h2>
+                    <p style={{ margin: '0.3rem 0 1.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '500' }}>Real-time operational metrics across all modules</p>
+                    {(() => {
+                        const chartData = ([
+                            { name: 'Partner Network', value: stats?.partnerOffices?.total ?? 0, fill: '#0ea5e9' },
+                            { name: 'Photo Requests', value: stats?.photoRequests?.pending ?? 0, fill: '#f59e0b' },
+                            { name: 'Photo Verifications', value: stats?.photoVerifications?.pending ?? 0, fill: '#8b5cf6' },
+                            { name: 'Profile Modifications', value: stats?.profileModifications?.pending ?? 0, fill: '#ec4899' },
+                            { name: 'Payment Verifications', value: stats?.paymentVerifications?.pending ?? 0, fill: '#14b8a6' },
+                            { name: 'Abandoned Payments', value: stats?.abandonedPayments?.total ?? 0, fill: '#ef4444' },
+                            { name: 'Contact Unlocks', value: stats?.unlocks?.total ?? 0, fill: '#6366f1' },
+                            { name: 'Festival Offers', value: stats?.festivals?.active ?? 0, fill: '#f97316' },
+                            { name: 'Mediator Promotions', value: stats?.mediatorPromotions?.active ?? 0, fill: '#a855f7' },
+                        ]).sort((a, b) => b.value - a.value);
+                        return (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart layout="vertical" data={chartData} margin={{ left: 10, right: 30, top: 5, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9"} />
+                                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+                                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: 'var(--text)', fontSize: 12, fontWeight: 600 }} width={150} />
+                                    <Tooltip cursor={false} content={<CustomTooltip isDark={isDark} />} />
+                                    <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={22} animationDuration={2500}>
+                                        {chartData.map((entry, idx) => (
+                                            <Cell key={idx} fill={entry.fill} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        );
+                    })()}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center' }}>
+                        {[
+                            { label: 'Partner Network', color: '#0ea5e9', link: '/partner-offices' },
+                            { label: 'Photo Requests', color: '#f59e0b', link: '/photo-requests' },
+                            { label: 'Photo Verifications', color: '#8b5cf6', link: '/photo-verifications' },
+                            { label: 'Profile Modifications', color: '#ec4899', link: '/profile-verifications' },
+                            { label: 'Payment Verifications', color: '#14b8a6', link: '/payment-verifications' },
+                            { label: 'Abandoned Payments', color: '#ef4444', link: '/abandoned-payments' },
+                            { label: 'Contact Unlocks', color: '#6366f1', link: '/contact-unlock-requests' },
+                            { label: 'Festival Offers', color: '#f97316', link: '/festivals' },
+                            { label: 'Mediator Promotions', color: '#a855f7', link: '/mediator-promotions' },
+                        ].map(item => (
+                            <div key={item.label} onClick={() => navigate(item.link)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 8, cursor: 'pointer', background: `${item.color}10`, border: `1px solid ${item.color}25`, transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = `${item.color}20`; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = `${item.color}10`; }}
+                            >
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{item.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
 
                 {/* Row 2: Engagement Matrix */}
                 <motion.div
