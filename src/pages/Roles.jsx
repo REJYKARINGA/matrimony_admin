@@ -4,6 +4,7 @@ import {
   LuShield, LuPlus, LuSave, LuCheck, LuTriangleAlert,
   LuRefreshCw, LuPencil, LuTrash2, LuX
 } from 'react-icons/lu';
+import { FaSearch, FaFilter, FaTimes, FaChevronDown } from 'react-icons/fa';
 
 export default function Roles() {
   const [roles, setRoles] = useState([]);
@@ -13,6 +14,10 @@ export default function Roles() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', label: '', description: '' });
   const [saving, setSaving] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const activeFilterCount = 0;
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type, id: Date.now() });
@@ -78,90 +83,182 @@ export default function Roles() {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: '3px solid var(--border-color)',
-          borderTopColor: 'var(--primary)',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-      </div>
-    );
-  }
+  const filteredRoles = roles.filter(r =>
+    !search ||
+    r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.label.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: 24, flexWrap: 'wrap', gap: 12,
-      }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <LuShield size={22} style={{ color: 'var(--primary)' }} />
-            Roles
-          </h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
-            Manage roles for sidebar menu permissions
-          </p>
-        </div>
-        <button onClick={openCreate} style={{
-          display: 'inline-flex', alignItems: 'center', gap: 7,
-          padding: '9px 20px', borderRadius: 10,
-          border: 'none', cursor: 'pointer',
-          background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-          color: '#fff', fontWeight: 600, fontSize: 13,
-          boxShadow: '0 4px 12px rgba(0,200,151,0.35)',
-          transition: 'all 0.2s',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
-        >
-          <LuPlus size={15} />
-          Add Role
-        </button>
-      </div>
+    <div className="roles-page">
+      <style>{`
+        .roles-page .um-toolbar { position: sticky; top: 0; z-index: 5; background: var(--card-bg); padding-bottom: 0.5rem; }
+        .roles-page .um-search-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+        .roles-page .um-search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+        .roles-page .um-search-wrap svg { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.85rem; }
+        .roles-page .um-search-wrap input { width: 100%; padding-left: 2.25rem; margin-bottom: 0; box-sizing: border-box; }
+        .roles-page .um-filter-toggle { display: none; align-items: center; gap: 0.5rem; border: 1.5px solid var(--border-color); background: var(--card-bg); color: var(--text); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+        .roles-page .um-filter-badge { background: var(--primary); color: white; border-radius: 9999px; font-size: 0.68rem; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+        .roles-page .um-cards { display: none; }
+        .roles-page .um-card { border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; margin-bottom: 0.85rem; background: var(--card-bg); }
+        .roles-page .um-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .roles-page .um-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem; }
+        .roles-page .um-card-grid dt { color: var(--text-secondary); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+        .roles-page .um-card-grid dd { margin: 0; font-weight: 500; word-break: break-word; }
+        .roles-page .um-card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .roles-page .um-card-actions .btn { flex: 1 1 auto; justify-content: center; padding: 0.55rem 0.75rem; }
+        .roles-page .um-empty { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+        .roles-page .um-empty svg { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5; }
+        .roles-page .um-skel-row { height: 56px; border-radius: 10px; margin-bottom: 0.6rem; background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%); background-size: 400% 100%; animation: um-shimmer 1.4s ease infinite; }
+        @keyframes um-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+        .roles-page .um-filter-drawer { display: none; }
+        @media (max-width: 768px) {
+          .roles-page .table-container { display: none; }
+          .roles-page .um-cards { display: block; }
+          .roles-page .um-filter-toggle { display: inline-flex; }
+          .roles-page .filter-bar { display: none; }
+          .roles-page .um-filter-drawer.open { display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--hover-bg); }
+          .roles-page .um-filter-drawer select { width: 100%; appearance: none; -webkit-appearance: none; background-color: var(--card-bg); color: var(--text); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 0.7rem 2.25rem 0.7rem 0.9rem; font-size: 0.85rem; font-weight: 500; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; background-size: 1.1rem; }
+          .roles-page .um-filter-drawer select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18); }
+        }
+        @media (min-width: 769px) { .roles-page .um-filter-drawer { display: none !important; } }
+      `}</style>
 
-      <div style={{
-        background: 'var(--card-bg)',
-        borderRadius: 16,
-        border: '1px solid var(--border-color)',
-        boxShadow: '0 1px 3px var(--shadow-color)',
-        overflow: 'hidden',
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Name</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Description</th>
-              <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {roles.map(role => (
-              <tr key={role.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{role.name}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text)' }}>{role.label}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-secondary)' }}>{role.description || '-'}</td>
-                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                  <button onClick={() => openEdit(role)} style={{
-                    padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)',
-                    background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)',
-                    marginRight: 6, fontSize: 12,
-                  }}><LuPencil size={13} /></button>
-                  {role.name !== 'admin' && (
-                    <button onClick={() => handleDelete(role)} style={{
-                      padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444',
-                      background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12,
-                    }}><LuTrash2 size={13} /></button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="card">
+        <div className="um-toolbar">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <LuShield size={22} style={{ color: 'var(--primary)' }} />
+                Roles
+              </h1>
+              <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Manage roles for sidebar menu permissions
+              </p>
+            </div>
+            <button onClick={openCreate} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              padding: '9px 20px', borderRadius: 10,
+              border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+              color: '#fff', fontWeight: 600, fontSize: 13,
+              boxShadow: '0 4px 12px rgba(0,200,151,0.35)',
+              transition: 'all 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+            >
+              <LuPlus size={15} />
+              Add Role
+            </button>
+          </div>
+
+          <div className="um-search-row">
+            <div className="um-search-wrap">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search roles..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              className="um-filter-toggle"
+              onClick={() => setFiltersOpen(o => !o)}
+            >
+              {filtersOpen ? <FaTimes /> : <FaFilter />}
+              Filters
+              {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+              <FaChevronDown style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+          </div>
+
+          <div className={`um-filter-drawer ${filtersOpen ? 'open' : ''}`} />
+        </div>
+
+        {loading ? (
+          <div style={{ padding: '1rem' }}>
+            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="um-skel-row" />)}
+          </div>
+        ) : filteredRoles.length === 0 ? (
+          <div className="um-empty">
+            <LuShield size={32} style={{ opacity: 0.5, marginBottom: '0.75rem' }} />
+            <p style={{ margin: 0, fontWeight: 600 }}>No roles found</p>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>{search ? 'Try adjusting your search.' : 'Create a new role to get started.'}</p>
+          </div>
+        ) : (
+          <>
+            <div className="table-container">
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Name</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Description</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRoles.map(role => (
+                    <tr key={role.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{role.name}</td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text)' }}>{role.label}</td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-secondary)' }}>{role.description || '-'}</td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <button onClick={() => openEdit(role)} style={{
+                          padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)',
+                          background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)',
+                          marginRight: 6, fontSize: 12,
+                        }}><LuPencil size={13} /></button>
+                        {role.name !== 'admin' && (
+                          <button onClick={() => handleDelete(role)} style={{
+                            padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444',
+                            background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12,
+                          }}><LuTrash2 size={13} /></button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="um-cards">
+              {filteredRoles.map(role => (
+                <div className="um-card" key={role.id}>
+                  <div className="um-card-top">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <LuShield size={16} style={{ color: 'var(--primary)' }} />
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{role.name}</span>
+                    </div>
+                  </div>
+                  <dl className="um-card-grid">
+                    <div>
+                      <dt>Label</dt>
+                      <dd>{role.label}</dd>
+                    </div>
+                    <div>
+                      <dt>Description</dt>
+                      <dd>{role.description || '-'}</dd>
+                    </div>
+                  </dl>
+                  <div className="um-card-actions">
+                    <button onClick={() => openEdit(role)} className="btn btn-secondary">
+                      <LuPencil size={13} /> Edit
+                    </button>
+                    {role.name !== 'admin' && (
+                      <button onClick={() => handleDelete(role)} className="btn btn-danger">
+                        <LuTrash2 size={13} /> Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {showModal && (

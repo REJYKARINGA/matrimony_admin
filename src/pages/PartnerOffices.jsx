@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaBuilding, FaMapMarkerAlt, FaPhone, FaRupeeSign, FaUserTie, FaHandshake, FaMoneyCheck, FaEye, FaToggleOn, FaToggleOff, FaShareAlt } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaBuilding, FaMapMarkerAlt, FaPhone, FaRupeeSign, FaUserTie, FaHandshake, FaMoneyCheck, FaEye, FaToggleOn, FaToggleOff, FaShareAlt, FaTimes, FaChevronDown, FaFilter } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import FormModal from '../components/FormModal';
@@ -30,6 +30,8 @@ export default function PartnerOffices() {
     const [officeStats, setOfficeStats] = useState(null);
     const [confirmState, setConfirmState] = useState({ isOpen: false, id: null });
     const { showToast, ToastComponent } = useToast();
+
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -142,8 +144,43 @@ export default function PartnerOffices() {
         o.city?.toLowerCase().includes(search.toLowerCase())
     );
 
+    const activeFilterCount = 0;
+
     return (
-        <div style={{ padding: '1rem' }}>
+        <div className="partner-offices-page">
+            <style>{`
+                .partner-offices-page .um-toolbar { position: sticky; top: 0; z-index: 5; background: var(--card-bg); padding-bottom: 0.5rem; }
+                .partner-offices-page .um-search-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+                .partner-offices-page .um-search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+                .partner-offices-page .um-search-wrap svg { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.85rem; }
+                .partner-offices-page .um-search-wrap input { width: 100%; padding-left: 2.25rem; margin-bottom: 0; box-sizing: border-box; }
+                .partner-offices-page .um-filter-toggle { display: none; align-items: center; gap: 0.5rem; border: 1.5px solid var(--border-color); background: var(--card-bg); color: var(--text); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+                .partner-offices-page .um-filter-badge { background: var(--primary); color: white; border-radius: 9999px; font-size: 0.68rem; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+                .partner-offices-page .um-cards { display: none; }
+                .partner-offices-page .um-card { border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; margin-bottom: 0.85rem; background: var(--card-bg); }
+                .partner-offices-page .um-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; }
+                .partner-offices-page .um-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem; }
+                .partner-offices-page .um-card-grid dt { color: var(--text-secondary); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+                .partner-offices-page .um-card-grid dd { margin: 0; font-weight: 500; word-break: break-word; }
+                .partner-offices-page .um-card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+                .partner-offices-page .um-card-actions .btn { flex: 1 1 auto; justify-content: center; padding: 0.55rem 0.75rem; }
+                .partner-offices-page .um-empty { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+                .partner-offices-page .um-empty svg { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5; }
+                .partner-offices-page .um-skel-row { height: 56px; border-radius: 10px; margin-bottom: 0.6rem; background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%); background-size: 400% 100%; animation: um-shimmer 1.4s ease infinite; }
+                @keyframes um-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+                .partner-offices-page .um-filter-drawer { display: none; }
+                @media (max-width: 768px) {
+                    .partner-offices-page .table-container { display: none; }
+                    .partner-offices-page .um-cards { display: block; }
+                    .partner-offices-page .um-filter-toggle { display: inline-flex; }
+                    .partner-offices-page .filter-bar { display: none; }
+                    .partner-offices-page .um-filter-drawer.open { display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--hover-bg); }
+                    .partner-offices-page .um-filter-drawer select { width: 100%; appearance: none; -webkit-appearance: none; background-color: var(--card-bg); color: var(--text); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 0.7rem 2.25rem 0.7rem 0.9rem; font-size: 0.85rem; font-weight: 500; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; background-size: 1.1rem; }
+                    .partner-offices-page .um-filter-drawer select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18); }
+                }
+                @media (min-width: 769px) { .partner-offices-page .um-filter-drawer { display: none !important; } }
+            `}</style>
+
             <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}
                 style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                 <FaBuilding size={28} color="var(--primary)" />
@@ -152,104 +189,195 @@ export default function PartnerOffices() {
 
             <motion.div variants={containerVariants} initial="hidden" animate="visible"
                 style={{ background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ position: 'relative' }}>
-                        <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                        <input type="text" placeholder="Search offices..." value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            style={{ paddingLeft: '40px', width: '280px', background: 'var(--bg)', border: '1px solid var(--border-color)', borderRadius: '10px' }} />
+                <div className="um-toolbar">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.3rem' }}>All Offices</h2>
+                        <button onClick={openCreate} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaPlus /> Add Partner Office
+                        </button>
                     </div>
-                    <button onClick={openCreate} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <FaPlus /> Add Partner Office
-                    </button>
+
+                    <div className="um-search-row">
+                        <div className="um-search-wrap">
+                            <FaSearch />
+                            <input type="text" placeholder="Search offices..." value={search}
+                                onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <button type="button" className="um-filter-toggle" onClick={() => setFiltersOpen(o => !o)}>
+                            {filtersOpen ? <FaTimes /> : <FaFilter />}
+                            Filters
+                            {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+                            <FaChevronDown style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                    </div>
+
+                    <div className={`um-filter-drawer ${filtersOpen ? 'open' : ''}`}>
+                    </div>
+
+                    <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ position: 'relative' }}>
+                            <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                            <input type="text" placeholder="Search offices..." value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                style={{ paddingLeft: '40px', width: '280px', background: 'var(--bg)', border: '1px solid var(--border-color)', borderRadius: '10px' }} />
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Loading...</div>
-                ) : (
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table className="data-table" style={{ width: '100%', minWidth: '800px' }}>
-                            <thead>
-                                <tr>
-                                    <th>Office</th>
-                                    <th>Code</th>
-                                    <th>Contact</th>
-                                    <th>Location</th>
-                                    <th style={{ textAlign: 'center' }}>Commission</th>
-                                    <th style={{ textAlign: 'center' }}>Revenue Share</th>
-                                    <th style={{ textAlign: 'center' }}>Agents</th>
-                                    <th style={{ textAlign: 'center' }}>Registrations</th>
-                                    <th style={{ textAlign: 'center' }}>Status</th>
-                                    <th>Created</th>
-                                    <th style={{ textAlign: 'center' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredOffices.map((office) => (
-                                    <tr key={office.id}>
-                                        <td>
-                                            <div style={{ fontWeight: 600, color: 'var(--text)' }}>{office.name}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{office.contact_person}</div>
-                                        </td>
-                                        <td><code style={{ background: 'var(--bg)', padding: '3px 8px', borderRadius: '6px', fontWeight: 600 }}>{office.office_code}</code></td>
-                                        <td>
-                                            <div style={{ fontSize: '0.85rem' }}>{office.phone}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{office.email}</div>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
-                                                <FaMapMarkerAlt size={10} /> {office.city || '—'}, {office.state || ''}
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span style={{ fontWeight: 600, color: 'var(--primary)' }}>₹{Number(office.commission_per_registration).toLocaleString()}</span>
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>per reg.</div>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span style={{ fontWeight: 600, color: '#10B981' }}>{office.revenue_share_percent}%</span>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>{office.agents_count || 0}</td>
-                                        <td style={{ textAlign: 'center' }}>{office.referred_users_count || 0}</td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span style={{
-                                                padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem',
-                                                fontWeight: 'bold', textTransform: 'uppercase',
-                                                background: office.status === 'active' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
-                                                color: office.status === 'active' ? '#10B981' : '#EF4444'
-                                            }}>{office.status}</span>
-                                        </td>
-                                        <td><TimeFormatCell date={office.created_at} /></td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                                <button onClick={() => navigate(`/partner/dashboard?office_id=${office.id}`)} className="btn-icon" title="Open Dashboard"
-                                                    style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                                                    <FaShareAlt />
-                                                </button>
-                                                <button onClick={() => viewDetails(office)} className="btn-icon" title="View Stats"
-                                                    style={{ background: 'rgba(var(--primary-rgb),0.1)', color: 'var(--primary)', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                                                    <FaEye />
-                                                </button>
-                                                <button onClick={() => openEdit(office)} className="btn-icon" title="Edit"
-                                                    style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                                                    <FaEdit />
-                                                </button>
-                                                <button onClick={() => confirmDelete(office.id)} className="btn-icon" title="Delete"
-                                                    style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {filteredOffices.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                                <FaBuilding size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                                <p>No partner offices found.</p>
-                            </div>
-                        )}
+                    <div>
+                        {Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)}
                     </div>
+                ) : filteredOffices.length === 0 ? (
+                    <div className="um-empty">
+                        <FaBuilding />
+                        <p style={{ margin: 0, fontWeight: 600 }}>No partner offices found</p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Try adjusting your search.</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="table-container" style={{ overflowX: 'auto' }}>
+                            <table className="data-table" style={{ width: '100%', minWidth: '800px' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Office</th>
+                                        <th>Code</th>
+                                        <th>Contact</th>
+                                        <th>Location</th>
+                                        <th style={{ textAlign: 'center' }}>Commission</th>
+                                        <th style={{ textAlign: 'center' }}>Revenue Share</th>
+                                        <th style={{ textAlign: 'center' }}>Agents</th>
+                                        <th style={{ textAlign: 'center' }}>Registrations</th>
+                                        <th style={{ textAlign: 'center' }}>Status</th>
+                                        <th>Created</th>
+                                        <th style={{ textAlign: 'center' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredOffices.map((office) => (
+                                        <tr key={office.id}>
+                                            <td>
+                                                <div style={{ fontWeight: 600, color: 'var(--text)' }}>{office.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{office.contact_person}</div>
+                                            </td>
+                                            <td><code style={{ background: 'var(--bg)', padding: '3px 8px', borderRadius: '6px', fontWeight: 600 }}>{office.office_code}</code></td>
+                                            <td>
+                                                <div style={{ fontSize: '0.85rem' }}>{office.phone}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{office.email}</div>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+                                                    <FaMapMarkerAlt size={10} /> {office.city || '—'}, {office.state || ''}
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span style={{ fontWeight: 600, color: 'var(--primary)' }}>₹{Number(office.commission_per_registration).toLocaleString()}</span>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>per reg.</div>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span style={{ fontWeight: 600, color: '#10B981' }}>{office.revenue_share_percent}%</span>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>{office.agents_count || 0}</td>
+                                            <td style={{ textAlign: 'center' }}>{office.referred_users_count || 0}</td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span style={{
+                                                    padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem',
+                                                    fontWeight: 'bold', textTransform: 'uppercase',
+                                                    background: office.status === 'active' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                                                    color: office.status === 'active' ? '#10B981' : '#EF4444'
+                                                }}>{office.status}</span>
+                                            </td>
+                                            <td><TimeFormatCell date={office.created_at} /></td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                    <button onClick={() => viewDetails(office)} className="btn-icon" title="View Stats"
+                                                        style={{ background: 'rgba(var(--primary-rgb),0.1)', color: 'var(--primary)', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                                                        <FaEye />
+                                                    </button>
+                                                    <button onClick={() => openEdit(office)} className="btn-icon" title="Edit"
+                                                        style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button onClick={() => confirmDelete(office.id)} className="btn-icon" title="Delete"
+                                                        style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                                                        <FaTrash />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="um-cards">
+                            {filteredOffices.map((office) => (
+                                <div className="um-card" key={office.id}>
+                                    <div className="um-card-top">
+                                        <div>
+                                            <div style={{ fontWeight: 600, color: 'var(--text)' }}>{office.name}</div>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{office.contact_person || '—'}</div>
+                                        </div>
+                                        <span style={{
+                                            padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem',
+                                            fontWeight: 'bold', textTransform: 'uppercase',
+                                            background: office.status === 'active' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                                            color: office.status === 'active' ? '#10B981' : '#EF4444'
+                                        }}>{office.status}</span>
+                                    </div>
+                                    <dl className="um-card-grid">
+                                        <div>
+                                            <dt>Code</dt>
+                                            <dd style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{office.office_code || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Contact</dt>
+                                            <dd>{office.phone || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Location</dt>
+                                            <dd><FaMapMarkerAlt size={9} /> {office.city || '—'}, {office.state || ''}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Email</dt>
+                                            <dd style={{ fontSize: '0.75rem' }}>{office.email || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Commission</dt>
+                                            <dd style={{ color: 'var(--primary)', fontWeight: 600 }}>₹{Number(office.commission_per_registration).toLocaleString()}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Revenue Share</dt>
+                                            <dd style={{ color: '#10B981', fontWeight: 600 }}>{office.revenue_share_percent}%</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Agents</dt>
+                                            <dd>{office.agents_count || 0}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Registrations</dt>
+                                            <dd>{office.referred_users_count || 0}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Created</dt>
+                                            <dd><TimeFormatCell date={office.created_at} /></dd>
+                                        </div>
+                                    </dl>
+                                    <div className="um-card-actions">
+                                        <button onClick={() => viewDetails(office)} className="btn btn-secondary" title="View Stats" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                            <FaEye /> Stats
+                                        </button>
+                                        <button onClick={() => openEdit(office)} className="btn btn-secondary" title="Edit" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                            <FaEdit /> Edit
+                                        </button>
+                                        <button onClick={() => confirmDelete(office.id)} className="btn btn-danger" title="Delete" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                            <FaTrash /> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 )}
             </motion.div>
 

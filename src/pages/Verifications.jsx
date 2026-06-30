@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaUserCheck, FaUserTimes, FaHourglassHalf, FaSearch, FaFilter, FaTimes as FaClose, FaIdCard, FaChevronDown } from 'react-icons/fa';
 import { useToast } from '../components/Toast';
 import UserCell from '../components/UserCell';
 import Pagination from '../components/Pagination';
@@ -16,13 +16,13 @@ export default function Verifications() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedVerification, setSelectedVerification] = useState(null);
     const [rejectReason, setRejectReason] = useState('');
-    const [currentIDPart, setCurrentIDPart] = useState(0); // 0: Front, 1: Back
+    const [currentIDPart, setCurrentIDPart] = useState(0);
     const [zoomedImage, setZoomedImage] = useState(null);
-    const [activeTab, setActiveTab] = useState('pending'); // pending, verified, rejected
+    const [activeTab, setActiveTab] = useState('pending');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
-    // Confirm Modal state
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, action: '', message: '', userId: null });
     const [blockingReason, setBlockingReason] = useState('');
 
@@ -36,7 +36,7 @@ export default function Verifications() {
         try {
             setLoading(true);
             const response = await api.get('/admin/verifications', {
-                params: { 
+                params: {
                     page,
                     search: searchTerm,
                     status: activeTab,
@@ -86,155 +86,360 @@ export default function Verifications() {
 
     const getStatusBadge = (status) => {
         switch (status) {
-            case 'verified': return <span style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>VERIFIED</span>;
-            case 'rejected': return <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>REJECTED</span>;
-            default: return <span style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>PENDING</span>;
+            case 'verified': return <span className="badge badge-verified">VERIFIED</span>;
+            case 'rejected': return <span className="badge badge-rejected">REJECTED</span>;
+            default: return <span className="badge badge-warning">PENDING</span>;
         }
     };
 
-    return (
-        <>
-            <div className="card">
-                <h2 style={{ margin: 0, marginBottom: '1.5rem' }}>ID Verifications</h2>
+    const formatDate = (dateString) => {
+        if (!dateString) return '—';
+        return new Date(dateString).toLocaleDateString('en-US', {
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    };
 
-                {/* Tabs + Filters */}
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem'
-                }}>
-                    <div className="tabs-scroll" style={{ gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: 0, flex: '1 1 auto' }}>
-                        <button 
-                            style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
-                            onClick={() => setActiveTab('pending')}
-                        >
-                            <FaHourglassHalf style={{ marginRight: '0.5rem' }} />
-                            Pending
-                        </button>
-                        <button 
-                            style={activeTab === 'verified' ? activeTabStyle : tabStyle} 
-                            onClick={() => setActiveTab('verified')}
-                        >
-                            <FaUserCheck style={{ marginRight: '0.5rem' }} />
-                            Approved
-                        </button>
-                        <button 
-                            style={activeTab === 'rejected' ? activeTabStyle : tabStyle} 
-                            onClick={() => setActiveTab('rejected')}
-                        >
-                            <FaUserTimes style={{ marginRight: '0.5rem' }} />
-                            Rejected
+    const activeFilterCount = sortBy !== 'created_at' || sortDir !== 'desc' ? 1 : 0;
+
+    return (
+        <div className="verifications-page">
+            <style>{`
+                .verifications-page .um-toolbar {
+                    position: sticky;
+                    top: 0;
+                    z-index: 5;
+                    background: var(--card-bg);
+                    padding-bottom: 0.5rem;
+                }
+                .verifications-page .um-search-row {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-bottom: 1rem;
+                }
+                .verifications-page .um-search-wrap {
+                    position: relative;
+                    flex: 1 1 260px;
+                    min-width: 0;
+                }
+                .verifications-page .um-search-wrap svg {
+                    position: absolute;
+                    left: 0.85rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--text-secondary);
+                    font-size: 0.85rem;
+                }
+                .verifications-page .um-search-wrap input {
+                    width: 100%;
+                    padding-left: 2.25rem;
+                    margin-bottom: 0;
+                    box-sizing: border-box;
+                }
+                .verifications-page .um-filter-toggle {
+                    display: none;
+                    align-items: center;
+                    gap: 0.5rem;
+                    border: 1.5px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: var(--text);
+                    border-radius: 10px;
+                    padding: 0.55rem 0.9rem;
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                }
+                .verifications-page .um-filter-badge {
+                    background: var(--primary);
+                    color: white;
+                    border-radius: 9999px;
+                    font-size: 0.68rem;
+                    min-width: 18px;
+                    height: 18px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 5px;
+                }
+                .verifications-page .um-cards { display: none; }
+                .verifications-page .um-card {
+                    border: 1px solid var(--border-color);
+                    border-radius: 14px;
+                    padding: 1rem;
+                    margin-bottom: 0.85rem;
+                    background: var(--card-bg);
+                }
+                .verifications-page .um-card-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    margin-bottom: 0.75rem;
+                }
+                .verifications-page .um-card-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.5rem 0.75rem;
+                    font-size: 0.8rem;
+                    margin-bottom: 0.85rem;
+                }
+                .verifications-page .um-card-grid dt {
+                    color: var(--text-secondary);
+                    font-size: 0.68rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 0.15rem;
+                }
+                .verifications-page .um-card-grid dd {
+                    margin: 0;
+                    font-weight: 500;
+                    word-break: break-word;
+                }
+                .verifications-page .um-card-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                }
+                .verifications-page .um-card-actions .btn {
+                    flex: 1 1 auto;
+                    justify-content: center;
+                    padding: 0.55rem 0.75rem;
+                }
+                .verifications-page .um-empty {
+                    text-align: center;
+                    padding: 3rem 1rem;
+                    color: var(--text-secondary);
+                }
+                .verifications-page .um-empty svg {
+                    font-size: 2rem;
+                    margin-bottom: 0.75rem;
+                    opacity: 0.5;
+                }
+                .verifications-page .um-skel-row {
+                    height: 56px;
+                    border-radius: 10px;
+                    margin-bottom: 0.6rem;
+                    background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%);
+                    background-size: 400% 100%;
+                    animation: um-shimmer 1.4s ease infinite;
+                }
+                @keyframes um-shimmer {
+                    0% { background-position: 100% 50%; }
+                    100% { background-position: 0 50%; }
+                }
+                .verifications-page .um-filter-drawer {
+                    display: none;
+                }
+                @media (max-width: 768px) {
+                    .verifications-page .um-table-wrap { display: none; }
+                    .verifications-page .um-cards { display: block; }
+                    .verifications-page .um-filter-toggle { display: inline-flex; }
+                    .verifications-page .filter-bar { display: none; }
+                    .verifications-page .um-card-grid { grid-template-columns: 1fr; }
+                    .verifications-page .um-filter-drawer.open {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.6rem;
+                        padding: 1rem;
+                        margin-bottom: 1rem;
+                        border: 1px solid var(--border-color);
+                        border-radius: 12px;
+                        background: var(--hover-bg);
+                    }
+                    .verifications-page .um-filter-drawer select {
+                        width: 100%;
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-color: var(--card-bg);
+                        color: var(--text);
+                        border: 1.5px solid var(--border-color);
+                        border-radius: 10px;
+                        padding: 0.7rem 2.25rem 0.7rem 0.9rem;
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 0.85rem center;
+                        background-size: 1.1rem;
+                    }
+                    .verifications-page .um-filter-drawer select:focus {
+                        outline: none;
+                        border-color: var(--primary);
+                        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+                    }
+                    .verifications-page .um-search-row .tabs-scroll { width: 100%; }
+                }
+                @media (min-width: 769px) {
+                    .verifications-page .um-filter-drawer { display: none !important; }
+                }
+            `}</style>
+
+            <div className="card">
+                <div className="um-toolbar">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(var(--primary-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}><FaIdCard /></div>
+                            <div>
+                                <h2 style={{ margin: 0 }}>ID Verifications</h2>
+                                <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Review and process identity verification submissions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="um-search-row">
+                        <div className="tabs-scroll" style={{ flex: '1 1 auto', marginBottom: 0 }}>
+                            <button style={{ padding: '0.6rem 1rem', border: 'none', background: activeTab === 'pending' ? 'var(--primary)' : 'transparent', color: activeTab === 'pending' ? 'white' : 'var(--text-secondary)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                                onClick={() => setActiveTab('pending')}><FaHourglassHalf /> Pending</button>
+                            <button style={{ padding: '0.6rem 1rem', border: 'none', background: activeTab === 'verified' ? 'var(--primary)' : 'transparent', color: activeTab === 'verified' ? 'white' : 'var(--text-secondary)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                                onClick={() => setActiveTab('verified')}><FaUserCheck /> Approved</button>
+                            <button style={{ padding: '0.6rem 1rem', border: 'none', background: activeTab === 'rejected' ? 'var(--primary)' : 'transparent', color: activeTab === 'rejected' ? 'white' : 'var(--text-secondary)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                                onClick={() => setActiveTab('rejected')}><FaUserTimes /> Rejected</button>
+                        </div>
+                        <div className="um-search-wrap" style={{ maxWidth: '260px' }}>
+                            <FaSearch />
+                            <input type="text" placeholder="Search by name, email, matrimony ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        </div>
+                        <button type="button" className="um-filter-toggle" onClick={() => setFiltersOpen(o => !o)}>
+                            {filtersOpen ? <FaTimes /> : <FaFilter />}
+                            Sort
+                            <FaChevronDown style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                         </button>
                     </div>
-                    <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none', flexShrink: 0 }}>
-                        <select
-                            value={`${sortBy}-${sortDir}`}
-                            onChange={(e) => {
-                                const [by, dir] = e.target.value.split('-');
-                                setSortBy(by);
-                                setSortDir(dir);
-                            }}
-                            style={{ fontWeight: '500' }}
-                        >
+
+                    <div className={`um-filter-drawer ${filtersOpen ? 'open' : ''}`}>
+                        <select value={`${sortBy}-${sortDir}`} onChange={(e) => { const [by, dir] = e.target.value.split('-'); setSortBy(by); setSortDir(dir); }}>
                             <option value="created_at-desc">Sort: Newest</option>
                             <option value="created_at-asc">Sort: Oldest</option>
                             <option value="updated_at-desc">Sort: Last Updated</option>
                             <option value="name-asc">Sort: Name (A-Z)</option>
                             <option value="name-desc">Sort: Name (Z-A)</option>
                         </select>
-                        <input
-                            type="text"
-                            placeholder="Search by name, email, matrimony ID..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ minWidth: '180px', maxWidth: '260px' }}
-                        />
+                    </div>
+
+                    <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+                        <select value={`${sortBy}-${sortDir}`} onChange={(e) => { const [by, dir] = e.target.value.split('-'); setSortBy(by); setSortDir(dir); }} style={{ fontWeight: '500' }}>
+                            <option value="created_at-desc">Sort: Newest</option>
+                            <option value="created_at-asc">Sort: Oldest</option>
+                            <option value="updated_at-desc">Sort: Last Updated</option>
+                            <option value="name-asc">Sort: Name (A-Z)</option>
+                            <option value="name-desc">Sort: Name (Z-A)</option>
+                        </select>
                     </div>
                 </div>
 
                 {loading ? (
-                    <p>Loading...</p>
+                    <div>
+                        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="um-skel-row" />)}
+                    </div>
                 ) : verifications.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>
-                        {searchTerm ? 'No matching verifications found.' : `No ${activeTab} verifications found.`}
-                    </p>
+                    <div className="um-empty">
+                        <FaIdCard />
+                        <p style={{ margin: 0, fontWeight: 600 }}>No verifications found</p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>{searchTerm ? 'No matching verifications found.' : `No ${activeTab} verifications found.`}</p>
+                    </div>
                 ) : (
                     <>
-                        <div className="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>ID Type</th>
-                                        <th>ID Number</th>
-                                        <th>Status</th>
-                                        <th>{activeTab === 'pending' ? 'Submitted At' : 'Processed At'}</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {verifications.map((v) => (
-                                        <tr key={v.id}>
-                                            <td>
-                                                <UserCell user={v.user} profile={v.user?.user_profile} />
-                                            </td>
-                                            <td>{v.id_proof_type}</td>
-                                            <td>{v.id_proof_number || 'N/A'}</td>
-                                            <td>{getStatusBadge(v.status)}</td>
-                                            <td>{new Date(v.verified_at || v.created_at).toLocaleDateString()}</td>
-                                            <td>
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedVerification(v);
-                                                        setRejectReason(v.rejection_reason || '');
-                                                    }} 
-                                                    className="btn btn-primary"
-                                                >
-                                                    {activeTab === 'pending' ? 'Review & Process' : 'View Details'}
-                                                </button>
-                                            </td>
+                        <div className="um-table-wrap">
+                            <div className="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>ID Type</th>
+                                            <th>ID Number</th>
+                                            <th>Status</th>
+                                            <th>{activeTab === 'pending' ? 'Submitted At' : 'Processed At'}</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {verifications.map((v) => (
+                                            <tr key={v.id}>
+                                                <td><UserCell user={v.user} profile={v.user?.user_profile} /></td>
+                                                <td>{v.id_proof_type}</td>
+                                                <td>{v.id_proof_number || 'N/A'}</td>
+                                                <td>{getStatusBadge(v.status)}</td>
+                                                <td>{formatDate(v.verified_at || v.created_at)}</td>
+                                                <td>
+                                                    <button onClick={() => { setSelectedVerification(v); setRejectReason(v.rejection_reason || ''); }} className="btn btn-primary">
+                                                        {activeTab === 'pending' ? 'Review & Process' : 'View Details'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                            totalItems={totalItems}
-                            itemsPerPage={15}
-                        />
+
+                        <div className="um-cards">
+                            {verifications.map((v) => (
+                                <div className="um-card" key={v.id}>
+                                    <div className="um-card-top">
+                                        <UserCell user={v.user} profile={v.user?.user_profile} />
+                                        {getStatusBadge(v.status)}
+                                    </div>
+                                    <dl className="um-card-grid">
+                                        <div>
+                                            <dt>ID Type</dt>
+                                            <dd>{v.id_proof_type}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>ID Number</dt>
+                                            <dd>{v.id_proof_number || 'N/A'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>{activeTab === 'pending' ? 'Submitted At' : 'Processed At'}</dt>
+                                            <dd style={{ fontSize: '0.75rem' }}>{formatDate(v.verified_at || v.created_at)}</dd>
+                                        </div>
+                                    </dl>
+                                    <div className="um-card-actions">
+                                        <button onClick={() => { setSelectedVerification(v); setRejectReason(v.rejection_reason || ''); }} className="btn btn-primary">
+                                            {activeTab === 'pending' ? 'Review & Process' : 'View Details'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} totalItems={totalItems} itemsPerPage={15} />
                     </>
                 )}
             </div>
 
-            {/* Verification Detail Modal */}
             {selectedVerification && (
-                <div className="modal-overlay" style={modalOverlayStyle} onClick={() => setSelectedVerification(null)}>
-                    <div className="modal-content" style={modalContentStyle} onClick={e => e.stopPropagation()}>
-                        <div style={modalHeaderStyle}>
+                <div className="modal-overlay" style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', zIndex: 1000, padding: '2rem'
+                }} onClick={() => setSelectedVerification(null)}>
+                    <div className="modal-content" style={{
+                        backgroundColor: 'var(--card-bg)', width: '100%', maxWidth: '1000px',
+                        maxHeight: '90vh', borderRadius: '1rem', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)', border: '1px solid var(--border-color)',
+                        overflow: 'hidden'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{
+                            padding: '1.25rem 2rem', borderBottom: '1px solid var(--border-color)',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            background: 'rgba(255,255,255,0.02)'
+                        }}>
                             <h3 style={{ margin: 0 }}>Reviewing Verification</h3>
-                            <button 
-                                onClick={() => setSelectedVerification(null)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', fontSize: '1.25rem' }}
-                            >
+                            <button onClick={() => setSelectedVerification(null)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', fontSize: '1.25rem' }}>
                                 <FaTimes />
                             </button>
                         </div>
-                        
-                        <div style={modalBodyStyle}>
+                        <div style={{ padding: '2rem', overflowY: 'auto' }}>
                             <div className="responsive-detail" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '2rem' }}>
-                                {/* Left Side: User Info & Gallery */}
                                 <div>
-                                    <h4 style={sectionTitleStyle}>User Profile Info</h4>
+                                    <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>User Profile Info</h4>
                                     <div className="profile-info-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem' }}>
                                         {selectedVerification.user?.user_profile?.profile_picture ? (
-                                            <img
-                                                src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
-                                                alt="Profile"
-                                                style={profileImageStyle}
-                                            />
-                                        ) : <div style={profileImagePlaceholderStyle}>No Image</div>}
+                                            <img src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
+                                                alt="Profile" style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover', border: '2px solid var(--border-color)' }} />
+                                        ) : <div style={{ width: '80px', height: '80px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>No Image</div>}
                                         <div>
                                             <p style={{ margin: '0 0 0.25rem', fontWeight: '600', fontSize: '1.1rem' }}>
                                                 {selectedVerification.user?.user_profile?.first_name} {selectedVerification.user?.user_profile?.last_name}
@@ -243,10 +448,8 @@ export default function Verifications() {
                                             <div style={{ display: 'inline-block', background: 'var(--primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
                                                 ID: {selectedVerification.user?.matrimony_id}
                                             </div>
-                                            
-                                            {/* Block User Button */}
                                             <div style={{ marginTop: '1rem' }}>
-                                                <button 
+                                                <button
                                                     className={`btn ${selectedVerification.user?.status === 'blocked' ? 'btn-success' : 'btn-danger'}`}
                                                     style={{ width: '100%', padding: '0.4rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                                                     onClick={() => {
@@ -254,12 +457,8 @@ export default function Verifications() {
                                                         const isBlocked = user?.status === 'blocked';
                                                         setBlockingReason('');
                                                         setConfirmModal({
-                                                            isOpen: true,
-                                                            userId: user?.id,
-                                                            action: 'toggleBlock',
-                                                            message: isBlocked 
-                                                                ? `Unblock ${user?.user_profile?.first_name}?`
-                                                                : `Block ${user?.user_profile?.first_name}? Please provide a reason:`,
+                                                            isOpen: true, userId: user?.id, action: 'toggleBlock',
+                                                            message: isBlocked ? `Unblock ${user?.user_profile?.first_name}?` : `Block ${user?.user_profile?.first_name}? Please provide a reason:`,
                                                             isBlocked
                                                         });
                                                     }}
@@ -270,42 +469,29 @@ export default function Verifications() {
                                             </div>
                                         </div>
                                     </div>
-
-                                    <h4 style={sectionTitleStyle}>User Photos</h4>
-                                    <div style={photoGridStyle}>
-                                        {/* Primary Photo First */}
+                                    <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>User Photos</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '0.75rem' }}>
                                         {selectedVerification.user?.user_profile?.profile_picture && (
                                             <div style={{ position: 'relative' }}>
-                                                <img
-                                                    src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
-                                                    alt="Primary"
-                                                    style={{ ...galleryImageStyle, border: '2px solid var(--primary)' }}
-                                                    onClick={() => setZoomedImage(selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`)}
-                                                />
+                                                <img src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
+                                                    alt="Primary" style={{ width: '100%', aspectRatio: '1/1', borderRadius: '8px', objectFit: 'cover', cursor: 'pointer', border: '2px solid var(--primary)' }}
+                                                    onClick={() => setZoomedImage(selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`)} />
                                                 <span style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--primary)', color: 'white', fontSize: '0.6rem', textAlign: 'center', fontWeight: 'bold' }}>PRIMARY</span>
                                             </div>
                                         )}
-                                        
-                                        {/* Gallery Photos (Filter out the primary if it's repeated) */}
                                         {selectedVerification.user?.profile_photos?.filter(photo => {
                                             const primaryUrl = selectedVerification.user.user_profile.profile_picture;
                                             if (!primaryUrl) return true;
                                             return !photo.photo_url.includes(primaryUrl) && !primaryUrl.includes(photo.photo_url);
                                         }).map((photo) => (
-                                            <img 
-                                                key={photo.id} 
-                                                src={photo.full_photo_url} 
-                                                alt="Gallery" 
-                                                style={galleryImageStyle}
-                                                onClick={() => setZoomedImage(photo.full_photo_url)}
-                                            />
+                                            <img key={photo.id} src={photo.full_photo_url} alt="Gallery"
+                                                style={{ width: '100%', aspectRatio: '1/1', borderRadius: '8px', objectFit: 'cover', cursor: 'pointer', border: '1px solid var(--border-color)' }}
+                                                onClick={() => setZoomedImage(photo.full_photo_url)} />
                                         ))}
                                     </div>
                                 </div>
-
-                                {/* Right Side: ID Documents */}
                                 <div>
-                                    <h4 style={sectionTitleStyle}>Submitted ID Documents</h4>
+                                    <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>Submitted ID Documents</h4>
                                     <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem' }}>
                                         <div className="grid-2">
                                             <div>
@@ -318,80 +504,45 @@ export default function Verifications() {
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                        <div className="id-image-viewer" style={{ position: 'relative', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <div className="id-image-viewer" style={{ position: 'relative', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
                                         <div className="id-image-container" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {currentIDPart === 0 ? (
-                                                <img 
-                                                    src={selectedVerification.id_proof_front_url?.startsWith('http') ? selectedVerification.id_proof_front_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_front_url}`}
-                                                    alt="ID Front"
-                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', cursor: 'zoom-in' }}
-                                                    onClick={() => setZoomedImage(selectedVerification.id_proof_front_url?.startsWith('http') ? selectedVerification.id_proof_front_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_front_url}`)}
-                                                />
+                                                <img src={selectedVerification.id_proof_front_url?.startsWith('http') ? selectedVerification.id_proof_front_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_front_url}`}
+                                                    alt="ID Front" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', cursor: 'zoom-in' }}
+                                                    onClick={() => setZoomedImage(selectedVerification.id_proof_front_url?.startsWith('http') ? selectedVerification.id_proof_front_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_front_url}`)} />
                                             ) : (
-                                                <img 
-                                                    src={selectedVerification.id_proof_back_url?.startsWith('http') ? selectedVerification.id_proof_back_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_back_url}`}
-                                                    alt="ID Back"
-                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', cursor: 'zoom-in' }}
-                                                    onClick={() => setZoomedImage(selectedVerification.id_proof_back_url?.startsWith('http') ? selectedVerification.id_proof_back_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_back_url}`)}
-                                                />
+                                                <img src={selectedVerification.id_proof_back_url?.startsWith('http') ? selectedVerification.id_proof_back_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_back_url}`}
+                                                    alt="ID Back" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', cursor: 'zoom-in' }}
+                                                    onClick={() => setZoomedImage(selectedVerification.id_proof_back_url?.startsWith('http') ? selectedVerification.id_proof_back_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_back_url}`)} />
                                             )}
                                         </div>
-
                                         {selectedVerification.id_proof_back_url && (
                                             <div style={{ display: 'flex', borderTop: '1px solid var(--border-color)' }}>
-                                                <button 
-                                                    onClick={() => setCurrentIDPart(0)}
-                                                    style={{ 
-                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 0 ? 'var(--primary)' : 'transparent',
-                                                        color: '#fff', cursor: 'pointer', fontWeight: 'bold'
-                                                    }}
-                                                >
-                                                    Front Side
-                                                </button>
-                                                <button 
-                                                    onClick={() => setCurrentIDPart(1)}
-                                                    style={{ 
-                                                        flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 1 ? 'var(--primary)' : 'transparent',
-                                                        color: '#fff', cursor: 'pointer', fontWeight: 'bold'
-                                                    }}
-                                                >
-                                                    Back Side
-                                                </button>
+                                                <button onClick={() => setCurrentIDPart(0)}
+                                                    style={{ flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 0 ? 'var(--primary)' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Front Side</button>
+                                                <button onClick={() => setCurrentIDPart(1)}
+                                                    style={{ flex: 1, padding: '0.75rem', border: 'none', background: currentIDPart === 1 ? 'var(--primary)' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Back Side</button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             </div>
-
                             <div style={{ marginTop: '2rem' }}>
-                                <h4 style={sectionTitleStyle}>{selectedVerification.status === 'pending' ? 'Decision Process' : 'Decision Status'}</h4>
+                                <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                    {selectedVerification.status === 'pending' ? 'Decision Process' : 'Decision Status'}
+                                </h4>
                                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '0.5rem' }}>
                                     {selectedVerification.status === 'pending' ? (
                                         <>
-                                            <p style={{ margin: '0 0 0.5rem', fontSize: '0.875rem' }}>If rejecting, please state the reason (e.g., "ID photo is blurry", "ID expired"):</p>
-                                            <textarea
-                                                value={rejectReason}
-                                                onChange={(e) => setRejectReason(e.target.value)}
+                                            <p style={{ margin: '0 0 0.5rem', fontSize: '0.875rem' }}>If rejecting, please state the reason:</p>
+                                            <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
                                                 placeholder="Enter rejection reason here..."
-                                                style={textareaStyle}
-                                            />
-                                            
-                                            <div className="btn-group-end">
-                                                <button 
-                                                    className="btn btn-danger" 
-                                                    style={{ padding: '0.75rem 1.5rem', fontWeight: '600' }}
-                                                    onClick={() => handleReject(selectedVerification.id, rejectReason)}
-                                                >
-                                                    Reject Submission
-                                                </button>
-                                                <button 
-                                                    className="btn btn-success" 
-                                                    style={{ padding: '0.75rem 1.5rem', fontWeight: '600' }}
-                                                    onClick={() => handleApprove(selectedVerification.id)}
-                                                >
-                                                    Approve & Mark Verified
-                                                </button>
+                                                style={{ width: '100%', minHeight: '80px', padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'var(--text)', fontSize: '0.875rem', resize: 'vertical', outline: 'none' }} />
+                                            <div className="btn-group-end" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                                                <button className="btn btn-danger" style={{ padding: '0.75rem 1.5rem', fontWeight: '600' }}
+                                                    onClick={() => handleReject(selectedVerification.id, rejectReason)}>Reject Submission</button>
+                                                <button className="btn btn-success" style={{ padding: '0.75rem 1.5rem', fontWeight: '600' }}
+                                                    onClick={() => handleApprove(selectedVerification.id)}>Approve & Mark Verified</button>
                                             </div>
                                         </>
                                     ) : (
@@ -409,24 +560,15 @@ export default function Verifications() {
                 </div>
             )}
 
-            {/* Zoomed Image Modal */}
             {zoomedImage && (
-                <div 
-                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.95)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
-                    onClick={() => setZoomedImage(null)}
-                >
-                    <button 
-                        onClick={() => setZoomedImage(null)}
-                        style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'white', color: 'black', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}
-                    >
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.95)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+                    onClick={() => setZoomedImage(null)}>
+                    <button onClick={() => setZoomedImage(null)}
+                        style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'white', color: 'black', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
                         <FaClose />
                     </button>
-                    <img 
-                        src={zoomedImage} 
-                        alt="Zoomed" 
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}
-                        onClick={e => e.stopPropagation()}
-                    />
+                    <img src={zoomedImage} alt="Zoomed" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }}
+                        onClick={e => e.stopPropagation()} />
                 </div>
             )}
 
@@ -435,16 +577,10 @@ export default function Verifications() {
                 onClose={() => setConfirmModal({ isOpen: false, id: null, action: '', message: '', userId: null })}
                 onConfirm={async () => {
                     try {
-                        await api.post(`/admin/users/${confirmModal.userId}/toggle-block`, {
-                            block_reason: blockingReason || undefined
-                        });
+                        await api.post(`/admin/users/${confirmModal.userId}/toggle-block`, { block_reason: blockingReason || undefined });
                         fetchVerifications(currentPage);
-                        // Refresh the selected verification user data
                         if (selectedVerification?.user?.id === confirmModal.userId) {
-                            setSelectedVerification(prev => ({
-                                ...prev,
-                                user: { ...prev.user, status: prev.user.status === 'active' ? 'blocked' : 'active' }
-                            }));
+                            setSelectedVerification(prev => ({ ...prev, user: { ...prev.user, status: prev.user.status === 'active' ? 'blocked' : 'active' } }));
                         }
                     } catch (error) {
                         showToast('Action failed', 'error');
@@ -461,156 +597,6 @@ export default function Verifications() {
                 onInputChange={setBlockingReason}
             />
             {ToastComponent}
-        </>
+        </div>
     );
 }
-
-// Tab Styles
-const tabContainerStyle = {
-    display: 'flex',
-    gap: '0.5rem',
-    marginBottom: '1.5rem',
-    borderBottom: '1px solid var(--border-color)',
-    paddingBottom: '0.5rem'
-};
-
-const tabStyle = {
-    padding: '0.75rem 1.5rem',
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--text-secondary)',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    borderRadius: '0.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    transition: 'all 0.2s'
-};
-
-const activeTabStyle = {
-    ...tabStyle,
-    background: 'var(--primary)',
-    color: '#fff'
-};
-
-// Modal Styles
-const modalOverlayStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    padding: '2rem'
-};
-
-const modalContentStyle = {
-    backgroundColor: 'var(--card-bg)',
-    width: '100%',
-    maxWidth: '1000px',
-    maxHeight: '90vh',
-    borderRadius: '1rem',
-    display: 'flex',
-    flexDirection: 'column',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
-    border: '1px solid var(--border-color)',
-    overflow: 'hidden'
-};
-
-const modalHeaderStyle = {
-    padding: '1.25rem 2rem',
-    borderBottom: '1px solid var(--border-color)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255,255,255,0.02)'
-};
-
-const modalBodyStyle = {
-    padding: '2rem',
-    overflowY: 'auto'
-};
-
-const sectionTitleStyle = {
-    fontSize: '0.75rem',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: 'var(--primary)',
-    marginBottom: '1rem',
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    paddingBottom: '0.5rem'
-};
-
-const profileImageStyle = {
-    width: '80px',
-    height: '80px',
-    borderRadius: '12px',
-    objectFit: 'cover',
-    border: '2px solid var(--border-color)'
-};
-
-const profileImagePlaceholderStyle = {
-    width: '80px',
-    height: '80px',
-    borderRadius: '12px',
-    background: 'rgba(255,255,255,0.05)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.75rem',
-    color: 'var(--text-secondary)'
-};
-
-const photoGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))',
-    gap: '0.75rem'
-};
-
-const galleryImageStyle = {
-    width: '100%',
-    aspectRatio: '1/1',
-    borderRadius: '8px',
-    objectFit: 'cover',
-    cursor: 'pointer',
-    border: '1px solid var(--border-color)',
-    transition: 'transform 0.2s'
-};
-
-const idDocumentImageStyle = {
-    width: '100%',
-    maxHeight: '250px',
-    borderRadius: '8px',
-    objectFit: 'contain',
-    background: '#000',
-    cursor: 'pointer',
-    border: '1px solid var(--border-color)',
-    padding: '4px'
-};
-
-const imageLabelStyle = {
-    fontSize: '0.7rem',
-    color: 'var(--text-secondary)',
-    marginBottom: '4px',
-    fontWeight: '600'
-};
-
-const textareaStyle = {
-    width: '100%',
-    minHeight: '80px',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    border: '1px solid var(--border-color)',
-    color: 'var(--text)',
-    fontSize: '0.875rem',
-    resize: 'vertical',
-    outline: 'none',
-    transition: 'border-color 0.2s'
-};

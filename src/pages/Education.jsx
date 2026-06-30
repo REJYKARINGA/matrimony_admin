@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { educationApi } from '../api/educationApi';
 import ConfirmModal from '../components/ConfirmModal';
 import TimeFormatCell from '../components/TimeFormatCell';
-import { FaGraduationCap, FaPlus, FaEdit, FaTrash, FaSearch, FaBook, FaChartBar, FaClock } from 'react-icons/fa';
+import { FaGraduationCap, FaPlus, FaEdit, FaTrash, FaSearch, FaBook, FaChartBar, FaClock, FaFilter, FaTimes, FaChevronDown } from 'react-icons/fa';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -46,6 +46,8 @@ export default function Education() {
     const [editingItem, setEditingItem] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
     const [mounted, setMounted] = useState(false);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const activeFilterCount = search ? 1 : 0;
     const [stats, setStats] = useState({
         totalEducations: 0,
         activeEducations: 0,
@@ -163,7 +165,7 @@ export default function Education() {
     if (!mounted) return null;
 
     return (
-        <div style={{ padding: '2rem', position: 'relative' }}>
+        <div className="education-page" style={{ padding: '2rem', position: 'relative' }}>
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -191,6 +193,8 @@ export default function Education() {
                 }}
                 transition={{ duration: 10, repeat: Infinity }}
             />
+
+
 
             {/* Header */}
             <motion.div
@@ -361,55 +365,32 @@ export default function Education() {
                 </motion.div>
             </motion.div>
 
-            {/* Controls - Responsive Layout */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '1.5rem',
-                    flexWrap: 'wrap',
-                    gap: '1rem'
-                }}
-            >
-                {/* Mobile-friendly title */}
-                <h2 style={{ 
-                    margin: 0, 
-                    color: 'var(--text-primary)',
-                    fontSize: 'clamp(1rem, 4vw, 1.5rem)'
-                }}>
-                    Education List
-                </h2>
-                
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '0.75rem', 
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
-                }}>
-                    <div style={{ position: 'relative' }}>
-                        <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+            {/* Toolbar with Search */}
+            <div className="um-toolbar">
+                <div className="um-search-row">
+                    <div className="um-search-wrap">
+                        <FaSearch />
                         <input
                             type="text"
                             placeholder="Search educations..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ 
-                                paddingLeft: '40px',
-                                width: 'clamp(200px, 40vw, 300px)',
-                                marginBottom: 0,
-                                background: 'var(--card-bg)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                padding: '0.75rem 1rem 0.75rem 40px'
-                            }}
+                            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
+                    <button className="um-filter-toggle" onClick={() => setFiltersOpen(!filtersOpen)}>
+                        <FaFilter /> Filters {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+                        <FaChevronDown size={10} style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
                 </div>
-            </motion.div>
+                <div className={`um-filter-drawer${filtersOpen ? ' open' : ''}`}>
+                    <input
+                        type="text"
+                        placeholder="Search educations..."
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                    />
+                </div>
+            </div>
 
             {/* Create Education Modal */}
             <AnimatePresence>
@@ -826,19 +807,10 @@ export default function Education() {
                 }}
             >
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '3rem' }}>
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                            style={{ display: 'inline-block' }}
-                        >
-                            <FaGraduationCap size={32} color="var(--primary)" />
-                        </motion.div>
-                        <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Loading educations...</p>
-                    </div>
+                    Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
                 ) : (
                     <>
-                        <div className="table-container" style={{ overflowX: 'auto' }}>
+                        <div className="um-table-wrap">
                             <table style={{ 
                                 width: '100%', 
                                 borderCollapse: 'collapse',
@@ -1002,11 +974,39 @@ export default function Education() {
                         </div>
 
                         {educations.length === 0 && !loading && (
-                            <div style={{ textAlign: 'center', padding: '3rem' }}>
-                                <FaGraduationCap size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
-                                <p style={{ color: 'var(--text-secondary)' }}>No educations found</p>
-                            </div>
+                            <div className="um-empty"><FaGraduationCap /><p>No educations found</p></div>
                         )}
+
+                        {/* Mobile Cards */}
+                        <div className="um-cards">
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
+                            ) : educations.length === 0 ? (
+                                <div className="um-empty"><FaGraduationCap /><p>No educations found</p></div>
+                            ) : (
+                                educations.map(education => (
+                                    <div key={education.id} className="um-card">
+                                        <div className="um-card-top">
+                                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{education.name}</span>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500,
+                                                background: education.is_active ? 'var(--success)20' : 'var(--danger)20',
+                                                color: education.is_active ? 'var(--success)' : 'var(--danger)',
+                                            }}>{education.is_active ? 'Active' : 'Inactive'}</span>
+                                        </div>
+                                        <div className="um-card-grid">
+                                            <div><dt>Order</dt><dd>#{education.order_number}</dd></div>
+                                            <div><dt>Popularity</dt><dd>{education.popularity_count || 0}</dd></div>
+                                            <div style={{ gridColumn: '1 / -1' }}><dt>Created</dt><dd><TimeFormatCell date={education.created_at} /></dd></div>
+                                        </div>
+                                        <div className="um-card-actions">
+                                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => openEditModal(education)} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, id: education.id })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
 
                         {/* Responsive Pagination */}
                         <div style={{ 

@@ -132,7 +132,8 @@ export default function RechargeTiers() {
     };
 
     return (
-        <div className="card">
+        <div className="recharge-tiers-page card">
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ background: 'var(--primary)', color: 'white', padding: '10px', borderRadius: '12px', display: 'flex' }}>
@@ -153,9 +154,10 @@ export default function RechargeTiers() {
             </div>
 
             {loading ? (
-                <div style={{ color: 'var(--text-secondary)', padding: '2rem', textAlign: 'center' }}>Loading...</div>
+                <div style={{ padding: '1rem' }}>{Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)}</div>
             ) : (
-                <div className="table-container">
+                <>
+                <div className="um-table-wrap">
                     <table>
                         <thead>
                             <tr>
@@ -232,6 +234,37 @@ export default function RechargeTiers() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile Cards */}
+                <div className="um-cards" style={{ padding: '1rem' }}>
+                    {tiers.length === 0 ? (
+                        <div className="um-empty"><p>No recharge tiers defined. Click "Add Tier" to create one.</p></div>
+                    ) : (
+                        tiers.map(tier => (
+                            <div key={tier.id} className="um-card">
+                                <div className="um-card-top">
+                                    <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: '1.1rem' }}>₹{Number(tier.amount).toLocaleString()}</span>
+                                    <button
+                                        onClick={() => toggleActive(tier.id)}
+                                        className={`badge ${tier.is_active ? 'badge-verified' : 'badge-rejected'}`}
+                                        style={{ border: 'none', cursor: 'pointer', padding: '4px 12px', fontSize: '0.75rem' }}
+                                    >
+                                        {tier.is_active ? 'Active' : 'Inactive'}
+                                    </button>
+                                </div>
+                                <div className="um-card-grid">
+                                    <div><dt>Contacts</dt><dd><LuUsers size={14} color="var(--primary)" /> {tier.contacts}</dd></div>
+                                    <div><dt>Priority</dt><dd><span style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem' }}>#{tier.priority_order + 1}</span></dd></div>
+                                </div>
+                                <div className="um-card-actions">
+                                    <button className="btn btn-primary" onClick={() => openEditModal(tier)} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px' }}><LuPencil size={12} /> Edit</button>
+                                    <button className="btn" onClick={() => handleDelete(tier.id)} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><LuTrash2 size={12} /> Delete</button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+                </>
             )}
 
             {isModalOpen && (

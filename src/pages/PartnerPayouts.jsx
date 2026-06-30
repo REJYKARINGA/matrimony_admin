@@ -55,7 +55,6 @@ export default function PartnerPayouts() {
     const handleConfirm = async (inputValue) => {
         const { payout, action } = confirmState;
         if (!payout) return;
-
         try {
             if (action === 'process') {
                 await api.post(`/admin/partner-payouts/${payout.id}/process`, { transfer_id: inputValue || null });
@@ -77,21 +76,115 @@ export default function PartnerPayouts() {
         return colors[status] || '#999';
     };
 
-    return (
-        <div style={{ padding: '1rem' }}>
-            <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}
-                style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <FaMoneyCheck size={28} color="var(--primary)" />
-                <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--text)' }}>Partner Payouts</h1>
-            </motion.div>
+    const getStatusBadge = (status) => {
+        return <span className={`badge ${status === 'paid' ? 'badge-verified' : status === 'rejected' ? 'badge-rejected' : 'badge-warning'}`}>{status}</span>;
+    };
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                style={{ background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div className="filter-bar" style={{ margin: 0, border: 'none', padding: 0, gap: '0.5rem' }}>
+    return (
+        <div className="partner-payouts-page">
+            <style>{`
+                .partner-payouts-page .um-toolbar {
+                    position: sticky;
+                    top: 0;
+                    z-index: 5;
+                    background: var(--card-bg);
+                    padding-bottom: 0.5rem;
+                }
+                .partner-payouts-page .um-search-row {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-bottom: 1rem;
+                }
+                .partner-payouts-page .um-cards { display: none; }
+                .partner-payouts-page .um-card {
+                    border: 1px solid var(--border-color);
+                    border-radius: 14px;
+                    padding: 1rem;
+                    margin-bottom: 0.85rem;
+                    background: var(--card-bg);
+                }
+                .partner-payouts-page .um-card-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    margin-bottom: 0.75rem;
+                }
+                .partner-payouts-page .um-card-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.5rem 0.75rem;
+                    font-size: 0.8rem;
+                    margin-bottom: 0.85rem;
+                }
+                .partner-payouts-page .um-card-grid dt {
+                    color: var(--text-secondary);
+                    font-size: 0.68rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 0.15rem;
+                }
+                .partner-payouts-page .um-card-grid dd {
+                    margin: 0;
+                    font-weight: 500;
+                    word-break: break-word;
+                }
+                .partner-payouts-page .um-card-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                }
+                .partner-payouts-page .um-card-actions .btn {
+                    flex: 1 1 auto;
+                    justify-content: center;
+                    padding: 0.55rem 0.75rem;
+                }
+                .partner-payouts-page .um-empty {
+                    text-align: center;
+                    padding: 3rem 1rem;
+                    color: var(--text-secondary);
+                }
+                .partner-payouts-page .um-empty svg {
+                    font-size: 2rem;
+                    margin-bottom: 0.75rem;
+                    opacity: 0.5;
+                }
+                .partner-payouts-page .um-skel-row {
+                    height: 56px;
+                    border-radius: 10px;
+                    margin-bottom: 0.6rem;
+                    background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%);
+                    background-size: 400% 100%;
+                    animation: um-shimmer 1.4s ease infinite;
+                }
+                @keyframes um-shimmer {
+                    0% { background-position: 100% 50%; }
+                    100% { background-position: 0 50%; }
+                }
+                @media (max-width: 768px) {
+                    .partner-payouts-page .um-table-wrap { display: none; }
+                    .partner-payouts-page .um-cards { display: block; }
+                    .partner-payouts-page .um-card-grid { grid-template-columns: 1fr; }
+                }
+            `}</style>
+
+            <div className="card">
+                <div className="um-toolbar">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(var(--primary-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}><FaMoneyCheck /></div>
+                            <div>
+                                <h2 style={{ margin: 0 }}>Partner Payouts</h2>
+                                <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Manage and process payout requests from partner offices</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
                         <FaFilter size={14} color="var(--text-secondary)" />
                         <select value={filter} onChange={e => setFilter(e.target.value)} style={{ minWidth: '160px' }}>
-                            <option value="all">All Status</option>
+                            <option value="all">Status: All</option>
                             <option value="pending">Pending</option>
                             <option value="paid">Paid</option>
                             <option value="rejected">Rejected</option>
@@ -100,86 +193,125 @@ export default function PartnerPayouts() {
                 </div>
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Loading...</div>
-                ) : (
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table className="data-table" style={{ width: '100%', minWidth: '800px' }}>
-                            <thead>
-                                <tr>
-                                    <th>Office</th>
-                                    <th style={{ textAlign: 'right' }}>Amount</th>
-                                    <th style={{ textAlign: 'center' }}>Status</th>
-                                    <th>Transfer ID</th>
-                                    <th>Notes</th>
-                                    <th>Processed By</th>
-                                    <th>Requested</th>
-                                    <th>Processed</th>
-                                    <th style={{ textAlign: 'center' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {payouts.map(p => (
-                                    <tr key={p.id}>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <FaBuilding size={12} color="var(--primary)" />
-                                                <span style={{ fontWeight: 600 }}>{p.office?.name || '—'}</span>
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: 'right', fontWeight: 700, fontSize: '1.1rem' }}>
-                                            ₹{Number(p.amount).toLocaleString()}
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span style={{
-                                                padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem',
-                                                fontWeight: 'bold', textTransform: 'uppercase',
-                                                background: `${statusColor(p.status)}20`, color: statusColor(p.status)
-                                            }}>{p.status}</span>
-                                        </td>
-                                        <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{p.transfer_id || '—'}</td>
-                                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {p.notes || '—'}
-                                        </td>
-                                        <td style={{ fontSize: '0.85rem' }}>{p.processed_by?.name || p.processed_by_id || '—'}</td>
-                                        <td><TimeFormatCell date={p.created_at} /></td>
-                                        <td><TimeFormatCell date={p.processed_at} /></td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            {p.status === 'pending' && (
-                                                <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                                                    <button onClick={() => openProcess(p)}
-                                                        style={{
-                                                            background: 'rgba(16,185,129,0.12)', color: '#10B981',
-                                                            border: 'none', padding: '8px 12px', borderRadius: '8px',
-                                                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
-                                                            fontWeight: 600, fontSize: '0.8rem'
-                                                        }}>
-                                                        <FaCheck /> Pay
-                                                    </button>
-                                                    <button onClick={() => openReject(p)}
-                                                        style={{
-                                                            background: 'rgba(239,68,68,0.12)', color: '#EF4444',
-                                                            border: 'none', padding: '8px 12px', borderRadius: '8px',
-                                                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
-                                                            fontWeight: 600, fontSize: '0.8rem'
-                                                        }}>
-                                                        <FaTimes /> Reject
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {payouts.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                                <FaMoneyCheck size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                                <p>No payouts found.</p>
-                            </div>
-                        )}
+                    <div>
+                        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="um-skel-row" />)}
                     </div>
+                ) : payouts.length === 0 ? (
+                    <div className="um-empty">
+                        <FaMoneyCheck />
+                        <p style={{ margin: 0, fontWeight: 600 }}>No payouts found</p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>No payout requests have been submitted yet.</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="um-table-wrap">
+                            <div className="table-container" style={{ overflowX: 'auto' }}>
+                                <table className="data-table" style={{ width: '100%', minWidth: '800px' }}>
+                                    <thead>
+                                        <tr>
+                                            <th>Office</th>
+                                            <th style={{ textAlign: 'right' }}>Amount</th>
+                                            <th style={{ textAlign: 'center' }}>Status</th>
+                                            <th>Transfer ID</th>
+                                            <th>Notes</th>
+                                            <th>Processed By</th>
+                                            <th>Requested</th>
+                                            <th>Processed</th>
+                                            <th style={{ textAlign: 'center' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {payouts.map(p => (
+                                            <tr key={p.id}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <FaBuilding size={12} color="var(--primary)" />
+                                                        <span style={{ fontWeight: 600 }}>{p.office?.name || '—'}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={{ textAlign: 'right', fontWeight: 700, fontSize: '1.1rem' }}>
+                                                    ₹{Number(p.amount).toLocaleString()}
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>{getStatusBadge(p.status)}</td>
+                                                <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{p.transfer_id || '—'}</td>
+                                                <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {p.notes || '—'}
+                                                </td>
+                                                <td style={{ fontSize: '0.85rem' }}>{p.processed_by?.name || p.processed_by_id || '—'}</td>
+                                                <td><TimeFormatCell date={p.created_at} /></td>
+                                                <td><TimeFormatCell date={p.processed_at} /></td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {p.status === 'pending' && (
+                                                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                                            <button onClick={() => openProcess(p)} className="btn btn-success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>
+                                                                <FaCheck /> Pay
+                                                            </button>
+                                                            <button onClick={() => openReject(p)} className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>
+                                                                <FaTimes /> Reject
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="um-cards">
+                            {payouts.map(p => (
+                                <div className="um-card" key={p.id}>
+                                    <div className="um-card-top">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                                            <FaBuilding size={12} color="var(--primary)" />
+                                            {p.office?.name || '—'}
+                                        </div>
+                                        <span className={`badge ${p.status === 'paid' ? 'badge-verified' : p.status === 'rejected' ? 'badge-rejected' : 'badge-warning'}`}>{p.status}</span>
+                                    </div>
+                                    <dl className="um-card-grid">
+                                        <div>
+                                            <dt>Amount</dt>
+                                            <dd style={{ fontWeight: 700, fontSize: '1.1rem' }}>₹{Number(p.amount).toLocaleString()}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Transfer ID</dt>
+                                            <dd style={{ fontFamily: 'monospace' }}>{p.transfer_id || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Requested</dt>
+                                            <dd><TimeFormatCell date={p.created_at} /></dd>
+                                        </div>
+                                        <div>
+                                            <dt>Processed</dt>
+                                            <dd><TimeFormatCell date={p.processed_at} /></dd>
+                                        </div>
+                                        <div>
+                                            <dt>Notes</dt>
+                                            <dd style={{ fontSize: '0.75rem' }}>{p.notes || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Processed By</dt>
+                                            <dd>{p.processed_by?.name || p.processed_by_id || '—'}</dd>
+                                        </div>
+                                    </dl>
+                                    {p.status === 'pending' && (
+                                        <div className="um-card-actions">
+                                            <button onClick={() => openProcess(p)} className="btn btn-success">
+                                                <FaCheck /> Pay
+                                            </button>
+                                            <button onClick={() => openReject(p)} className="btn btn-danger">
+                                                <FaTimes /> Reject
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 )}
-            </motion.div>
+            </div>
+
             <ConfirmModal
                 isOpen={confirmState.isOpen}
                 onClose={() => setConfirmState({ ...confirmState, isOpen: false, payout: null })}

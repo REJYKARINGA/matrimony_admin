@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { personalityApi } from '../api/personalityApi';
 import ConfirmModal from '../components/ConfirmModal';
 import Pagination from '../components/Pagination';
-import { FaUserTag, FaPlus, FaEdit, FaTrash, FaSearch, FaStar, FaFilter, FaListAlt, FaFolder, FaTags, FaSmile } from 'react-icons/fa';
+import { FaUserTag, FaPlus, FaEdit, FaTrash, FaSearch, FaStar, FaFilter, FaListAlt, FaFolder, FaTags, FaSmile, FaChevronDown } from 'react-icons/fa';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -156,7 +156,8 @@ export default function Personalities() {
     };
 
     return (
-        <div style={{ padding: 'min(1rem, 4vw)' }}>
+        <div className="personalities-page" style={{ padding: 'min(1rem, 4vw)' }}>
+
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -281,7 +282,7 @@ export default function Personalities() {
                     </motion.div>
 
                     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                        <div className="table-container">
+                        <div className="um-table-wrap">
                             <table>
                                 <thead>
                                     <tr>
@@ -294,7 +295,9 @@ export default function Personalities() {
                                 </thead>
                                 <tbody>
                                     {loading ? (
-                                        <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Loading...</td></tr>
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <tr key={i}><td colSpan="5" style={{ padding: 0, border: 'none' }}><div className="um-skel-row" /></td></tr>
+                                        ))
                                     ) : (
                                         personalities.map((item) => (
                                             <tr key={item.id}>
@@ -335,6 +338,36 @@ export default function Personalities() {
                         </div>
                         <div style={{ padding: '1rem' }}>
                             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} totalItems={totalItems} itemsPerPage={15} />
+                        </div>
+
+                        {/* Mobile Cards */}
+                        <div className="um-cards" style={{ padding: '1rem' }}>
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
+                            ) : personalities.length === 0 ? (
+                                <div className="um-empty"><FaSmile /><p>No traits found</p></div>
+                            ) : (
+                                personalities.map(item => (
+                                    <div key={item.id} className="um-card">
+                                        <div className="um-card-top">
+                                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.personality_name}</span>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500,
+                                                background: item.is_active ? 'var(--success)20' : 'var(--danger)20',
+                                                color: item.is_active ? 'var(--success)' : 'var(--danger)',
+                                            }}>{item.is_active ? 'Active' : 'Inactive'}</span>
+                                        </div>
+                                        <div className="um-card-grid">
+                                            <div><dt>Category</dt><dd><span style={{ padding: '0.15rem 0.5rem', background: 'var(--success)20', color: 'var(--success)', borderRadius: '12px', fontSize: '0.75rem' }}>{item.personality_type}</span></dd></div>
+                                            <div><dt>Popularity</dt><dd><FaStar size={12} color={item.trending_number <= 5 ? 'var(--warning)' : 'var(--text-secondary)'} /> {item.trending_number}</dd></div>
+                                        </div>
+                                        <div className="um-card-actions">
+                                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => openEditModal(item)} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, id: item.id, type: 'personality' })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </>

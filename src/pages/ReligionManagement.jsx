@@ -163,13 +163,17 @@ export default function ReligionManagement() {
         const caste = castes.find(c => c.id === casteId);
         return caste ? getReligionName(caste.religion_id) : 'Unknown';
     };
-
     return (
-        <div style={{ padding: '2rem' }}>
+        <div className="religion-management-page" style={{ padding: '2rem' }}>
+            <style>{`
+.religion-management-page .um-religion-table { overflow-x: auto; }
+@media (max-width: 768px) { .religion-management-page .um-religion-table { display: none; } }
+`}</style>
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -30 }}
                 animate={{ opacity: 1, y: 0 }}
+
                 style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -309,7 +313,7 @@ export default function ReligionManagement() {
                     </div>
 
                     {/* Table-style Hierarchical View */}
-                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', overflowX: 'auto' }}>
+                    <div className="um-religion-table" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', overflowX: 'auto' }}>
                         {/* Table Header */}
                         <div style={{
                             display: 'flex',
@@ -642,6 +646,37 @@ export default function ReligionManagement() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Mobile Cards - Religions */}
+                    <div className="um-cards">
+                        {religions.length === 0 ? (
+                            <div className="um-empty"><FaMosque /><p>No religions found</p></div>
+                        ) : (
+                            religions.map(religion => (
+                                <div key={religion.id} className="um-card">
+                                    <div className="um-card-top">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <FaMosque color="var(--primary)" size={16} />
+                                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{religion.name}</span>
+                                        </div>
+                                        <span style={{
+                                            padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.7rem',
+                                            background: religion.is_active ? 'var(--success)' : 'var(--danger)',
+                                            color: 'white'
+                                        }}>{religion.is_active ? 'Active' : 'Inactive'}</span>
+                                    </div>
+                                    <div className="um-card-grid">
+                                        <div><dt>Castes</dt><dd><span style={{ padding: '0.15rem 0.5rem', background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)', borderRadius: '6px', fontSize: '0.75rem' }}>{getCastesByReligion(religion.id).length}</span></dd></div>
+                                        <div><dt>Order</dt><dd>#{religion.order_number || 0}</dd></div>
+                                    </div>
+                                    <div className="um-card-actions">
+                                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { setEditingReligion(religion); setReligionForm({ name: religion.name, is_active: religion.is_active, order_number: religion.order_number || 0 }); }} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, type: 'religion', id: religion.id })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -672,6 +707,7 @@ export default function ReligionManagement() {
                     </div>
 
                     <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+                        <div className="um-table-wrap">
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead style={{ background: 'var(--input-bg)' }}>
                                 <tr>
@@ -751,42 +787,73 @@ export default function ReligionManagement() {
                                                 </motion.button>
                                             </div>
                                         </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-            )}
 
-            {activeTab === 'subcastes' && (
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Sub-Castes</h2>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowCreateSubCaste(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.75rem 1.5rem',
-                                background: 'var(--primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                                fontSize: '1rem',
-                                fontWeight: '500'
-                            }}
-                        >
-                            <FaPlus /> Add Sub-Caste
-                        </motion.button>
-                    </div>
+                {/* Mobile Cards - Castes */}
+                <div className="um-cards" style={{ padding: '1rem' }}>
+                    {castes.length === 0 ? (
+                        <div className="um-empty"><p>No castes found</p></div>
+                    ) : (
+                        castes.map(caste => (
+                            <div key={caste.id} className="um-card">
+                                <div className="um-card-top">
+                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{caste.name}</span>
+                                    <span style={{
+                                        padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.7rem',
+                                        background: caste.is_active ? 'var(--success)' : 'var(--danger)',
+                                        color: 'white'
+                                    }}>{caste.is_active ? 'Active' : 'Inactive'}</span>
+                                </div>
+                                <div className="um-card-grid">
+                                    <div><dt>Religion</dt><dd>{getReligionName(caste.religion_id)}</dd></div>
+                                    <div><dt>Sub-Castes</dt><dd>{getSubCastesByCaste(caste.id).length}</dd></div>
+                                    <div><dt>Order</dt><dd>{caste.order_number || 0}</dd></div>
+                                </div>
+                                <div className="um-card-actions">
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { setEditingCaste(caste); setCasteForm({ religion_id: caste.religion_id, name: caste.name, is_active: caste.is_active, order_number: caste.order_number || 0 }); }} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, type: 'caste', id: caste.id })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    )}
 
-                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    {activeTab === 'subcastes' && (
+            <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Sub-Castes</h2>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowCreateSubCaste(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1.5rem',
+                            background: 'var(--primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            fontWeight: '500'
+                        }}
+                    >
+                        <FaPlus /> Add Sub-Caste
+                    </motion.button>
+                </div>
+
+                <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+                    <div className="um-table-wrap">
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead style={{ background: 'var(--input-bg)' }}>
                                 <tr>
                                     <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--text-primary)' }}>Name</th>
@@ -855,13 +922,42 @@ export default function ReligionManagement() {
                                                 </motion.button>
                                             </div>
                                         </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-            )}
+
+                {/* Mobile Cards - Sub-Castes */}
+                <div className="um-cards" style={{ padding: '1rem' }}>
+                    {subCastes.length === 0 ? (
+                        <div className="um-empty"><p>No sub-castes found</p></div>
+                    ) : (
+                        subCastes.map(subCaste => (
+                            <div key={subCaste.id} className="um-card">
+                                <div className="um-card-top">
+                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{subCaste.name}</span>
+                                    <span style={{
+                                        width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
+                                        background: subCaste.is_active ? 'var(--success)' : 'var(--danger)'
+                                    }} />
+                                </div>
+                                <div className="um-card-grid">
+                                    <div><dt>Religion</dt><dd>{getReligionNameByCasteId(subCaste.caste_id)}</dd></div>
+                                    <div><dt>Caste</dt><dd>{getCasteName(subCaste.caste_id)}</dd></div>
+                                    <div><dt>Order</dt><dd>{subCaste.order_number || 0}</dd></div>
+                                </div>
+                                <div className="um-card-actions">
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { setEditingSubCaste(subCaste); setSubCasteForm({ caste_id: subCaste.caste_id, name: subCaste.name, is_active: subCaste.is_active, order_number: subCaste.order_number || 0 }); }} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, type: 'subcaste', id: subCaste.id })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    )}
 
 
             {/* Create Religion Modal */}

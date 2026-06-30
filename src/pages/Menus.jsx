@@ -84,21 +84,9 @@ export default function Menus() {
     return acc;
   }, {});
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: '3px solid var(--border-color)',
-          borderTopColor: 'var(--primary)',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+    <div className="menus-page" style={{ maxWidth: 1000, margin: '0 auto' }}>
+
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         marginBottom: 24, flexWrap: 'wrap', gap: 12,
@@ -129,7 +117,11 @@ export default function Menus() {
         </button>
       </div>
 
-      {Object.entries(grouped).map(([group, items]) => (
+      {loading ? (
+        <div style={{ padding: '1rem' }}>{Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)}</div>
+      ) : Object.keys(grouped).length === 0 ? (
+        <div className="um-empty"><LuFolder /><p>No menus defined. Click "Add Menu" to create one.</p></div>
+      ) : Object.entries(grouped).map(([group, items]) => (
         <div key={group} style={{ marginBottom: 20 }}>
           <h3 style={{
             fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
@@ -143,6 +135,7 @@ export default function Menus() {
             boxShadow: '0 1px 3px var(--shadow-color)',
             overflow: 'hidden',
           }}>
+            <div className="um-table-wrap">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
@@ -173,6 +166,27 @@ export default function Menus() {
                 ))}
               </tbody>
             </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="um-cards" style={{ padding: '0.75rem' }}>
+              {items.map(menu => (
+                <div key={menu.id} className="um-card">
+                  <div className="um-card-top">
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{menu.label}</span>
+                  </div>
+                  <div className="um-card-grid">
+                    <div style={{ gridColumn: '1 / -1' }}><dt>Path</dt><dd style={{ fontFamily: 'monospace', fontSize: '0.78rem' }}>{menu.path}</dd></div>
+                    <div><dt>Group</dt><dd>{menu.group}</dd></div>
+                    <div><dt>Order</dt><dd>{menu.sort_order}</dd></div>
+                  </div>
+                  <div className="um-card-actions">
+                    <button onClick={() => openEdit(menu)} style={{ flex: 1, justifyContent: 'center', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}><LuPencil size={13} /> Edit</button>
+                    <button onClick={() => handleDelete(menu)} style={{ flex: 1, justifyContent: 'center', padding: '0.5rem', borderRadius: '8px', border: '1px solid #EF444444', background: 'transparent', cursor: 'pointer', color: '#EF4444', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}><LuTrash2 size={13} /> Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ))}

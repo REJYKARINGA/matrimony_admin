@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf, FaEye, FaImages } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaTimes as FaClose, FaUserCheck, FaUserTimes, FaHourglassHalf, FaEye, FaImages, FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import { CONFIG } from '../config';
@@ -34,6 +34,9 @@ export default function PhotoVerifications() {
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDir, setSortDir] = useState('desc');
     const { showToast, ToastComponent } = useToast();
+
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const activeFilterCount = sortBy !== 'created_at' || sortDir !== 'desc' ? 1 : 0;
 
     useEffect(() => {
         fetchUsers(1);
@@ -197,16 +200,101 @@ export default function PhotoVerifications() {
         }
     };
 
-    return (
-        <div style={{ padding: '20px' }}>
-            <div className="card">
-                <h2 style={{ margin: 0, marginBottom: '1.5rem' }}>Photo Verifications</h2>
+    const resetSort = () => {
+        setSortBy('created_at');
+        setSortDir('desc');
+    };
 
-                {/* Tabs + Filters */}
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem'
-                }}>
+    const FilterControls = (
+        <select
+            value={`${sortBy}-${sortDir}`}
+            onChange={(e) => {
+                const [by, dir] = e.target.value.split('-');
+                setSortBy(by);
+                setSortDir(dir);
+            }}
+            style={{ fontWeight: '500' }}
+        >
+            <option value="created_at-desc">Sort: Newest</option>
+            <option value="created_at-asc">Sort: Oldest</option>
+            <option value="name-asc">Sort: Name (A-Z)</option>
+            <option value="name-desc">Sort: Name (Z-A)</option>
+        </select>
+    );
+
+    return (
+        <div className="photo-verifications-page">
+            <style>{`
+                .photo-verifications-page .um-toolbar { position: sticky; top: 0; z-index: 5; background: var(--card-bg); padding-bottom: 0.5rem; }
+                .photo-verifications-page .um-search-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+                .photo-verifications-page .um-search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+                .photo-verifications-page .um-search-wrap svg { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.85rem; }
+                .photo-verifications-page .um-search-wrap input { width: 100%; padding-left: 2.25rem; margin-bottom: 0; box-sizing: border-box; }
+                .photo-verifications-page .um-filter-toggle { display: none; align-items: center; gap: 0.5rem; border: 1.5px solid var(--border-color); background: var(--card-bg); color: var(--text); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+                .photo-verifications-page .um-filter-badge { background: var(--primary); color: white; border-radius: 9999px; font-size: 0.68rem; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; }
+                .photo-verifications-page .um-cards { display: none; }
+                .photo-verifications-page .um-card { border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; margin-bottom: 0.85rem; background: var(--card-bg); }
+                .photo-verifications-page .um-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; }
+                .photo-verifications-page .um-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem; }
+                .photo-verifications-page .um-card-grid dt { color: var(--text-secondary); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+                .photo-verifications-page .um-card-grid dd { margin: 0; font-weight: 500; word-break: break-word; }
+                .photo-verifications-page .um-card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+                .photo-verifications-page .um-card-actions .btn { flex: 1 1 auto; justify-content: center; padding: 0.55rem 0.75rem; }
+                .photo-verifications-page .um-empty { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+                .photo-verifications-page .um-empty svg { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.5; }
+                .photo-verifications-page .um-skel-row { height: 56px; border-radius: 10px; margin-bottom: 0.6rem; background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%); background-size: 400% 100%; animation: um-shimmer 1.4s ease infinite; }
+                @keyframes um-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+                .photo-verifications-page .um-filter-drawer { display: none; }
+                @media (max-width: 768px) {
+                    .photo-verifications-page .um-table-wrap { display: none; }
+                    .photo-verifications-page .um-cards { display: block; }
+                    .photo-verifications-page .um-filter-toggle { display: inline-flex; }
+                    .photo-verifications-page .filter-bar { display: none; }
+                    .photo-verifications-page .um-filter-drawer.open { display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--hover-bg); }
+                    .photo-verifications-page .um-filter-drawer select { width: 100%; appearance: none; -webkit-appearance: none; background-color: var(--card-bg); color: var(--text); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 0.7rem 2.25rem 0.7rem 0.9rem; font-size: 0.85rem; font-weight: 500; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; background-size: 1.1rem; }
+                    .photo-verifications-page .um-filter-drawer select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18); }
+                }
+                @media (min-width: 769px) { .photo-verifications-page .um-filter-drawer { display: none !important; } }
+            `}</style>
+
+            <div className="card">
+                <div className="um-toolbar">
+                    <h2 style={{ margin: 0, marginBottom: '1.5rem' }}>Photo Verifications</h2>
+
+                    {/* Search + filter toggle */}
+                    <div className="um-search-row">
+                        <div className="um-search-wrap">
+                            <FaSearch />
+                            <input
+                                type="text"
+                                placeholder="Search by name, email, matrimony ID..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            className="um-filter-toggle"
+                            onClick={() => setFiltersOpen(o => !o)}
+                        >
+                            {filtersOpen ? <FaTimes /> : <FaFilter />}
+                            Sort
+                            {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+                            <FaChevronDown style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                    </div>
+
+                    {/* Mobile filter drawer */}
+                    <div className={`um-filter-drawer ${filtersOpen ? 'open' : ''}`}>
+                        {FilterControls}
+                        {activeFilterCount > 0 && (
+                            <button type="button" className="btn btn-secondary" onClick={resetSort} style={{ justifyContent: 'center' }}>
+                                Clear sort
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Tabs */}
                     <div className="tabs-scroll" style={{ gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: 0, flex: '1 1 auto' }}>
                         <button 
                             style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
@@ -230,76 +318,109 @@ export default function PhotoVerifications() {
                             Rejected
                         </button>
                     </div>
-                    <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none', flexShrink: 0 }}>
-                        <select
-                            value={`${sortBy}-${sortDir}`}
-                            onChange={(e) => {
-                                const [by, dir] = e.target.value.split('-');
-                                setSortBy(by);
-                                setSortDir(dir);
-                            }}
-                            style={{ fontWeight: '500' }}
-                        >
-                            <option value="created_at-desc">Sort: Newest</option>
-                            <option value="created_at-asc">Sort: Oldest</option>
-                            <option value="name-asc">Sort: Name (A-Z)</option>
-                            <option value="name-desc">Sort: Name (Z-A)</option>
-                        </select>
-                        <input
-                            type="text"
-                            placeholder="Search by name, email, matrimony ID..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ minWidth: '180px', maxWidth: '260px' }}
-                        />
+
+                    {/* Desktop filter row */}
+                    <div className="filter-bar" style={{ margin: 0, padding: '0.75rem 0', border: 'none', flexShrink: 0 }}>
+                        {FilterControls}
+                        {activeFilterCount > 0 && (
+                            <button type="button" className="btn btn-secondary" onClick={resetSort} style={{ padding: '0.5rem 0.9rem', fontSize: '0.8rem' }}>
+                                <FaTimes /> Clear
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {loading ? (
-                    <p>Loading...</p>
+                    <div>
+                        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="um-skel-row" />)}
+                    </div>
                 ) : users.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>
-                        {searchTerm ? 'No matching users found.' : `No ${activeTab} photo requests found.`}
-                    </p>
+                    <div className="um-empty">
+                        <FaImages />
+                        <p style={{ margin: 0, fontWeight: 600 }}>No {activeTab} photo requests found</p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>
+                            {searchTerm ? 'Try adjusting your search or filters.' : 'No pending photo verifications at this time.'}
+                        </p>
+                    </div>
                 ) : (
                     <>
-                        <div style={userGridStyle}>
-                            {users.map((user) => (
-                                <div key={user.id} style={userCardStyle} onClick={() => setSelectedUser(user)}>
-                                    <div style={stackedImagesStyle}>
-                                        {user.profile_photos?.slice(0, 3).map((photo, index) => (
-                                            <div key={photo.id} style={stackedImageWrapperStyle(index)}>
-                                                <img
-                                                    src={photo.full_photo_url}
-                                                    alt="User upload"
-                                                    style={photoImageStyle}
-                                                />
-                                                {index === 0 && user.profile_photos.length > 1 && (
-                                                    <div style={countBadgeStyle}>
-                                                        <FaImages style={{ marginRight: '4px' }} />
-                                                        {user.profile_photos.length}
-                                                    </div>
-                                                )}
+                        <div className="um-table-wrap">
+                            <div style={userGridStyle}>
+                                {users.map((user) => (
+                                    <div key={user.id} style={userCardStyle} onClick={() => setSelectedUser(user)}>
+                                        <div style={stackedImagesStyle}>
+                                            {user.profile_photos?.slice(0, 3).map((photo, index) => (
+                                                <div key={photo.id} style={stackedImageWrapperStyle(index)}>
+                                                    <img
+                                                        src={photo.full_photo_url}
+                                                        alt="User upload"
+                                                        style={photoImageStyle}
+                                                    />
+                                                    {index === 0 && user.profile_photos.length > 1 && (
+                                                        <div style={countBadgeStyle}>
+                                                            <FaImages style={{ marginRight: '4px' }} />
+                                                            {user.profile_photos.length}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div style={userInfoStyle}>
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <UserCell user={user} profile={user.user_profile} avatarSize={44} />
                                             </div>
-                                        ))}
+                                            
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                                    {user.profile_photos?.length} PENDING {user.profile_photos?.length === 1 ? 'PHOTO' : 'PHOTOS'}
+                                                </span>
+                                                <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+                                                    Review
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style={userInfoStyle}>
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <UserCell user={user} profile={user.user_profile} avatarSize={44} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Mobile cards */}
+                        <div className="um-cards">
+                            {users.map((user) => (
+                                <div className="um-card" key={user.id} onClick={() => setSelectedUser(user)}>
+                                    <div className="um-card-top">
+                                        <UserCell user={user} profile={user.user_profile} avatarSize={44} />
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--primary)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                            {user.profile_photos?.length} PENDING
+                                        </span>
+                                    </div>
+                                    <dl className="um-card-grid">
+                                        <div>
+                                            <dt>Name</dt>
+                                            <dd>{user.user_profile?.first_name} {user.user_profile?.last_name}</dd>
                                         </div>
-                                        
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                                                {user.profile_photos?.length} PENDING {user.profile_photos?.length === 1 ? 'PHOTO' : 'PHOTOS'}
-                                            </span>
-                                            <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
-                                                Review
-                                            </button>
+                                        <div>
+                                            <dt>Matrimony ID</dt>
+                                            <dd style={{ color: 'var(--primary)' }}>{user.matrimony_id}</dd>
                                         </div>
+                                        <div>
+                                            <dt>Email</dt>
+                                            <dd>{user.email}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Photos</dt>
+                                            <dd>{user.profile_photos?.length || 0}</dd>
+                                        </div>
+                                    </dl>
+                                    <div className="um-card-actions">
+                                        <button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }}>
+                                            <FaEye /> Review
+                                        </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
+
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

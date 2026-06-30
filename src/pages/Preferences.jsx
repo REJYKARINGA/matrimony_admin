@@ -60,7 +60,8 @@ export default function Preferences() {
     };
 
     return (
-        <div className="card">
+        <div className="preferences-page card">
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h2 style={{ margin: 0 }}>Global Insights & Preferences</h2>
@@ -140,10 +141,12 @@ export default function Preferences() {
              )}
 
             {loading ? (
-                <p>Loading...</p>
+                Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
+            ) : preferences.length === 0 ? (
+                <div className="um-empty" style={{ padding: '3rem 1rem' }}><p>No preferences found</p></div>
             ) : (
                 <>
-                    <div className="table-container">
+                    <div className="um-table-wrap">
                         <table>
                             <thead>
                                 <tr>
@@ -233,6 +236,37 @@ export default function Preferences() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="um-cards" style={{ padding: '1rem 0' }}>
+                        {preferences.length === 0 ? (
+                            <div className="um-empty"><p>No preferences found</p></div>
+                        ) : (
+                            preferences.map(preference => (
+                                <div key={preference.id} className="um-card">
+                                    <div className="um-card-top">
+                                        <div>
+                                            {preference.user?.user_profile ? (
+                                                <UserCell user={preference.user} profile={preference.user.user_profile} />
+                                            ) : (
+                                                <span>-</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="um-card-grid">
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Age & Height</dt><dd>Age: {preference.min_age || 'Any'} - {preference.max_age || 'Any'}, Ht: {preference.min_height || 'Any'} - {preference.max_height || 'Any'} cm</dd></div>
+                                        <div><dt>Status</dt><dd>{preference.marital_status ? (['never_married', 'never married', 'single'].includes(preference.marital_status.toLowerCase().replace('_', ' ')) ? 'Single' : preference.marital_status.replace('_', ' ')) : '-'}</dd></div>
+                                        <div><dt>Income</dt><dd>{formatIncome(preference.min_income)} - {formatIncome(preference.max_income)}</dd></div>
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Community</dt><dd>{preference.religion_name || 'Any'}{preference.caste_names?.length > 0 ? ` - ${formatArray(preference.caste_names)}` : ''}</dd></div>
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Professional</dt><dd>Edu: {formatArray(preference.education_names)}, Occ: {formatArray(preference.occupation_names)}</dd></div>
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Location</dt><dd>{formatArray(preference.preferred_locations)}{preference.max_distance ? ` (${preference.max_distance} km)` : ''}</dd></div>
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Lifestyle</dt><dd>Drug: {preference.drug_addiction || 'Any'}, Smoke: {formatArray(preference.smoke)}, Alcohol: {formatArray(preference.alcohol)}</dd></div>
+                                        <div style={{ gridColumn: '1 / -1' }}><dt>Settings</dt><dd>Sort: {preference.sort_by?.replace('_', ' ') || '-'}{preference.hide_viewed ? ', Hide Viewed' : ''}{preference.hide_interested ? ', Hide Interested' : ''}</dd></div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     <Pagination

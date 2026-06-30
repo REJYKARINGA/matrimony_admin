@@ -4,7 +4,7 @@ import { occupationApi } from '../api/occupationApi';
 import ConfirmModal from '../components/ConfirmModal';
 import TimeFormatCell from '../components/TimeFormatCell';
 import Pagination from '../components/Pagination';
-import { FaBriefcase, FaPlus, FaEdit, FaTrash, FaSearch, FaChartBar, FaClock } from 'react-icons/fa';
+import { FaBriefcase, FaPlus, FaEdit, FaTrash, FaSearch, FaChartBar, FaClock, FaFilter, FaChevronDown } from 'react-icons/fa';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,6 +47,8 @@ export default function Occupation() {
     const [editingItem, setEditingItem] = useState(null);
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
     const [mounted, setMounted] = useState(false);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const activeFilterCount = search ? 1 : 0;
     const [stats, setStats] = useState({
         totalOccupations: 0,
         activeOccupations: 0,
@@ -163,7 +165,7 @@ export default function Occupation() {
     if (!mounted) return null;
 
     return (
-        <div style={{ padding: 'min(1rem, 4vw)', position: 'relative' }}>
+        <div className="occupation-page" style={{ padding: 'min(1rem, 4vw)', position: 'relative' }}>
             {/* Animated Background */}
             <motion.div
                 style={{
@@ -191,6 +193,8 @@ export default function Occupation() {
                 }}
                 transition={{ duration: 10, repeat: Infinity }}
             />
+
+
 
             {/* Header */}
             <motion.div
@@ -301,25 +305,31 @@ export default function Occupation() {
 
             {/* Main Table Card */}
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <h3 style={{ margin: 0 }}>Occupation List</h3>
-                    <div style={{ position: 'relative' }}>
-                        <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <div className="um-search-row" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div className="um-search-wrap">
+                        <FaSearch />
                         <input
                             type="text"
                             placeholder="Search occupations..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ 
-                                paddingLeft: '40px',
-                                width: 'min(300px, 100%)',
-                                marginBottom: 0
-                            }}
+                            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
+                    <button className="um-filter-toggle" onClick={() => setFiltersOpen(!filtersOpen)}>
+                        <FaFilter /> Filters {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+                        <FaChevronDown size={10} style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
+                </div>
+                <div className={`um-filter-drawer${filtersOpen ? ' open' : ''}`}>
+                    <input
+                        type="text"
+                        placeholder="Search occupations..."
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                    />
                 </div>
 
-                <div className="table-container">
+                <div className="um-table-wrap">
                     <table>
                         <thead>
                             <tr>
@@ -333,7 +343,9 @@ export default function Occupation() {
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td></tr>
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <tr key={i}><td colSpan="6" style={{ padding: 0, border: 'none' }}><div className="um-skel-row" /></td></tr>
+                                ))
                             ) : occupations.length === 0 ? (
                                 <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>No occupations found</td></tr>
                             ) : (
@@ -392,6 +404,37 @@ export default function Occupation() {
                         totalItems={totalItems}
                         itemsPerPage={15}
                     />
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="um-cards" style={{ padding: '1rem' }}>
+                    {loading ? (
+                        Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
+                    ) : occupations.length === 0 ? (
+                        <div className="um-empty"><FaBriefcase /><p>No occupations found</p></div>
+                    ) : (
+                        occupations.map(occupation => (
+                            <div key={occupation.id} className="um-card">
+                                <div className="um-card-top">
+                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{occupation.name}</span>
+                                    <span style={{
+                                        padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500,
+                                        background: occupation.is_active !== false ? 'var(--success)20' : 'var(--danger)20',
+                                        color: occupation.is_active !== false ? 'var(--success)' : 'var(--danger)',
+                                    }}>{occupation.is_active !== false ? 'Active' : 'Inactive'}</span>
+                                </div>
+                                <div className="um-card-grid">
+                                    <div><dt>Order</dt><dd>#{occupation.order_number || 0}</dd></div>
+                                    <div><dt>Popularity</dt><dd><FaChartBar size={12} color="var(--text-secondary)" /> {occupation.popularity_count || 0}</dd></div>
+                                    <div style={{ gridColumn: '1 / -1' }}><dt>Created</dt><dd><TimeFormatCell date={occupation.created_at} /></dd></div>
+                                </div>
+                                <div className="um-card-actions">
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => openEditModal(occupation)} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}><FaEdit size={12} /> Edit</motion.button>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setConfirmModal({ isOpen: true, id: occupation.id })} className="btn" style={{ flex: 1, justifyContent: 'center', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--danger)' }}><FaTrash size={12} /> Delete</motion.button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 

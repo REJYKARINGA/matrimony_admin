@@ -313,7 +313,11 @@ export default function Festivals() {
     const dotColors = { english: '#3B82F6', hijri: '#10B981', malayalam: '#9CA3AF' };
 
     return (
-        <motion.div variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="visible" className="card">
+        <motion.div variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="visible" className="festivals-page card">
+            <style>{`
+.festivals-page .festivals-sidebar { flex: 1 1 280px; max-width: 280px; width: 100%; }
+@media (max-width: 768px) { .festivals-page .festivals-sidebar { max-width: 100%; flex-basis: 100%; } }
+`}</style>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.75rem' }}>
@@ -332,14 +336,11 @@ export default function Festivals() {
                 {/* Table */}
                 <div style={{ flex: '1 1 600px', background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
                     {loading ? (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</div>
+                        <div style={{ padding: '1rem' }}>{Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)}</div>
                     ) : festivals.length === 0 ? (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            <FaGift size={40} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-                            <p>No festivals configured yet. Click "New Festival" to add one.</p>
-                        </div>
+                        <div className="um-empty"><FaGift /><p>No festivals configured yet. Click "New Festival" to add one.</p></div>
                     ) : (
-                        <div style={{ overflowX: 'auto', position: 'relative' }}>
+                        <div className="um-table-wrap" style={{ overflowX: 'auto', position: 'relative' }}>
                             <table className="table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '920px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--hover-bg, rgba(255,255,255,0.02))' }}>
@@ -437,8 +438,48 @@ export default function Festivals() {
                     )}
                 </div>
 
+                {/* Mobile Cards */}
+                <div className="um-cards" style={{ width: '100%' }}>
+                    {loading ? (
+                        Array.from({ length: 5 }).map((_, i) => <div key={i} className="um-skel-row" />)
+                    ) : festivals.length === 0 ? (
+                        <div className="um-empty"><FaGift /><p>No festivals configured yet</p></div>
+                    ) : (
+                        festivals.map(f => (
+                            <div key={f.id} className="um-card">
+                                <div className="um-card-top">
+                                    <div>
+                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{f.celebration_name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{getEventLabel(f)}</div>
+                                    </div>
+                                    <span style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem',
+                                        background: f.is_active ? '#10B98120' : '#EF444420',
+                                        color: f.is_active ? '#10B981' : '#EF4444', fontWeight: 500,
+                                    }}>
+                                        {f.is_active ? <FaCheckCircle size={10} /> : <FaTimesCircle size={10} />}
+                                        {f.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                <div className="um-card-grid">
+                                    <div><dt>Discount</dt><dd><span style={{ padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.8rem', background: '#10B98120', color: '#10B981', fontWeight: 600 }}>{f.offer_discount_type === 'percentage' ? `${f.offer_discount}%` : `₹${f.offer_discount}`} OFF</span></dd></div>
+                                    <div><dt>Calendar</dt><dd>{getCalendarLabel(f.calendar_type)}</dd></div>
+                                    <div><dt>Window</dt><dd>{f.occurrences?.length > 0 ? `${f.occurrences[0].start_at?.slice(0, 10)} → ${f.occurrences[0].end_at?.slice(0, 10)}` : <span style={{ fontStyle: 'italic' }}>Not resolved</span>}</dd></div>
+                                    <div><dt>Target</dt><dd>{!f.target_gender ? 'Both' : f.target_gender === 'male' ? 'Male' : 'Female'}</dd></div>
+                                </div>
+                                <div className="um-card-actions">
+                                    <button className="btn btn-sm" onClick={() => openEdit(f)} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text)' }}><FaEdit size={12} /> Edit</button>
+                                    <button className="btn btn-sm" onClick={() => handleResolve(f)} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text)' }}><FaCalendarAlt size={12} /> Resolve</button>
+                                    <button className="btn btn-sm" onClick={() => handleToggleActive(f)} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: f.is_active ? '#F59E0B' : '#10B981' }}>{f.is_active ? <FaToggleOff size={12} /> : <FaToggleOn size={12} />} Toggle</button>
+                                    <button className="btn btn-sm" onClick={() => setConfirmModal({ isOpen: true, id: f.id })} style={{ flex: 1, justifyContent: 'center', borderRadius: '8px', border: '1px solid #EF444444', background: 'transparent', color: '#EF4444' }}><FaTrash size={12} /> Delete</button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
                 {/* Right Sidebar Column */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: '1 1 280px', maxWidth: '280px', width: '100%' }}>
+                <div className="festivals-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {/* Calendar */}
                     <div style={{
                         background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)',
