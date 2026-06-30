@@ -3,7 +3,7 @@ import api from '../api/axios';
 import Pagination from '../components/Pagination';
 import FormModal from '../components/FormModal';
 import TimeFormatCell from '../components/TimeFormatCell';
-import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaBan, FaUnlock, FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTrashRestore, FaBan, FaUnlock, FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash, FaIdCard, FaFilter, FaTimes, FaSearch, FaChevronDown, FaExclamationTriangle } from 'react-icons/fa';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
 import UserCell from '../components/UserCell';
@@ -176,7 +176,7 @@ export default function UserProfiles() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [activeTab, setActiveTab] = useState('all');
-    const [roleOptions, setRoleOptions] = useState([]);
+    const [_roleOptions, setRoleOptions] = useState([]);
 
     // Filters
     const [genderFilter, setGenderFilter] = useState('all');
@@ -205,6 +205,9 @@ export default function UserProfiles() {
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [formErrors, setFormErrors] = useState({});
     const [formLoading, setFormLoading] = useState(false);
+
+    // Mobile filter drawer
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     // Block Reason state for confirm modal
     const [blockingReason, setBlockingReason] = useState('');
@@ -542,253 +545,614 @@ export default function UserProfiles() {
         || occupationFilter !== 'all' || statusFilter !== 'all' || verificationFilter !== 'all'
         || ageMin || ageMax || search;
 
+    const activeFilterCount = [genderFilter, religionFilter, educationFilter, occupationFilter, statusFilter, verificationFilter]
+        .filter(v => v !== 'all').length + (ageMin ? 1 : 0) + (ageMax ? 1 : 0);
+
+    const FilterControls = (
+        <>
+            <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
+                const [by, dir] = e.target.value.split('-');
+                setSortBy(by); setSortDir(dir);
+            }} style={{ fontWeight: '500' }}>
+                <option value="created_at-desc">Sort: Newest</option>
+                <option value="created_at-asc">Sort: Oldest</option>
+                <option value="last_active_at-desc">Sort: Last Active</option>
+                <option value="last_active_at-asc">Sort: Oldest Active</option>
+                <option value="updated_at-desc">Sort: Last Updated</option>
+                <option value="name-asc">Sort: Name (A-Z)</option>
+                <option value="name-desc">Sort: Name (Z-A)</option>
+            </select>
+            <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
+                <option value="all">Gender: All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <select value={religionFilter} onChange={(e) => setReligionFilter(e.target.value)}>
+                <option value="all">Religion: All</option>
+                {religions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+            <select value={educationFilter} onChange={(e) => setEducationFilter(e.target.value)}>
+                <option value="all">Education: All</option>
+                {educations.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </select>
+            <select value={occupationFilter} onChange={(e) => setOccupationFilter(e.target.value)}>
+                <option value="all">Occupation: All</option>
+                {occupations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="all">Status: All</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)}>
+                <option value="all">Verification: All</option>
+                <option value="verified">Verified</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+                <option value="not_submitted">Not Submitted</option>
+            </select>
+            <div className="span-full" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <input type="number" placeholder="Age min" value={ageMin} onChange={(e) => setAgeMin(e.target.value)}
+                    style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>–</span>
+                <input type="number" placeholder="Age max" value={ageMax} onChange={(e) => setAgeMax(e.target.value)}
+                    style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
+            </div>
+        </>
+    );
+
     return (
-        <div className="card" style={{ position: 'relative' }}>
+        <div className="userprofiles-page">
+            <style>{`
+                .userprofiles-page .um-toolbar {
+                    position: sticky;
+                    top: 0;
+                    z-index: 5;
+                    background: var(--card-bg);
+                    padding-bottom: 0.5rem;
+                }
+                .userprofiles-page .um-stats {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 0.75rem;
+                    margin-bottom: 1.25rem;
+                }
+                .userprofiles-page .um-stat-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.85rem 1rem;
+                    border-radius: 14px;
+                    border: 1px solid var(--border-color);
+                    background: var(--hover-bg);
+                }
+                .userprofiles-page .um-stat-icon {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1rem;
+                    flex-shrink: 0;
+                    color: white;
+                }
+                .userprofiles-page .um-stat-icon.total { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+                .userprofiles-page .um-stat-icon.active { background: #10B981; }
+                .userprofiles-page .um-stat-icon.inactive { background: #6B7280; }
+                .userprofiles-page .um-stat-value {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    line-height: 1.1;
+                }
+                .userprofiles-page .um-stat-label {
+                    font-size: 0.72rem;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                }
+                .userprofiles-page .um-search-row {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-bottom: 1rem;
+                }
+                .userprofiles-page .um-search-wrap {
+                    position: relative;
+                    flex: 1 1 260px;
+                    min-width: 0;
+                }
+                .userprofiles-page .um-search-wrap svg {
+                    position: absolute;
+                    left: 0.85rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--text-secondary);
+                    font-size: 0.85rem;
+                }
+                .userprofiles-page .um-search-wrap input {
+                    width: 100%;
+                    padding-left: 2.25rem;
+                    margin-bottom: 0;
+                    box-sizing: border-box;
+                }
+                .userprofiles-page .um-filter-toggle {
+                    display: none;
+                    align-items: center;
+                    gap: 0.5rem;
+                    border: 1.5px solid var(--border-color);
+                    background: var(--card-bg);
+                    color: var(--text);
+                    border-radius: 10px;
+                    padding: 0.55rem 0.9rem;
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                }
+                .userprofiles-page .um-filter-badge {
+                    background: var(--primary);
+                    color: white;
+                    border-radius: 9999px;
+                    font-size: 0.68rem;
+                    min-width: 18px;
+                    height: 18px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 5px;
+                }
+                .userprofiles-page .um-cards { display: none; }
+                .userprofiles-page .um-card {
+                    border: 1px solid var(--border-color);
+                    border-radius: 14px;
+                    padding: 1rem;
+                    margin-bottom: 0.85rem;
+                    background: var(--card-bg);
+                }
+                .userprofiles-page .um-card-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    margin-bottom: 0.75rem;
+                }
+                .userprofiles-page .um-card-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.5rem 0.75rem;
+                    font-size: 0.8rem;
+                    margin-bottom: 0.85rem;
+                }
+                .userprofiles-page .um-card-grid dt {
+                    color: var(--text-secondary);
+                    font-size: 0.68rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 0.15rem;
+                }
+                .userprofiles-page .um-card-grid dd {
+                    margin: 0;
+                    font-weight: 500;
+                    word-break: break-word;
+                }
+                .userprofiles-page .um-card-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                }
+                .userprofiles-page .um-card-actions .btn {
+                    flex: 1 1 auto;
+                    justify-content: center;
+                    padding: 0.55rem 0.75rem;
+                }
+                .userprofiles-page .um-empty {
+                    text-align: center;
+                    padding: 3rem 1rem;
+                    color: var(--text-secondary);
+                }
+                .userprofiles-page .um-empty svg {
+                    font-size: 2rem;
+                    margin-bottom: 0.75rem;
+                    opacity: 0.5;
+                }
+                .userprofiles-page .um-skel-row {
+                    height: 56px;
+                    border-radius: 10px;
+                    margin-bottom: 0.6rem;
+                    background: linear-gradient(90deg, var(--hover-bg) 25%, var(--border-color) 37%, var(--hover-bg) 63%);
+                    background-size: 400% 100%;
+                    animation: um-shimmer 1.4s ease infinite;
+                }
+                @keyframes um-shimmer {
+                    0% { background-position: 100% 50%; }
+                    100% { background-position: 0 50%; }
+                }
+                .userprofiles-page .um-filter-drawer {
+                    display: none;
+                }
 
-            {/* Toast */}
-            {ToastComponent}
+                @media (max-width: 768px) {
+                    .userprofiles-page .um-table-wrap { display: none; }
+                    .userprofiles-page .um-cards { display: block; }
+                    .userprofiles-page .um-filter-toggle { display: inline-flex; }
+                    .userprofiles-page .filter-bar { display: none; }
+                    .userprofiles-page .um-filter-drawer.open {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.6rem;
+                        padding: 1rem;
+                        margin-bottom: 1rem;
+                        border: 1px solid var(--border-color);
+                        border-radius: 12px;
+                        background: var(--hover-bg);
+                    }
+                    .userprofiles-page .um-filter-drawer select {
+                        width: 100%;
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-color: var(--card-bg);
+                        color: var(--text);
+                        border: 1.5px solid var(--border-color);
+                        border-radius: 10px;
+                        padding: 0.7rem 2.25rem 0.7rem 0.9rem;
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 0.85rem center;
+                        background-size: 1.1rem;
+                    }
+                    .userprofiles-page .um-filter-drawer select:focus {
+                        outline: none;
+                        border-color: var(--primary);
+                        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+                    }
+                    .userprofiles-page .um-stats { grid-template-columns: 1fr 1fr; }
+                    .userprofiles-page .um-stats .um-stat-card:last-child { grid-column: 1 / -1; }
+                }
 
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h2 style={{ margin: 0 }}>User Profiles</h2>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        placeholder="Search by name, email..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: '240px', marginBottom: 0 }}
-                    />
-                    <button onClick={handleAdd} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <FaPlus /> Add Profile
-                    </button>
-                </div>
-            </div>
+                @media (min-width: 769px) {
+                    .userprofiles-page .um-filter-drawer { display: none !important; }
+                }
+            `}</style>
 
-            {/* Tabs */}
-            <div className="tabs-scroll">
-                {[['active', 'Active Profiles'], ['trashed', 'Trashed']].map(([key, label]) => (
-                    <button key={key} onClick={() => setActiveTab(key)} style={{
-                        borderBottom: activeTab === key
-                            ? `3px solid ${key === 'trashed' ? '#EF4444' : 'var(--primary)'}`
-                            : '3px solid transparent',
-                        color: activeTab === key
-                            ? (key === 'trashed' ? '#EF4444' : 'var(--primary)')
-                            : 'var(--text-secondary)',
-                    }}>{label}</button>
-                ))}
-            </div>
+            <div className="card">
 
-            {/* Filter row */}
-            <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
-                <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
-                    const [by, dir] = e.target.value.split('-');
-                    setSortBy(by); setSortDir(dir);
-                }} style={{ fontWeight: '500' }}>
-                    <option value="created_at-desc">Sort: Newest</option>
-                    <option value="created_at-asc">Sort: Oldest</option>
-                    <option value="last_active_at-desc">Sort: Last Active</option>
-                    <option value="last_active_at-asc">Sort: Oldest Active</option>
-                    <option value="updated_at-desc">Sort: Last Updated</option>
-                    <option value="name-asc">Sort: Name (A-Z)</option>
-                    <option value="name-desc">Sort: Name (Z-A)</option>
-                </select>
-                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
-                    <option value="all">Gender: All</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
-                <select value={religionFilter} onChange={(e) => setReligionFilter(e.target.value)}>
-                    <option value="all">Religion: All</option>
-                    {religions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                </select>
-                <select value={educationFilter} onChange={(e) => setEducationFilter(e.target.value)}>
-                    <option value="all">Education: All</option>
-                    {educations.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-                </select>
-                <select value={occupationFilter} onChange={(e) => setOccupationFilter(e.target.value)}>
-                    <option value="all">Occupation: All</option>
-                    {occupations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
-                </select>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="all">Status: All</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                </select>
-                <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)}>
-                    <option value="all">Verification: All</option>
-                    <option value="verified">Verified</option>
-                    <option value="pending">Pending</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="not_submitted">Not Submitted</option>
-                </select>
-                <div className="span-full" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <input type="number" placeholder="Age min" value={ageMin} onChange={(e) => setAgeMin(e.target.value)}
-                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>–</span>
-                    <input type="number" placeholder="Age max" value={ageMax} onChange={(e) => setAgeMax(e.target.value)}
-                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
-                </div>
-                {hasFilters && (
-                    <button className="span-full" onClick={clearFilters} style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid #EF4444', background: 'transparent', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem' }}>
-                        Clear
-                    </button>
-                )}
-            </div>
+                {/* Toast */}
+                {ToastComponent}
 
-            {loading ? (
-                <p>Loading...</p>
-            ) : (
-                <>
-                    <div className="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Age / Gender</th>
-                                    <th>Religion</th>
-                                    <th>Location</th>
-                                    <th>Education</th>
-                                    <th>Occupation</th>
-                                    <th>Role</th>
-                                    <th>Created By</th>
-                                    <th>Status / Activity</th>
-                                    <th>Verification</th>
-                                    <th>Block Reason</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {profiles.length === 0 ? (
-                                    <tr><td colSpan="12" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No profiles found</td></tr>
-                                ) : profiles.map((profile) => (
-                                    <tr key={profile.id}>
-                                        <td>
-                                            <UserCell user={profile.user} profile={profile} avatarSize={42} />
-                                        </td>
-                                        <td>
-                                            <div style={{ fontWeight: '600' }}>{getAge(profile.date_of_birth)} yrs</div>
-                                            <div style={{ fontSize: '0.8rem', textTransform: 'capitalize', color: profile.gender === 'male' ? '#60a5fa' : '#f472b6', marginTop: '2px' }}>
-                                                {profile.gender || '—'}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)', display: 'block', width: 'fit-content' }}>
-                                                {profile.religion_model?.name || '-'}
-                                            </span>
-                                            {profile.caste_model?.name && (
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '3px' }}>{profile.caste_model.name}</div>
-                                            )}
-                                            {profile.sub_caste_model?.name && (
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.75, marginTop: '1px' }}>{profile.sub_caste_model.name}</div>
-                                            )}
-                                        </td>
-                                        <td>{[profile.city, profile.state].filter(Boolean).join(', ') || '-'}</td>
-                                        <td>{profile.education_model?.name || '-'}</td>
-                                        <td>{profile.occupation_model?.name || '-'}</td>
-                                        <td>
-                                            <span style={{ textTransform: 'capitalize', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text)' }}>
-                                                {profile.user?.role || '-'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {profile.created_by ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <div style={{ 
-                                                            width: '6px', height: '6px', borderRadius: '50%', 
-                                                            background: profile.created_by?.role === 'admin' ? '#8B5CF6' : (profile.created_by?.role === 'mediator' ? '#F59E0B' : '#3B82F6')
-                                                        }} />
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>
-                                                            {profile.created_by?.role === 'user' ? 'Self' : profile.created_by?.role}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }} title={profile.created_by?.email}>
-                                                        {profile.created_by?.email}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', opacity: 0.6 }}>Legacy (Self)</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <span className={`badge ${profile.is_profile_active ? 'badge-verified' : 'badge-rejected'}`}>
-                                                {profile.is_profile_active ? 'Active' : 'Inactive'}
-                                            </span>
-                                            <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', gap: '4px' }}>
-                                                <span style={{ opacity: 0.7 }}>Activity:</span>
-                                                <TimeFormatCell date={profile.user?.last_active_at} />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {(() => {
-                                                const status = profile.user?.verification?.status;
-                                                const map = { verified: { cls: 'badge-verified', label: 'Verified' }, pending: { cls: 'badge-warning', label: 'Pending' }, rejected: { cls: 'badge-rejected', label: 'Rejected' } };
-                                                const { cls, label } = map[status] || { cls: 'badge-secondary', label: 'Not Submitted' };
-                                                return <span className={`badge ${cls}`}>{label}</span>;
-                                            })()}
-                                        </td>
-                                        <td>
-                                            {profile.user?.status === 'blocked' && (
-                                                <div style={{ maxWidth: '120px', fontSize: '0.75rem', color: '#EF4444', fontStyle: 'italic' }}>
-                                                    {profile.user.block_reason || 'Blocked'}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                                                {activeTab === 'trashed' ? (
-                                                    <>
-                                                        <button onClick={() => handleRestore(profile)} title="Restore"
-                                                            style={{ background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            <FaTrashRestore />
-                                                        </button>
-                                                        <button onClick={() => handleDelete(profile)} title="Permanently Delete"
-                                                            style={{ background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            <FaTrash />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <button onClick={() => handleToggleVerified(profile)} title={profile.is_identity_verified ? 'Mark Unverified' : 'Mark ID Verified'}
-                                                            style={{ background: profile.is_identity_verified ? '#8B5CF6' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            {profile.is_identity_verified ? <FaCheckCircle /> : <FaTimesCircle />}
-                                                        </button>
-                                                        <button onClick={() => handleToggleProfileActive(profile)} title={profile.is_profile_active ? 'Deactivate Profile' : 'Activate Profile'}
-                                                            style={{ background: profile.is_profile_active ? '#10B981' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            {profile.is_profile_active ? <FaEye /> : <FaEyeSlash />}
-                                                        </button>
-                                                        <button onClick={() => handleEdit(profile)} title="Edit"
-                                                            style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            <FaEdit />
-                                                        </button>
-                                                        <button onClick={() => handleToggleBlock(profile)} title={profile.user?.status === 'blocked' ? "Unblock" : "Block"}
-                                                            style={{ background: profile.user?.status === 'blocked' ? '#10B981' : '#F59E0B', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            {profile.user?.status === 'blocked' ? <FaUnlock /> : <FaBan />}
-                                                        </button>
-                                                        <button onClick={() => handleDelete(profile)} title="Trash"
-                                                            style={{ background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                            <FaTrash />
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <div className="um-toolbar">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                            <h2 style={{ margin: 0 }}>User Profiles</h2>
+                            <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                Manage user profiles, verification, and identity across your platform.
+                            </p>
+                        </div>
+                        <button onClick={handleAdd} className="btn btn-primary">
+                            <FaPlus /> Add Profile
+                        </button>
                     </div>
 
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={fetchProfiles}
-                        totalItems={totalItems}
-                        itemsPerPage={15}
-                    />
-                </>
-            )}
+                    {/* Search + filter toggle */}
+                    <div className="um-search-row">
+                        <div className="um-search-wrap">
+                            <FaSearch />
+                            <input
+                                type="text"
+                                placeholder="Search by name, email, matrimony ID..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            className="um-filter-toggle"
+                            onClick={() => setFiltersOpen(o => !o)}
+                        >
+                            {filtersOpen ? <FaTimes /> : <FaFilter />}
+                            Filters
+                            {activeFilterCount > 0 && <span className="um-filter-badge">{activeFilterCount}</span>}
+                            <FaChevronDown style={{ transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </button>
+                    </div>
+
+                    {/* Mobile filter drawer */}
+                    <div className={`um-filter-drawer ${filtersOpen ? 'open' : ''}`}>
+                        {FilterControls}
+                        {activeFilterCount > 0 && (
+                            <button type="button" className="btn btn-secondary" onClick={clearFilters} style={{ justifyContent: 'center' }}>
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="tabs-scroll">
+                        {[['active', 'Active Profiles'], ['trashed', 'Trashed']].map(([key, label]) => (
+                            <button key={key} onClick={() => setActiveTab(key)} style={{
+                                borderBottom: activeTab === key
+                                    ? `3px solid ${key === 'trashed' ? '#EF4444' : 'var(--primary)'}`
+                                    : '3px solid transparent',
+                                color: activeTab === key
+                                    ? (key === 'trashed' ? '#EF4444' : 'var(--primary)')
+                                    : 'var(--text-secondary)',
+                            }}>{label}</button>
+                        ))}
+                    </div>
+
+                    {/* Desktop filter row */}
+                    <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
+                        {FilterControls}
+                        {hasFilters && (
+                            <button type="button" className="btn btn-secondary" onClick={clearFilters} style={{ padding: '0.5rem 0.9rem', fontSize: '0.8rem' }}>
+                                <FaTimes /> Clear
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {loading ? (
+                    <div>
+                        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="um-skel-row" />)}
+                    </div>
+                ) : profiles.length === 0 ? (
+                    <div className="um-empty">
+                        <FaIdCard />
+                        <p style={{ margin: 0, fontWeight: 600 }}>No profiles found</p>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Try adjusting your search or filters.</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Desktop table */}
+                        <div className="um-table-wrap">
+                            <div className="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Age / Gender</th>
+                                            <th>Religion</th>
+                                            <th>Location</th>
+                                            <th>Education</th>
+                                            <th>Occupation</th>
+                                            <th>Role</th>
+                                            <th>Created By</th>
+                                            <th>Status / Activity</th>
+                                            <th>Verification</th>
+                                            <th>Block Reason</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {profiles.map((profile) => (
+                                            <tr key={profile.id}>
+                                                <td>
+                                                    <UserCell user={profile.user} profile={profile} avatarSize={42} />
+                                                </td>
+                                                <td>
+                                                    <div style={{ fontWeight: '600' }}>{getAge(profile.date_of_birth)} yrs</div>
+                                                    <div style={{ fontSize: '0.8rem', textTransform: 'capitalize', color: profile.gender === 'male' ? '#60a5fa' : '#f472b6', marginTop: '2px' }}>
+                                                        {profile.gender || '—'}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="badge" style={{ background: 'var(--hover-bg)', color: 'var(--text-secondary)', display: 'block', width: 'fit-content' }}>
+                                                        {profile.religion_model?.name || '-'}
+                                                    </span>
+                                                    {profile.caste_model?.name && (
+                                                        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '3px' }}>{profile.caste_model.name}</div>
+                                                    )}
+                                                    {profile.sub_caste_model?.name && (
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', opacity: 0.75, marginTop: '1px' }}>{profile.sub_caste_model.name}</div>
+                                                    )}
+                                                </td>
+                                                <td>{[profile.city, profile.state].filter(Boolean).join(', ') || '-'}</td>
+                                                <td>{profile.education_model?.name || '-'}</td>
+                                                <td>{profile.occupation_model?.name || '-'}</td>
+                                                <td>
+                                                    <span style={{ textTransform: 'capitalize', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text)' }}>
+                                                        {profile.user?.role || '-'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {profile.created_by ? (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <div style={{ 
+                                                                    width: '6px', height: '6px', borderRadius: '50%', 
+                                                                    background: profile.created_by?.role === 'admin' ? '#8B5CF6' : (profile.created_by?.role === 'mediator' ? '#F59E0B' : '#3B82F6')
+                                                                }} />
+                                                                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>
+                                                                    {profile.created_by?.role === 'user' ? 'Self' : profile.created_by?.role}
+                                                                </span>
+                                                            </div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }} title={profile.created_by?.email}>
+                                                                {profile.created_by?.email}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', opacity: 0.6 }}>Legacy (Self)</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <span className={`badge ${profile.is_profile_active ? 'badge-verified' : 'badge-rejected'}`}>
+                                                        {profile.is_profile_active ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                    <div style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', gap: '4px' }}>
+                                                        <span style={{ opacity: 0.7 }}>Activity:</span>
+                                                        <TimeFormatCell date={profile.user?.last_active_at} />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {(() => {
+                                                        const status = profile.user?.verification?.status;
+                                                        const map = { verified: { cls: 'badge-verified', label: 'Verified' }, pending: { cls: 'badge-warning', label: 'Pending' }, rejected: { cls: 'badge-rejected', label: 'Rejected' } };
+                                                        const { cls, label } = map[status] || { cls: 'badge-secondary', label: 'Not Submitted' };
+                                                        return <span className={`badge ${cls}`}>{label}</span>;
+                                                    })()}
+                                                </td>
+                                                <td>
+                                                    {profile.user?.status === 'blocked' && (
+                                                        <div style={{ maxWidth: '120px', fontSize: '0.75rem', color: '#EF4444', fontStyle: 'italic' }}>
+                                                            {profile.user.block_reason || 'Blocked'}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                                        {activeTab === 'trashed' ? (
+                                                            <>
+                                                                <button onClick={() => handleRestore(profile)} title="Restore"
+                                                                    className="btn btn-success" style={{ padding: '0.35rem 0.6rem' }}>
+                                                                    <FaTrashRestore />
+                                                                </button>
+                                                                <button onClick={() => handleDelete(profile)} title="Permanently Delete"
+                                                                    className="btn btn-danger" style={{ padding: '0.35rem 0.6rem' }}>
+                                                                    <FaTrash />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={() => handleToggleVerified(profile)} title={profile.is_identity_verified ? 'Mark Unverified' : 'Mark ID Verified'}
+                                                                    style={{ background: profile.is_identity_verified ? '#8B5CF6' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                                    {profile.is_identity_verified ? <FaCheckCircle /> : <FaTimesCircle />}
+                                                                </button>
+                                                                <button onClick={() => handleToggleProfileActive(profile)} title={profile.is_profile_active ? 'Deactivate Profile' : 'Activate Profile'}
+                                                                    style={{ background: profile.is_profile_active ? '#10B981' : '#6B7280', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                                    {profile.is_profile_active ? <FaEye /> : <FaEyeSlash />}
+                                                                </button>
+                                                                <button onClick={() => handleEdit(profile)} title="Edit"
+                                                                    className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem' }}>
+                                                                    <FaEdit />
+                                                                </button>
+                                                                <button onClick={() => handleToggleBlock(profile)} title={profile.user?.status === 'blocked' ? "Unblock" : "Block"}
+                                                                    style={{ background: profile.user?.status === 'blocked' ? '#10B981' : '#F59E0B', color: 'white', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                                    {profile.user?.status === 'blocked' ? <FaUnlock /> : <FaBan />}
+                                                                </button>
+                                                                <button onClick={() => handleDelete(profile)} title="Trash"
+                                                                    className="btn btn-danger" style={{ padding: '0.35rem 0.6rem' }}>
+                                                                    <FaTrash />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Mobile cards */}
+                        <div className="um-cards">
+                            {profiles.map((profile) => (
+                                <div className="um-card" key={profile.id}>
+                                    <div className="um-card-top">
+                                        <UserCell user={profile.user} profile={profile} avatarSize={42} />
+                                        <span className={`badge ${profile.is_profile_active ? 'badge-verified' : 'badge-rejected'}`}>
+                                            {profile.is_profile_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    <dl className="um-card-grid">
+                                        <div>
+                                            <dt>Age / Gender</dt>
+                                            <dd>{getAge(profile.date_of_birth)} yrs, {profile.gender || '—'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Religion</dt>
+                                            <dd>{profile.religion_model?.name || '-'}{profile.caste_model?.name ? ` / ${profile.caste_model.name}` : ''}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Location</dt>
+                                            <dd>{[profile.city, profile.state].filter(Boolean).join(', ') || '-'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Education</dt>
+                                            <dd>{profile.education_model?.name || '-'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Occupation</dt>
+                                            <dd>{profile.occupation_model?.name || '-'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Role</dt>
+                                            <dd style={{ textTransform: 'capitalize' }}>{profile.user?.role || '-'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Verification</dt>
+                                            <dd>
+                                                {(() => {
+                                                    const status = profile.user?.verification?.status;
+                                                    const map = { verified: { cls: 'badge-verified', label: 'Verified' }, pending: { cls: 'badge-warning', label: 'Pending' }, rejected: { cls: 'badge-rejected', label: 'Rejected' } };
+                                                    const { cls, label } = map[status] || { cls: 'badge-secondary', label: 'Not Submitted' };
+                                                    return <span className={`badge ${cls}`} style={{ fontSize: '0.7rem' }}>{label}</span>;
+                                                })()}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>Last Active</dt>
+                                            <dd><TimeFormatCell date={profile.user?.last_active_at} /></dd>
+                                        </div>
+                                        {profile.user?.status === 'blocked' && (
+                                            <div>
+                                                <dt>Block Reason</dt>
+                                                <dd style={{ color: '#EF4444', fontStyle: 'italic' }}>{profile.user.block_reason || 'Blocked'}</dd>
+                                            </div>
+                                        )}
+                                    </dl>
+                                    <div className="um-card-actions">
+                                        {activeTab === 'trashed' ? (
+                                            <>
+                                                <button onClick={() => handleRestore(profile)} className="btn btn-success" title="Restore">
+                                                    <FaTrashRestore /> Restore
+                                                </button>
+                                                <button onClick={() => handleDelete(profile)} className="btn btn-danger" title="Permanently Delete">
+                                                    <FaTrash /> Delete
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => handleEdit(profile)} className="btn btn-secondary" title="Edit">
+                                                    <FaEdit /> Edit
+                                                </button>
+                                                <button onClick={() => handleToggleVerified(profile)}
+                                                    className={`btn ${profile.is_identity_verified ? 'btn-primary' : 'btn-secondary'}`}
+                                                    title={profile.is_identity_verified ? 'Mark Unverified' : 'Mark ID Verified'}>
+                                                    {profile.is_identity_verified ? <FaCheckCircle /> : <FaTimesCircle />} {profile.is_identity_verified ? 'Verified' : 'Verify'}
+                                                </button>
+                                                <button onClick={() => handleToggleProfileActive(profile)}
+                                                    className={`btn ${profile.is_profile_active ? 'btn-success' : 'btn-secondary'}`}
+                                                    title={profile.is_profile_active ? 'Deactivate Profile' : 'Activate Profile'}>
+                                                    {profile.is_profile_active ? <FaEye /> : <FaEyeSlash />} {profile.is_profile_active ? 'Active' : 'Inactive'}
+                                                </button>
+                                                <button onClick={() => handleToggleBlock(profile)}
+                                                    className={`btn ${profile.user?.status === 'blocked' ? 'btn-success' : 'btn-warning'}`}
+                                                    title={profile.user?.status === 'blocked' ? "Unblock" : "Block"}>
+                                                    {profile.user?.status === 'blocked' ? <FaUnlock /> : <FaBan />} {profile.user?.status === 'blocked' ? 'Unblock' : 'Block'}
+                                                </button>
+                                                <button onClick={() => handleDelete(profile)} className="btn btn-danger" title="Trash">
+                                                    <FaTrash /> Delete
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={fetchProfiles}
+                            totalItems={totalItems}
+                            itemsPerPage={15}
+                        />
+                    </>
+                )}
+            </div>
 
             <ConfirmModal
                 isOpen={confirm.open}
