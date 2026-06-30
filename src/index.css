@@ -487,91 +487,263 @@ input:focus+.slider {
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* ── User Management responsive tabs & filters ── */
-.filter-container {
+/* ── Responsive filter bars (rows of select/input filters) ── */
+.filter-bar {
   display: flex;
   gap: 0.6rem;
   align-items: center;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
   flex-wrap: wrap;
 }
 
-.filter-container select {
+.filter-bar select,
+.filter-bar input[type="text"],
+.filter-bar input[type="search"] {
   padding: 0.35rem 2rem 0.35rem 0.65rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   background: var(--card-bg);
   color: var(--text-primary);
-  cursor: pointer;
   font-size: 0.85rem;
   width: auto;
   flex: 0 1 auto;
+  box-sizing: border-box;
+}
+
+.filter-bar input[type="text"],
+.filter-bar input[type="search"] {
+  padding: 0.4rem 0.65rem;
+  max-width: 220px;
 }
 
 @media (max-width: 768px) {
-  .filter-container {
+  .filter-bar {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
-  }
-  .filter-container select {
     width: 100%;
+  }
+  .filter-bar select,
+  .filter-bar input[type="text"],
+  .filter-bar input[type="search"] {
+    width: 100%;
+    max-width: 100%;
     font-size: 0.8rem;
     padding: 0.4rem 1.8rem 0.4rem 0.55rem;
   }
-  .filter-container .sort-select {
+  .filter-bar input[type="text"],
+  .filter-bar input[type="search"] {
+    padding: 0.4rem 0.55rem;
+  }
+  .filter-bar .span-full {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 480px) {
-  .filter-container {
+  .filter-bar {
     grid-template-columns: 1fr;
   }
 }
 
-/* Responsive tabs */
-.tabs-container {
+/* ── Responsive tab navigation (horizontal scroll on mobile) ── */
+.tabs-scroll {
   display: flex;
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 1rem;
+  gap: 0;
 }
 
-.tabs-container button {
+.tabs-scroll button {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0.6rem 1rem;
+  padding: 0.55rem 1rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   transition: all 0.2s;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.tabs-scroll button:hover {
+  color: var(--text);
 }
 
 @media (max-width: 768px) {
-  .tabs-container {
-    flex-wrap: nowrap;
+  .tabs-scroll {
     overflow-x: auto;
+    flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    gap: 0;
   }
-  .tabs-container::-webkit-scrollbar {
+  .tabs-scroll::-webkit-scrollbar {
     display: none;
   }
-  .tabs-container button {
-    padding: 0.5rem 0.75rem;
+  .tabs-scroll button {
+    padding: 0.45rem 0.7rem;
     font-size: 0.82rem;
-    flex-shrink: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .tabs-container button {
-    padding: 0.45rem 0.6rem;
+  .tabs-scroll button {
+    padding: 0.4rem 0.55rem;
     font-size: 0.78rem;
+  }
+}
+
+/* ── Responsive modal / detail view utilities ── */
+.modal-overlay {
+  padding: 1.5rem;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1rem !important;
+  }
+  .modal-content {
+    border-radius: 0.75rem;
+  }
+  .modal-content > div:first-child {
+    padding: 0.75rem 1rem !important;
+  }
+  .modal-content > div:last-child {
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-info-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .id-image-container {
+    height: 200px !important;
+  }
+}
+.responsive-detail,
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-detail {
+    grid-template-columns: 1fr !important;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-group-end {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .btn-group-end {
+    flex-direction: column;
+  }
+  .btn-group-end .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* ── Suggestions responsive ── */
+.page-content {
+  overflow-x: hidden;
+}
+
+.stats-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .stats-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid-5 {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid-5 .card {
+    padding: 0.9rem 1rem !important;
+  }
+}
+
+/* ── Suggestions modal responsive ── */
+.suggestion-form .status-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .suggestion-form {
+    padding: 1rem !important;
+  }
+  .suggestion-form .status-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .suggestion-form .upload-row {
+    flex-wrap: wrap;
+  }
+  .suggestion-form .modal-actions {
+    flex-direction: column;
+  }
+  .suggestion-form .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Profile Verification responsive ── */
+@media (max-width: 768px) {
+  .pv-modal-body {
+    padding: 1rem !important;
+  }
+}
+
+/* ── Photo Verification modal responsive ── */
+@media (max-width: 768px) {
+  .pv-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .pv-detail-grid > div:last-child {
+    max-width: 100% !important;
+  }
+  .pv-photo-grid {
+    max-height: none !important;
+    padding-right: 0 !important;
+  }
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

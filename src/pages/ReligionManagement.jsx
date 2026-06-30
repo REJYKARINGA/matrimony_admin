@@ -257,13 +257,7 @@ export default function ReligionManagement() {
             </div>
 
             {/* Tabs */}
-            <div style={{
-                display: 'flex',
-                gap: '1rem',
-                marginBottom: '1.5rem',
-                borderBottom: '2px solid var(--border-color)',
-                flexWrap: 'wrap'
-            }}>
+            <div className="tabs-scroll" style={{ gap: '1rem', borderBottomWidth: '2px' }}>
                 {['religions', 'castes', 'subcastes'].map(tab => (
                     <button
                         key={tab}

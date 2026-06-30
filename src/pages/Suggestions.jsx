@@ -71,12 +71,12 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
     const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
 
     const modal = (
-        <div style={{
+        <div className="modal-overlay" style={{
             position: 'fixed', inset: 0, zIndex: 999999,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
         }}>
-            <div style={{
+            <div className="modal-content" style={{
                 background: 'var(--card-bg)', borderRadius: '20px', width: '100%', maxWidth: '560px',
                 boxShadow: '0 24px 64px rgba(0,0,0,0.4)', border: '1px solid var(--border-color)',
                 animation: 'modalSlideUp 0.3s ease',
@@ -95,7 +95,7 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
                     <button onClick={onClose} className="icon-btn" style={{ width: 32, height: 32 }}><LuX size={16} /></button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ padding: '1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <form onSubmit={handleSubmit} className="suggestion-form" style={{ padding: '1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     {/* Feature request preview */}
                     <div style={{ background: 'var(--hover-bg)', borderRadius: 12, padding: '1rem', border: '1px solid var(--border-color)' }}>
                         <p style={{ margin: '0 0 6px', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Feature Request</p>
@@ -113,7 +113,7 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
                     {/* Implementation Status */}
                     <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Implementation Status</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                        <div className="status-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                             {Object.entries(STATUS_CONFIG).map(([key, val]) => (
                                 <label key={key} style={{
                                     display: 'flex', alignItems: 'center', gap: '8px',
@@ -149,7 +149,7 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
                     {/* Developer Photo Upload */}
                     <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Attach Screenshot/Mockup (Optional)</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="upload-row" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <label style={{ 
                                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                                 padding: '0.45rem 0.85rem', background: 'var(--hover-bg)', 
@@ -194,7 +194,7 @@ function ReviewModal({ suggestion, onClose, onSaved }) {
 
                     {error && <p style={{ margin: 0, color: '#EF4444', fontSize: '0.82rem' }}>{error}</p>}
 
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                    <div className="modal-actions" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
                         <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                         <button type="submit" className="btn btn-primary" disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <LuRocket size={14} /> {saving ? 'Saving...' : 'Update Status'}
@@ -290,7 +290,7 @@ export default function Suggestions() {
             </div>
 
             {/* Stats Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="stats-grid-5" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
                 {statCards.map(card => (
                     <div
                         key={card.label}
@@ -315,26 +315,25 @@ export default function Suggestions() {
             </div>
 
             {/* Toolbar */}
-            <div className="card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <div style={{ position: 'relative', flex: '1 1 240px' }}>
+            <div className="card filter-bar" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', gap: '0.75rem', border: '1px solid var(--border-color)' }}>
+                <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 0 }}>
                     <LuSearch size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input
                         type="text"
-                        className="form-control"
                         placeholder="Search by feature title, user name, email..."
                         value={search}
                         onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        style={{ paddingLeft: '2.25rem', margin: 0 }}
+                        style={{ paddingLeft: '2.25rem', margin: 0, width: '100%', boxSizing: 'border-box' }}
                     />
                 </div>
-                <select className="form-control" style={{ width: 'auto', margin: 0 }} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+                <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
                     <option value="all">All Statuses</option>
                     <option value="pending">Under Review</option>
                     <option value="in_progress">In Development</option>
                     <option value="completed">Shipped</option>
                     <option value="rejected">Declined</option>
                 </select>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginLeft: 'auto' }}>{total} request{total !== 1 ? 's' : ''}</span>
+                <span className="span-full" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'right' }}>{total} request{total !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Feature Requests Table */}

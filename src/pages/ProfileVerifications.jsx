@@ -382,9 +382,9 @@ const ProfileVerifications = () => {
     return (
         <div style={{ padding: '20px' }}>
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h2 style={{ margin: 0 }}>Profile Verifications</h2>
-                    <div className="search-box" style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none' }}>
                         <select
                             value={`${sortBy}-${sortDir}`}
                             onChange={(e) => {
@@ -392,17 +392,7 @@ const ProfileVerifications = () => {
                                 setSortBy(by);
                                 setSortDir(dir);
                             }}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--card-bg)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                fontSize: '0.875rem',
-                                cursor: 'pointer',
-                                fontWeight: '500'
-                            }}
+                            style={{ fontWeight: '500' }}
                         >
                             <option value="updated_at-desc">Sort: New Requests</option>
                             <option value="name-asc">Sort: Name (A-Z)</option>
@@ -416,14 +406,7 @@ const ProfileVerifications = () => {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                minWidth: '350px',
-                                outline: 'none',
-                                fontSize: '0.875rem'
-                            }}
+                            style={{ minWidth: '200px', maxWidth: '260px' }}
                         />
                     </div>
                 </div>
@@ -590,11 +573,11 @@ const ProfileVerifications = () => {
 
             {/* Modal */}
             {selectedProfile && (
-                <div 
+                <div className="modal-overlay"
                     style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
                     onClick={() => !isProcessing && setSelectedProfile(null)}
                 >
-                    <div 
+                    <div className="modal-content"
                         style={{ background: 'var(--card-bg)', width: '100%', maxWidth: '850px', borderRadius: '1.5rem', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
                         onClick={e => e.stopPropagation()}
                     >
@@ -605,8 +588,8 @@ const ProfileVerifications = () => {
                             </button>
                         </div>
 
-                        <div style={{ padding: '2rem', overflowY: 'auto' }}>
-                            <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
+                        <div className="pv-modal-body" style={{ padding: '2rem', overflowY: 'auto' }}>
+                            <div className="profile-info-row" style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
                                 <UserCell user={selectedProfile.user} profile={selectedProfile} avatarSize={100} />
                                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                     <p style={{ margin: 0, color: 'var(--primary)', fontWeight: 'bold' }}>{selectedProfile.user?.matrimony_id}</p>
@@ -697,7 +680,7 @@ const ProfileVerifications = () => {
                             </div>
                         </div>
 
-                        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '1rem' }}>
+                        <div className="btn-group-end" style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border-color)', margin: 0 }}>
                             <button 
                                 className="btn btn-success" 
                                 style={{ flex: 1, padding: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}

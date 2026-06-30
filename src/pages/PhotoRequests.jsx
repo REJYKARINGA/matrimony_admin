@@ -79,8 +79,8 @@ export default function PhotoRequests() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <div style={{ position: 'relative' }}>
+                <div className="filter-bar" style={{ gap: '0.75rem' }}>
+                    <div style={{ position: 'relative', flex: '1 1 auto' }}>
                         <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.9rem' }} />
                         <input
                             type="text"
@@ -88,15 +88,15 @@ export default function PhotoRequests() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ 
-                                width: '260px', paddingLeft: '2.5rem', marginBottom: 0,
-                                borderRadius: '10px', height: '42px'
+                                paddingLeft: '2.5rem', marginBottom: 0,
+                                borderRadius: '10px', height: '42px', maxWidth: '260px'
                             }}
                         />
                     </div>
                     <select 
                         value={statusFilter} 
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{ ...SELECT_STYLE, height: '42px', minWidth: '140px' }}
+                        style={{ height: '42px', minWidth: '140px' }}
                     >
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>

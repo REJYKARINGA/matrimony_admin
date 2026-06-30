@@ -200,9 +200,37 @@ export default function PhotoVerifications() {
     return (
         <div style={{ padding: '20px' }}>
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 style={{ margin: 0 }}>Photo Verifications</h2>
-                    <div className="search-box" style={{ display: 'flex', gap: '0.75rem' }}>
+                <h2 style={{ margin: 0, marginBottom: '1.5rem' }}>Photo Verifications</h2>
+
+                {/* Tabs + Filters */}
+                <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem'
+                }}>
+                    <div className="tabs-scroll" style={{ gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: 0, flex: '1 1 auto' }}>
+                        <button 
+                            style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('pending')}
+                        >
+                            <FaHourglassHalf style={{ marginRight: '0.5rem' }} />
+                            Pending Requests
+                        </button>
+                        <button 
+                            style={activeTab === 'verified' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('verified')}
+                        >
+                            <FaUserCheck style={{ marginRight: '0.5rem' }} />
+                            Verified
+                        </button>
+                        <button 
+                            style={activeTab === 'rejected' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('rejected')}
+                        >
+                            <FaUserTimes style={{ marginRight: '0.5rem' }} />
+                            Rejected
+                        </button>
+                    </div>
+                    <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none', flexShrink: 0 }}>
                         <select
                             value={`${sortBy}-${sortDir}`}
                             onChange={(e) => {
@@ -210,17 +238,7 @@ export default function PhotoVerifications() {
                                 setSortBy(by);
                                 setSortDir(dir);
                             }}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--card-bg)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                fontSize: '0.875rem',
-                                cursor: 'pointer',
-                                fontWeight: '500'
-                            }}
+                            style={{ fontWeight: '500' }}
                         >
                             <option value="created_at-desc">Sort: Newest</option>
                             <option value="created_at-asc">Sort: Oldest</option>
@@ -232,41 +250,9 @@ export default function PhotoVerifications() {
                             placeholder="Search by name, email, matrimony ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                minWidth: '300px',
-                                outline: 'none',
-                                fontSize: '0.875rem'
-                            }}
+                            style={{ minWidth: '180px', maxWidth: '260px' }}
                         />
                     </div>
-                </div>
-
-                {/* Tabs */}
-                <div style={tabContainerStyle}>
-                    <button 
-                        style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('pending')}
-                    >
-                        <FaHourglassHalf style={{ marginRight: '0.5rem' }} />
-                        Pending Requests
-                    </button>
-                    <button 
-                        style={activeTab === 'verified' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('verified')}
-                    >
-                        <FaUserCheck style={{ marginRight: '0.5rem' }} />
-                        Verified
-                    </button>
-                    <button 
-                        style={activeTab === 'rejected' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('rejected')}
-                    >
-                        <FaUserTimes style={{ marginRight: '0.5rem' }} />
-                        Rejected
-                    </button>
                 </div>
 
                 {loading ? (
@@ -327,8 +313,8 @@ export default function PhotoVerifications() {
 
             {/* Photo Detail Modal */}
             {selectedUser && (
-                <div style={modalOverlayStyle} onClick={() => !isBulkProcessing && setSelectedUser(null)}>
-                    <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
+                <div className="modal-overlay" style={modalOverlayStyle} onClick={() => !isBulkProcessing && setSelectedUser(null)}>
+                    <div className="modal-content" style={modalContentStyle} onClick={e => e.stopPropagation()}>
                         <div style={modalHeaderStyle}>
                             <h3 style={{ margin: 0 }}>Review User Photos - {selectedUser.user_profile?.first_name}</h3>
                             <button 
@@ -341,14 +327,14 @@ export default function PhotoVerifications() {
                         </div>
                         
                         <div style={modalBodyStyle}>
-                            <div style={{ 
+                            <div className="pv-detail-grid" style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: selectedUser.profile_photos?.length === 1 ? 'minmax(300px, 450px) 1fr' : '1fr 300px', 
                                 gap: '2rem',
                                 justifyContent: 'start'
                             }}>
                                 {/* Left Side: Photo List */}
-                                <div style={{ 
+                                <div className="pv-photo-grid" style={{ 
                                     display: 'grid', 
                                     gridTemplateColumns: selectedUser.profile_photos?.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(220px, 1fr))', 
                                     gap: '1.5rem', 
@@ -507,7 +493,7 @@ export default function PhotoVerifications() {
                                             <p style={{ margin: '0 0 1rem 0', fontSize: '0.8rem', color: 'var(--primary)' }}>
                                                 Use these to verify identity
                                             </p>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                                            <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                                                 {selectedUser.approved_profile_photos.map(photo => (
                                                     <div key={photo.id} style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
                                                         <img 

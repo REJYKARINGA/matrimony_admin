@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal';
@@ -605,21 +606,20 @@ export default function Festivals() {
             </div>
 
             {/* Create/Edit Modal */}
-            <AnimatePresence>
-                {showForm && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-                        onClick={() => setShowForm(false)}
+            {showForm && createPortal(
+                <motion.div
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                    onClick={() => setShowForm(false)}
+                >
+                    <motion.div
+                        style={{ background: 'var(--card-bg)', borderRadius: '20px', padding: '2rem', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto', border: '1px solid var(--border-color)' }}
+                        onClick={e => e.stopPropagation()}
                     >
-                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                            style={{ background: 'var(--card-bg)', borderRadius: '20px', padding: '2rem', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto', border: '1px solid var(--border-color)' }}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <h2 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <FaGift style={{ color: '#10B981' }} /> {editing ? 'Edit Festival' : 'New Festival'}
-                            </h2>
+                    <h2 style={{ margin: '0 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <FaGift style={{ color: '#10B981' }} /> {editing ? 'Edit Festival' : 'New Festival'}
+                    </h2>
 
-                            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.35rem' }}>Celebration Name *</label>
                                     <input className="form-control" required value={formData.celebration_name}
@@ -743,9 +743,9 @@ export default function Festivals() {
                                 </div>
                             </form>
                         </motion.div>
-                    </motion.div>
+                    </motion.div>,
+                    document.body
                 )}
-            </AnimatePresence>
 
             <ConfirmModal
                 isOpen={confirmModal.isOpen}

@@ -566,28 +566,25 @@ export default function UserProfiles() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+            <div className="tabs-scroll">
                 {[['active', 'Active Profiles'], ['trashed', 'Trashed']].map(([key, label]) => (
                     <button key={key} onClick={() => setActiveTab(key)} style={{
-                        background: 'transparent', border: 'none', cursor: 'pointer',
-                        padding: '0.6rem 1rem', fontWeight: '600', fontSize: '0.95rem',
                         borderBottom: activeTab === key
                             ? `3px solid ${key === 'trashed' ? '#EF4444' : 'var(--primary)'}`
                             : '3px solid transparent',
                         color: activeTab === key
                             ? (key === 'trashed' ? '#EF4444' : 'var(--primary)')
                             : 'var(--text-secondary)',
-                        transition: 'all 0.2s'
                     }}>{label}</button>
                 ))}
             </div>
 
             {/* Filter row */}
-            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+            <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
                 <select value={`${sortBy}-${sortDir}`} onChange={(e) => {
                     const [by, dir] = e.target.value.split('-');
                     setSortBy(by); setSortDir(dir);
-                }} style={{ ...SELECT_STYLE, fontWeight: '500' }}>
+                }} style={{ fontWeight: '500' }}>
                     <option value="created_at-desc">Sort: Newest</option>
                     <option value="created_at-asc">Sort: Oldest</option>
                     <option value="last_active_at-desc">Sort: Last Active</option>
@@ -596,44 +593,44 @@ export default function UserProfiles() {
                     <option value="name-asc">Sort: Name (A-Z)</option>
                     <option value="name-desc">Sort: Name (Z-A)</option>
                 </select>
-                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
                     <option value="all">Gender: All</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                 </select>
-                <select value={religionFilter} onChange={(e) => setReligionFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={religionFilter} onChange={(e) => setReligionFilter(e.target.value)}>
                     <option value="all">Religion: All</option>
                     {religions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                 </select>
-                <select value={educationFilter} onChange={(e) => setEducationFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={educationFilter} onChange={(e) => setEducationFilter(e.target.value)}>
                     <option value="all">Education: All</option>
                     {educations.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                 </select>
-                <select value={occupationFilter} onChange={(e) => setOccupationFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={occupationFilter} onChange={(e) => setOccupationFilter(e.target.value)}>
                     <option value="all">Occupation: All</option>
                     {occupations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                 </select>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                     <option value="all">Status: All</option>
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                 </select>
-                <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)} style={SELECT_STYLE}>
+                <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)}>
                     <option value="all">Verification: All</option>
                     <option value="verified">Verified</option>
                     <option value="pending">Pending</option>
                     <option value="rejected">Rejected</option>
                     <option value="not_submitted">Not Submitted</option>
                 </select>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div className="span-full" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <input type="number" placeholder="Age min" value={ageMin} onChange={(e) => setAgeMin(e.target.value)}
-                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0 }} />
+                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>–</span>
                     <input type="number" placeholder="Age max" value={ageMax} onChange={(e) => setAgeMax(e.target.value)}
-                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0 }} />
+                        style={{ width: '75px', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontSize: '0.85rem', marginBottom: 0, maxWidth: '100%', boxSizing: 'border-box' }} />
                 </div>
                 {hasFilters && (
-                    <button onClick={clearFilters} style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid #EF4444', background: 'transparent', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem', flexShrink: 0 }}>
+                    <button className="span-full" onClick={clearFilters} style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid #EF4444', background: 'transparent', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem' }}>
                         Clear
                     </button>
                 )}

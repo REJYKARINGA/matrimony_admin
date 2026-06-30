@@ -156,12 +156,34 @@ export default function Reports() {
 
     return (
         <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                    <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>User Reports</h2>
-                    <p style={{ margin: 0, opacity: 0.6, fontSize: '0.9rem' }}>Manage and review community reports</p>
+            <div>
+                <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>User Reports</h2>
+                <p style={{ margin: '0 0 1rem', opacity: 0.6, fontSize: '0.9rem' }}>Manage and review community reports</p>
+            </div>
+
+            {/* Tabs + Filters */}
+            <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem'
+            }}>
+                <div className="tabs-scroll" style={{ gap: '0', marginBottom: 0, flex: '1 1 auto' }}>
+                    {['all', 'pending', 'resolved'].map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            style={{
+                                color: statusFilter === status ? 'var(--primary)' : 'inherit',
+                                fontWeight: statusFilter === status ? '700' : '400',
+                                borderBottom: statusFilter === status ? '2px solid var(--primary)' : 'none',
+                                textTransform: 'capitalize',
+                                opacity: statusFilter === status ? 1 : 0.6
+                            }}
+                        >
+                            {status}
+                        </button>
+                    ))}
                 </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none', flexShrink: 0 }}>
                     <select
                         value={`${sortBy}-${sortDir}`}
                         onChange={(e) => {
@@ -169,18 +191,7 @@ export default function Reports() {
                             setSortBy(by);
                             setSortDir(dir);
                         }}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.25rem',
-                            border: '1px solid var(--border-color)',
-                            background: 'var(--card-bg)',
-                            color: 'var(--text-primary)',
-                            outline: 'none',
-                            fontSize: '0.875rem',
-                            cursor: 'pointer',
-                            fontWeight: '500',
-                            height: '35px'
-                        }}
+                        style={{ fontWeight: '500' }}
                     >
                         <option value="created_at-desc">Sort: Newest</option>
                         <option value="created_at-asc">Sort: Oldest</option>
@@ -188,70 +199,26 @@ export default function Reports() {
                         <option value="name-asc">Sort: Reporter Name (A-Z)</option>
                         <option value="name-desc">Sort: Reporter Name (Z-A)</option>
                     </select>
-                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ position: 'relative' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Search Reporter..." 
-                                className="form-control"
-                                list="reporter-list"
-                                value={reporterSearch}
-                                onChange={(e) => setReporterSearch(e.target.value)}
-                                style={{ width: '180px', fontSize: '0.85rem' }}
-                            />
-                            <datalist id="reporter-list">
-                                {participants.reporters?.map(p => (
-                                    <option key={p.id} value={p.matrimony_id}>
-                                        {p.user_profile?.first_name} {p.user_profile?.last_name}
-                                    </option>
-                                ))}
-                            </datalist>
-                        </div>
-                        <div style={{ position: 'relative' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Search Reported..." 
-                                className="form-control"
-                                list="reported-list"
-                                value={reportedSearch}
-                                onChange={(e) => setReportedSearch(e.target.value)}
-                                style={{ width: '180px', fontSize: '0.85rem' }}
-                            />
-                            <datalist id="reported-list">
-                                {participants.reported?.map(p => (
-                                    <option key={p.id} value={p.matrimony_id}>
-                                        {p.user_profile?.first_name} {p.user_profile?.last_name}
-                                    </option>
-                                ))}
-                            </datalist>
-                        </div>
-                        <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>Search</button>
-                    </form>
+                    <input type="text" placeholder="Search Reporter..." list="reporter-list"
+                        value={reporterSearch} onChange={(e) => setReporterSearch(e.target.value)} />
+                    <datalist id="reporter-list">
+                        {participants.reporters?.map(p => (
+                            <option key={p.id} value={p.matrimony_id}>
+                                {p.user_profile?.first_name} {p.user_profile?.last_name}
+                            </option>
+                        ))}
+                    </datalist>
+                    <input type="text" placeholder="Search Reported..." list="reported-list"
+                        value={reportedSearch} onChange={(e) => setReportedSearch(e.target.value)} />
+                    <datalist id="reported-list">
+                        {participants.reported?.map(p => (
+                            <option key={p.id} value={p.matrimony_id}>
+                                {p.user_profile?.first_name} {p.user_profile?.last_name}
+                            </option>
+                        ))}
+                    </datalist>
+                    <button onClick={handleSearch} className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>Search</button>
                 </div>
-            </div>
-
-            {/* Filter Tabs */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                {['all', 'pending', 'resolved'].map((status) => (
-                    <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: '0.5rem 1rem',
-                            cursor: 'pointer',
-                            color: statusFilter === status ? 'var(--primary)' : 'inherit',
-                            fontWeight: statusFilter === status ? '700' : '400',
-                            borderBottom: statusFilter === status ? '2px solid var(--primary)' : 'none',
-                            textTransform: 'capitalize',
-                            fontSize: '0.9rem',
-                            opacity: statusFilter === status ? 1 : 0.6
-                        }}
-                    >
-                        {status}
-                    </button>
-                ))}
             </div>
 
             {loading ? (

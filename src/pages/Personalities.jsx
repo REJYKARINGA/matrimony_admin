@@ -173,7 +173,7 @@ export default function Personalities() {
                     <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)' }}>
                         <FaSmile /> Personality Traits
                     </h1>
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <div className="tabs-scroll" style={{ gap: '1rem', marginTop: '1rem' }}>
                         <button 
                             onClick={() => setActiveTab('personalities')}
                             style={{

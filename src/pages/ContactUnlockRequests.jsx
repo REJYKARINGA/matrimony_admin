@@ -86,17 +86,16 @@ export default function ContactUnlockRequests() {
                 </p>
             </motion.div>
 
-            <div style={{
+            <div className="filter-bar" style={{
                 background: 'var(--card-bg)', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem',
-                border: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'
+                border: '1px solid var(--border-color)'
             }}>
-                <div style={{ position: 'relative', flex: '1 1 250px' }}>
+                <div style={{ position: 'relative', flex: '1 1 250px', minWidth: 0 }}>
                     <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input type="text" placeholder="Search by name, matrimony ID or email..." value={search}
-                        onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: '40px', width: '100%', marginBottom: 0 }} />
+                        onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: '40px', width: '100%', marginBottom: 0, boxSizing: 'border-box' }} />
                 </div>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                    style={{ width: 'auto', minWidth: '140px', marginBottom: 0 }}>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ minWidth: '140px' }}>
                     <option value="">All Status</option>
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>

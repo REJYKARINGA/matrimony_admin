@@ -313,8 +313,8 @@ export default function WalletTransactions() {
             >
                 <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Transaction History</h2>
                 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ position: 'relative' }}>
+                <div className="filter-bar" style={{ gap: '1rem' }}>
+                    <div style={{ position: 'relative', flex: '1 1 auto' }}>
                         <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                         <input
                             type="text"
@@ -323,8 +323,7 @@ export default function WalletTransactions() {
                             onChange={(e) => setSearch(e.target.value)}
                             style={{ 
                                 paddingLeft: '40px',
-                                width: '250px',
-                                marginBottom: 0,
+                                marginBottom: 0, maxWidth: '250px',
                                 background: 'var(--card-bg)',
                                 border: '1px solid var(--border-color)'
                             }}
@@ -334,14 +333,6 @@ export default function WalletTransactions() {
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        style={{ 
-                            padding: '0.75rem 1rem',
-                            background: 'var(--card-bg)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '0.5rem',
-                            color: 'var(--text)',
-                            cursor: 'pointer'
-                        }}
                     >
                         <option value="all">All Transactions</option>
                         <option value="wallet_recharge">Recharge</option>

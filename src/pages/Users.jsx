@@ -179,7 +179,7 @@ export default function Users() {
                 </div>
 
                 {/* Tabs */}
-                <div className="tabs-container">
+                <div className="tabs-scroll">
                     {[{ name: 'all', label: 'All' }, ...roleOptions, { name: 'trashed', label: 'Deleted Users' }].map(role => (
                         <button key={role.name} onClick={() => setActiveTab(role.name)} style={{
                             borderBottom: activeTab === role.name
@@ -193,7 +193,7 @@ export default function Users() {
                 </div>
 
                 {/* Filter row */}
-                <div className="filter-container">
+                <div className="filter-bar" style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
                     <select value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)}>
                         <option value="all">Email: All</option>
                         <option value="1">Email: Verified</option>

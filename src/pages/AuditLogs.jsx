@@ -81,13 +81,13 @@ export default function AuditLogs() {
                     </p>
                 </div>
 
-                <div style={{ 
+                <div className="tabs-scroll" style={{ 
                     background: 'var(--card-bg)', 
                     padding: '0.4rem', 
                     borderRadius: '12px',
-                    display: 'flex',
                     border: '1px solid var(--border-color)',
-                    boxShadow: '0 2px 10px var(--shadow-color)'
+                    boxShadow: '0 2px 10px var(--shadow-color)',
+                    gap: 0, marginBottom: '1.5rem'
                 }}>
                     <button 
                         onClick={() => setActiveTab('login_history')}

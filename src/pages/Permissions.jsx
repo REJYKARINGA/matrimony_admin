@@ -9,6 +9,7 @@ import {
   LuShield, LuSave, LuCheck, LuTriangleAlert, LuRefreshCw,
   LuUsers, LuShieldAlert, LuWallet, LuHeart,
   LuDatabase, LuSettings2, LuFolder, LuPlus, LuPencil, LuTrash2, LuX,
+  LuChevronDown, LuChevronRight,
 } from 'react-icons/lu';
 
 const loadTabOrder = () => {
@@ -56,7 +57,7 @@ function ToggleSwitch({ checked, onChange, accent, size = 18 }) {
   );
 }
 
-function RoleCard({ role, roleName, label, accent, menusByGroup, checkedMenuIds, onToggle }) {
+function RoleCard({ role, roleName, label, accent, menusByGroup, checkedMenuIds, onToggle, collapsed, onToggleCollapse }) {
   const allMenuIds = Object.values(menusByGroup).flat().map(m => m.id);
   const checkedCount = allMenuIds.filter(id => checkedMenuIds.has(id)).length;
   const allChecked = checkedCount === allMenuIds.length && allMenuIds.length > 0;
@@ -65,9 +66,16 @@ function RoleCard({ role, roleName, label, accent, menusByGroup, checkedMenuIds,
     for (const id of allMenuIds) onToggle(roleName, id, !allChecked);
   };
 
+  const visibleMenus = Object.entries(menusByGroup).flatMap(([group, items]) => {
+    const vis = group === 'Settings & Logs' ? items.filter(m => m.path !== '/permissions' || roleName === 'admin') : items;
+    return vis.map(m => ({ ...m, group }));
+  });
+  const checkedMenus = visibleMenus.filter(m => checkedMenuIds.has(m.id));
+  const previewItems = checkedMenus.slice(0, 2);
+
   return (
     <div style={{ background: 'var(--card-bg)', borderRadius: 16, border: '1px solid var(--border-color)', boxShadow: '0 1px 3px var(--shadow-color), 0 4px 16px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border-color)', background: `linear-gradient(135deg, ${accent}0d, ${accent}04)` }}>
+      <div onClick={onToggleCollapse} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: collapsed ? 'none' : '1px solid var(--border-color)', background: `linear-gradient(135deg, ${accent}0d, ${accent}04)`, cursor: 'pointer', userSelect: 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${accent}, ${accent}cc)`, color: '#fff', fontSize: 14 }}><LuShield /></div>
           <div>
@@ -76,38 +84,65 @@ function RoleCard({ role, roleName, label, accent, menusByGroup, checkedMenuIds,
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>All</span>
-          <ToggleSwitch checked={allChecked} onChange={toggleAll} accent={accent} />
+          <div onClick={e => { e.stopPropagation(); toggleAll(); }} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 6px', borderRadius: 6, cursor: 'pointer' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>All</span>
+            <ToggleSwitch checked={allChecked} onChange={toggleAll} accent={accent} />
+          </div>
+          {collapsed ? <LuChevronRight size={18} style={{ color: 'var(--text-secondary)' }} /> : <LuChevronDown size={18} style={{ color: 'var(--text-secondary)' }} />}
         </div>
       </div>
-      <div style={{ padding: '12px 20px 16px' }}>
-        {Object.entries(menusByGroup).map(([group, items]) => {
-          const GroupIcon = GROUP_ICONS[group] || LuFolder;
-          const visibleItems = group === 'Settings & Logs' ? items.filter(m => m.path !== '/permissions' || roleName === 'admin') : items;
-          if (visibleItems.length === 0) return null;
-          return (
-            <div key={group} style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, padding: '4px 0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}><GroupIcon size={12} />{group}</div>
-                <ToggleSwitch checked={visibleItems.every(m => checkedMenuIds.has(m.id))} onChange={v => { visibleItems.forEach(m => onToggle(roleName, m.id, v)); }} accent={accent} size={14} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {visibleItems.map(menu => {
-                  const isChecked = checkedMenuIds.has(menu.id);
-                  return (
-                    <label key={menu.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 8px', borderRadius: 8, cursor: 'pointer', background: isChecked ? `${accent}06` : 'transparent', transition: 'background 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = isChecked ? `${accent}10` : 'var(--hover-bg)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = isChecked ? `${accent}06` : 'transparent'; }}>
-                      <ToggleSwitch checked={isChecked} onChange={v => onToggle(roleName, menu.id, v)} accent={accent} size={16} />
-                      <span style={{ fontSize: 13, fontWeight: isChecked ? 600 : 400, color: 'var(--text)' }}>{menu.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
+      {collapsed ? (
+        <div style={{ padding: '0 20px 14px' }}>
+          {previewItems.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {previewItems.map(m => (
+                <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 500, background: `${accent}12`, color: accent }}>
+                  {m.label}
+                </span>
+              ))}
+              {checkedMenus.length > 2 && (
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', padding: '3px 0' }}>
+                  +{checkedMenus.length - 2} more
+                </span>
+              )}
             </div>
-          );
-        })}
-      </div>
+          )}
+          <button onClick={e => { e.stopPropagation(); onToggleCollapse(); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, border: `1px solid ${accent}40`, background: `${accent}08`, color: accent, cursor: 'pointer', fontSize: 12, fontWeight: 600, transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${accent}14`; }}
+            onMouseLeave={e => { e.currentTarget.style.background = `${accent}08`; }}>
+            <LuChevronDown size={14} /> Expand
+          </button>
+        </div>
+      ) : (
+        <div style={{ padding: '12px 20px 16px' }}>
+          {Object.entries(menusByGroup).map(([group, items]) => {
+            const GroupIcon = GROUP_ICONS[group] || LuFolder;
+            const visibleItems = group === 'Settings & Logs' ? items.filter(m => m.path !== '/permissions' || roleName === 'admin') : items;
+            if (visibleItems.length === 0) return null;
+            return (
+              <div key={group} style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, padding: '4px 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}><GroupIcon size={12} />{group}</div>
+                  <ToggleSwitch checked={visibleItems.every(m => checkedMenuIds.has(m.id))} onChange={v => { visibleItems.forEach(m => onToggle(roleName, m.id, v)); }} accent={accent} size={14} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {visibleItems.map(menu => {
+                    const isChecked = checkedMenuIds.has(menu.id);
+                    return (
+                      <label key={menu.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 8px', borderRadius: 8, cursor: 'pointer', background: isChecked ? `${accent}06` : 'transparent', transition: 'background 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = isChecked ? `${accent}10` : 'var(--hover-bg)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = isChecked ? `${accent}06` : 'transparent'; }}>
+                        <ToggleSwitch checked={isChecked} onChange={v => onToggle(roleName, menu.id, v)} accent={accent} size={16} />
+                        <span style={{ fontSize: 13, fontWeight: isChecked ? 600 : 400, color: 'var(--text)' }}>{menu.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -249,6 +284,22 @@ export default function Permissions() {
   const [permissions, setPermissions] = useState({});
   const [permLoading, setPermLoading] = useState(true);
   const [permSaving, setPermSaving] = useState(false);
+  const [collapsedRoles, setCollapsedRoles] = useState(() => new Set());
+
+  useEffect(() => {
+    if (permRoles.length > 0 && collapsedRoles.size === 0) {
+      setCollapsedRoles(new Set(permRoles.map(r => r.name)));
+    }
+  }, [permRoles]);
+
+  const toggleRoleCollapse = (roleName) => {
+    setCollapsedRoles(prev => {
+      const next = new Set(prev);
+      if (next.has(roleName)) next.delete(roleName);
+      else next.add(roleName);
+      return next;
+    });
+  };
 
   // Initial data load per tab
   useEffect(() => {
@@ -415,7 +466,7 @@ export default function Permissions() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderBottom: '2px solid var(--border-color)' }}>
+      <div className="tabs-scroll" style={{ gap: 0, marginBottom: 24, borderBottomWidth: '2px' }}>
         {TABS().map(t => {
           const active = tab === t.key;
           return (
@@ -446,33 +497,35 @@ export default function Permissions() {
               </button>
             </div>
             <div style={{ background: 'var(--card-bg)', borderRadius: 16, border: '1px solid var(--border-color)', boxShadow: '0 1px 3px var(--shadow-color)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
-                    <th style={{ width: 60, padding: '12px 16px', textAlign: 'center', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Order</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Name</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Description</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {roles.map((role, ri) => (
-                    <tr key={role.id} draggable onDragStart={handleItemDragStart(role.id)} onDragOver={handleItemDragOver} onDrop={handleRoleDrop(role.id)} onDragEnd={handleItemDragEnd(role.id)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'grab', background: dragItemId === role.id ? 'var(--hover-bg)' : 'transparent', transition: 'background 0.15s' }}>
-                      <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{ri + 1}</td>
-                      <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{role.name}</td>
-                      <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text)' }}>{role.label}</td>
-                      <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-secondary)' }}>{role.description || '-'}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                        <button onClick={() => openEditRole(role)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)', marginRight: 6, fontSize: 12 }}><LuPencil size={13} /></button>
-                        {role.name !== 'admin' && (
-                          <button onClick={() => handleDeleteRole(role)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444', background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12 }}><LuTrash2 size={13} /></button>
-                        )}
-                      </td>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
+                      <th style={{ width: 60, padding: '12px 16px', textAlign: 'center', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Order</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Name</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Description</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {roles.map((role, ri) => (
+                      <tr key={role.id} draggable onDragStart={handleItemDragStart(role.id)} onDragOver={handleItemDragOver} onDrop={handleRoleDrop(role.id)} onDragEnd={handleItemDragEnd(role.id)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'grab', background: dragItemId === role.id ? 'var(--hover-bg)' : 'transparent', transition: 'background 0.15s' }}>
+                        <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>{ri + 1}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{role.name}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text)' }}>{role.label}</td>
+                        <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--text-secondary)' }}>{role.description || '-'}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                          <button onClick={() => openEditRole(role)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)', marginRight: 6, fontSize: 12 }}><LuPencil size={13} /></button>
+                          {role.name !== 'admin' && (
+                            <button onClick={() => handleDeleteRole(role)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444', background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12 }}><LuTrash2 size={13} /></button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
             {showRoleModal && (
               <Modal title={editingRole ? 'Edit Role' : 'Add Role'}>
@@ -516,29 +569,31 @@ export default function Permissions() {
               <div key={group} style={{ marginBottom: 20 }}>
                 <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', margin: '0 0 8px', padding: '0 4px' }}>{group}</h3>
                 <div style={{ background: 'var(--card-bg)', borderRadius: 16, border: '1px solid var(--border-color)', boxShadow: '0 1px 3px var(--shadow-color)', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
-                        <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Path</th>
-                        <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
-                        <th style={{ padding: '10px 16px', textAlign: 'center', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Order</th>
-                        <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map(menu => (
-                        <tr key={menu.id} draggable onDragStart={handleItemDragStart(menu.id, menu.group)} onDragOver={handleItemDragOver} onDrop={handleMenuDrop(menu.id)} onDragEnd={handleItemDragEnd(menu.id)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'grab', background: dragItemId === menu.id ? 'var(--hover-bg)' : 'transparent', transition: 'background 0.15s' }}>
-                          <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace' }}>{menu.path}</td>
-                          <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--text)' }}>{menu.label}</td>
-                          <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center' }}>{menu.sort_order}</td>
-                          <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                            <button onClick={() => openEditMenu(menu)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)', marginRight: 6, fontSize: 12 }}><LuPencil size={13} /></button>
-                            <button onClick={() => handleDeleteMenu(menu)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444', background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12 }}><LuTrash2 size={13} /></button>
-                          </td>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg)' }}>
+                          <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Path</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'center', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Order</th>
+                          <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {items.map(menu => (
+                          <tr key={menu.id} draggable onDragStart={handleItemDragStart(menu.id, menu.group)} onDragOver={handleItemDragOver} onDrop={handleMenuDrop(menu.id)} onDragEnd={handleItemDragEnd(menu.id)} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'grab', background: dragItemId === menu.id ? 'var(--hover-bg)' : 'transparent', transition: 'background 0.15s' }}>
+                            <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace' }}>{menu.path}</td>
+                            <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--text)' }}>{menu.label}</td>
+                            <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center' }}>{menu.sort_order}</td>
+                            <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                              <button onClick={() => openEditMenu(menu)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)', marginRight: 6, fontSize: 12 }}><LuPencil size={13} /></button>
+                              <button onClick={() => handleDeleteMenu(menu)} style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid #EF444444', background: 'transparent', cursor: 'pointer', color: '#EF4444', fontSize: 12 }}><LuTrash2 size={13} /></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             ))}
@@ -594,7 +649,8 @@ export default function Permissions() {
               {permRoles.map(role => (
                 <div key={role.id} draggable onDragStart={handleItemDragStart(role.id)} onDragOver={handleItemDragOver} onDrop={handlePermRoleDrop(role.id)} onDragEnd={handleItemDragEnd(role.id)} style={{ cursor: 'grab', opacity: dragItemId === role.id ? 0.5 : 1, transition: 'opacity 0.15s' }}>
                   <RoleCard role={role} roleName={role.name} label={role.label} accent={ROLE_ACCENTS[role.name] || 'var(--primary)'}
-                    menusByGroup={menusByGroup} checkedMenuIds={permissions[role.name] || new Set()} onToggle={handleTogglePerm} />
+                    menusByGroup={menusByGroup} checkedMenuIds={permissions[role.name] || new Set()} onToggle={handleTogglePerm}
+                    collapsed={collapsedRoles.has(role.name)} onToggleCollapse={() => toggleRoleCollapse(role.name)} />
                 </div>
               ))}
             </div>

@@ -95,9 +95,37 @@ export default function Verifications() {
     return (
         <>
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 style={{ margin: 0 }}>ID Verifications</h2>
-                    <div className="search-box" style={{ display: 'flex', gap: '0.75rem' }}>
+                <h2 style={{ margin: 0, marginBottom: '1.5rem' }}>ID Verifications</h2>
+
+                {/* Tabs + Filters */}
+                <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem'
+                }}>
+                    <div className="tabs-scroll" style={{ gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: 0, flex: '1 1 auto' }}>
+                        <button 
+                            style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('pending')}
+                        >
+                            <FaHourglassHalf style={{ marginRight: '0.5rem' }} />
+                            Pending
+                        </button>
+                        <button 
+                            style={activeTab === 'verified' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('verified')}
+                        >
+                            <FaUserCheck style={{ marginRight: '0.5rem' }} />
+                            Approved
+                        </button>
+                        <button 
+                            style={activeTab === 'rejected' ? activeTabStyle : tabStyle} 
+                            onClick={() => setActiveTab('rejected')}
+                        >
+                            <FaUserTimes style={{ marginRight: '0.5rem' }} />
+                            Rejected
+                        </button>
+                    </div>
+                    <div className="filter-bar" style={{ margin: 0, padding: 0, border: 'none', flexShrink: 0 }}>
                         <select
                             value={`${sortBy}-${sortDir}`}
                             onChange={(e) => {
@@ -105,17 +133,7 @@ export default function Verifications() {
                                 setSortBy(by);
                                 setSortDir(dir);
                             }}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--card-bg)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                fontSize: '0.875rem',
-                                cursor: 'pointer',
-                                fontWeight: '500'
-                            }}
+                            style={{ fontWeight: '500' }}
                         >
                             <option value="created_at-desc">Sort: Newest</option>
                             <option value="created_at-asc">Sort: Oldest</option>
@@ -128,41 +146,9 @@ export default function Verifications() {
                             placeholder="Search by name, email, matrimony ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{
-                                padding: '0.6rem 1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid var(--border-color)',
-                                minWidth: '300px',
-                                outline: 'none',
-                                fontSize: '0.875rem'
-                            }}
+                            style={{ minWidth: '180px', maxWidth: '260px' }}
                         />
                     </div>
-                </div>
-
-                {/* Tabs */}
-                <div style={tabContainerStyle}>
-                    <button 
-                        style={activeTab === 'pending' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('pending')}
-                    >
-                        <FaHourglassHalf style={{ marginRight: '0.5rem' }} />
-                        Pending
-                    </button>
-                    <button 
-                        style={activeTab === 'verified' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('verified')}
-                    >
-                        <FaUserCheck style={{ marginRight: '0.5rem' }} />
-                        Approved
-                    </button>
-                    <button 
-                        style={activeTab === 'rejected' ? activeTabStyle : tabStyle} 
-                        onClick={() => setActiveTab('rejected')}
-                    >
-                        <FaUserTimes style={{ marginRight: '0.5rem' }} />
-                        Rejected
-                    </button>
                 </div>
 
                 {loading ? (
@@ -224,8 +210,8 @@ export default function Verifications() {
 
             {/* Verification Detail Modal */}
             {selectedVerification && (
-                <div style={modalOverlayStyle} onClick={() => setSelectedVerification(null)}>
-                    <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
+                <div className="modal-overlay" style={modalOverlayStyle} onClick={() => setSelectedVerification(null)}>
+                    <div className="modal-content" style={modalContentStyle} onClick={e => e.stopPropagation()}>
                         <div style={modalHeaderStyle}>
                             <h3 style={{ margin: 0 }}>Reviewing Verification</h3>
                             <button 
@@ -237,11 +223,11 @@ export default function Verifications() {
                         </div>
                         
                         <div style={modalBodyStyle}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '2rem' }}>
+                            <div className="responsive-detail" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '2rem' }}>
                                 {/* Left Side: User Info & Gallery */}
                                 <div>
                                     <h4 style={sectionTitleStyle}>User Profile Info</h4>
-                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem' }}>
+                                    <div className="profile-info-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '0.5rem' }}>
                                         {selectedVerification.user?.user_profile?.profile_picture ? (
                                             <img
                                                 src={selectedVerification.user.user_profile.profile_picture.startsWith('http') ? selectedVerification.user.user_profile.profile_picture : `${CONFIG.BASE_URL}${selectedVerification.user.user_profile.profile_picture}`}
@@ -321,7 +307,7 @@ export default function Verifications() {
                                 <div>
                                     <h4 style={sectionTitleStyle}>Submitted ID Documents</h4>
                                     <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div className="grid-2">
                                             <div>
                                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Proof Type</span>
                                                 <p style={{ margin: 0, fontWeight: '600' }}>{selectedVerification.id_proof_type}</p>
@@ -333,8 +319,8 @@ export default function Verifications() {
                                         </div>
                                     </div>
                                     
-                                    <div style={{ position: 'relative', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
-                                        <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="id-image-viewer" style={{ position: 'relative', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+                                        <div className="id-image-container" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {currentIDPart === 0 ? (
                                                 <img 
                                                     src={selectedVerification.id_proof_front_url?.startsWith('http') ? selectedVerification.id_proof_front_url : `${CONFIG.BASE_URL}${selectedVerification.id_proof_front_url}`}
@@ -391,7 +377,7 @@ export default function Verifications() {
                                                 style={textareaStyle}
                                             />
                                             
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                                            <div className="btn-group-end">
                                                 <button 
                                                     className="btn btn-danger" 
                                                     style={{ padding: '0.75rem 1.5rem', fontWeight: '600' }}

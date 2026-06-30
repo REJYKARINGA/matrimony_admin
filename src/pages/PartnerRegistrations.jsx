@@ -49,10 +49,9 @@ export default function PartnerRegistrations() {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 style={{ background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <div className="filter-bar" style={{ marginBottom: '1.5rem', gap: '1rem' }}>
                     <FaFilter size={14} color="var(--text-secondary)" />
-                    <select value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}
-                        style={{ padding: '0.6rem 1rem', background: 'var(--bg)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text)', minWidth: '220px' }}>
+                    <select value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)} style={{ minWidth: '220px' }}>
                         <option value="">All Offices</option>
                         {offices.map(o => <option key={o.id} value={o.id}>{o.name} ({o.office_code})</option>)}
                     </select>

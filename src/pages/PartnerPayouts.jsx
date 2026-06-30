@@ -88,10 +88,9 @@ export default function PartnerPayouts() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 style={{ background: 'var(--card-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="filter-bar" style={{ margin: 0, border: 'none', padding: 0, gap: '0.5rem' }}>
                         <FaFilter size={14} color="var(--text-secondary)" />
-                        <select value={filter} onChange={e => setFilter(e.target.value)}
-                            style={{ padding: '0.6rem 1rem', background: 'var(--bg)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text)', minWidth: '160px' }}>
+                        <select value={filter} onChange={e => setFilter(e.target.value)} style={{ minWidth: '160px' }}>
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="paid">Paid</option>
